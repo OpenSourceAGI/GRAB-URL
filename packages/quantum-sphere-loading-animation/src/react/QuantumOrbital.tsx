@@ -28,7 +28,25 @@ import type {
 import { useRandom } from "./useRandom"
 import { useSphereConfig } from "./useSphereConfig"
 
-import "./QuantumOrbital.css"
+const keyframesCSS = `
+@keyframes orbitalSpin {
+  from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+  to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+}
+@keyframes orbitalLineSpin {
+  from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+  to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+}
+`
+
+const styles = {
+  orbitalSphere: {
+    perspective: "1000px",
+  } as React.CSSProperties,
+  orbitalLine: {
+    animation: "orbitalLineSpin infinite linear",
+  } as React.CSSProperties,
+}
 
 /**
  * Animated quantum-orbital loader component.
@@ -150,10 +168,12 @@ export default function QuantumOrbital({
 
   return (
     <div className={`relative flex justify-center items-center ${className}`}>
+      <style>{keyframesCSS}</style>
       <div className="relative z-10" onClick={handleSphereClick} ref={sphereRef}>
         <div
-          className="relative cursor-pointer orbital-sphere"
+          className="relative cursor-pointer"
           style={{
+            ...styles.orbitalSphere,
             transformStyle: "preserve-3d",
             animation: `orbitalSpin ${sphereData.rotationSpeed}s infinite linear`,
             width: `${sphereData.sphereSize}px`,
@@ -165,9 +185,10 @@ export default function QuantumOrbital({
             return (
               <div
                 key={line.id}
-                className="absolute inset-0 rounded-full border-solid transition-all duration-200 ease-in-out orbital-line"
+                className="absolute inset-0 rounded-full border-solid transition-all duration-200 ease-in-out"
                 data-line-id={line.id}
                 style={{
+                  ...styles.orbitalLine,
                   transform: lineStyle.transform,
                   borderColor: lineStyle.borderColor,
                   borderWidth: lineStyle.borderWidth,
