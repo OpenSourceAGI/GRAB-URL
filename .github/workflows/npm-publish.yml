@@ -81,7 +81,8 @@ jobs:
       - name: Commit version bumps
         if: always()
         run: |
-          git add packages/*/package.json packages/*/package-lock.json
+          git add packages/*/package.json
+          if [ -f package-lock.json ]; then git add package-lock.json; fi
           git diff --staged --quiet && echo "No version changes to commit" && exit 0
           git commit -m "chore: bump package versions [skip ci]"
           git push
