@@ -26,5 +26,14 @@
     "vite": "^7.3.1",
     "vite-plugin-dts": "^4.5.4"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vtempest/GRAB-URL",
+    "directory": "packages/archiver-web"
+  },
+  "bugs": {
+    "url": "https://github.com/vtempest/GRAB-URL/issues"
+  },
+  "homepage": "https://github.com/vtempest/GRAB-URL/tree/master/packages/archiver-web#readme"
 }
