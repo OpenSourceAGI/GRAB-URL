@@ -5,6 +5,7 @@
     "moduleResolution": "bundler", // Recommended for Vite/ESM
     "resolveJsonModule": true,
     "allowJs": true,
+    "jsx": "react-jsx",
     "declaration": true,
     "emitDeclarationOnly": true,
     "checkJs": false, // Disable JS type checking

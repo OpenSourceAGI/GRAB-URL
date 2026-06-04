@@ -29,7 +29,7 @@ const nodeBuiltins = [
 ];
 
 const externalPkgs = ["chalk", "cli-table3", "cli-progress", "cli-spinners"];
-const slimExternalPkgs = [...externalPkgs, "adm-zip", "linkedom"];
+const slimExternalPkgs = [...externalPkgs, "archiver-web", "linkedom"];
 
 const sharedAlias = {
   "@grab-url/log": resolve(__dirname, "packages/log-json/log-json.ts"),
@@ -39,9 +39,10 @@ const sharedAlias = {
 const sharedPlugins = [
   dts({
     insertTypesEntry: true,
-    include: ["packages/**/*.ts"],
+    include: ["packages/**/*.ts", "packages/**/*.tsx"],
+    exclude: ["packages/quantum-sphere-loading-animation/**"],
     outDir: "dist",
-    rollupTypes: true,
+    rollupTypes: false,
   }),
 ];
 
