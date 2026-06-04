@@ -18,18 +18,20 @@ import {
 } from "../response/response-handler";
 import { setupInfiniteScroll } from "../response/infinite-scroll";
 import { manageCacheAndPagination } from "./cache-pagination";
-import { prepareFetchRequest, executeRequest } from "./request-executor";
+import { prepareFetchRequest } from "./request-prep";
+import type { executeRequest as ExecuteRequestType } from "./request-executor";
+
+type ExecuteRequestFn = typeof ExecuteRequestType;
 
 /**
- * ### GRAB: Generate Request to API from Browser
- *
- * The core function for making API requests. Handles JSON conversion,
- * loading states, caching, pagination, debouncing, and more.
+ * Creates a grab function using the provided executor — enables slim builds to inject
+ * a lighter executor that omits archiver-web / linkedom processing.
  */
-export async function grab<TResponse = any, TParams = any>(
-  path: string,
-  options?: GrabOptions<TResponse, TParams>,
-): Promise<GrabResponse<TResponse>> {
+export function createGrab(executeRequest: ExecuteRequestFn) {
+  const grab = async function grab<TResponse = any, TParams = any>(
+    path: string,
+    options?: GrabOptions<TResponse, TParams>,
+  ): Promise<GrabResponse<TResponse>> {
   const merged = getMergedOptions(options);
   let {
     headers,
@@ -55,6 +57,8 @@ export async function grab<TResponse = any, TParams = any>(
     onResponse,
     onError,
     onStream,
+    unzip,
+    dom,
     body,
     post,
     put,
@@ -159,6 +163,8 @@ export async function grab<TResponse = any, TParams = any>(
       fetchParams,
       params,
       onStream,
+      unzip,
+      dom,
     );
 
     // Clear loading state
@@ -218,4 +224,6 @@ export async function grab<TResponse = any, TParams = any>(
     }
     return response as any;
   }
+  };
+  return grab as any;
 }

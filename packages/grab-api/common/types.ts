@@ -64,6 +64,10 @@ export type GrabOptions<TResponse = any, TParams = any> = {
   onError?: (...args: any[]) => any;
   /** Set with defaults to process the response as a stream (i.e., for instant unzip) */
   onStream?: (...args: any[]) => any;
+  /** default=false Auto-unzip zip responses into { data: { filename: content } } */
+  unzip?: boolean;
+  /** CSS selector or true to get document — parses HTML responses into DOM and returns querySelector result under data */
+  dom?: string | boolean;
   /** default=0 Repeat request this many times */
   repeat?: number;
   /** default=null Repeat request every seconds */

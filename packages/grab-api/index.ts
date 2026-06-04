@@ -1,4 +1,6 @@
-import { grab as coreGrab } from "./core/core";
+import { createGrab } from "./core/core";
+import { executeRequest } from "./core/request-executor";
+const coreGrab = createGrab(executeRequest);
 import { setupDevTools } from "./devtools/devtools";
 import { GrabFunction, GrabOptions } from "./common/types";
 import { log } from "@grab-url/log";

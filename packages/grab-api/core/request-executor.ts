@@ -6,40 +6,9 @@
 
 import { GrabFunction, GrabMockHandler } from "../common/types";
 import { wait } from "../common/utils";
+import { processZipResponse, processDomResponse } from "./content-processors";
 
-/**
- * Prepares the fetch parameters and URL.
- */
-export function prepareFetchRequest(
-    method: string,
-    headers: any,
-    body: any,
-    params: any,
-    cache: boolean,
-    signal: AbortSignal
-): { fetchParams: RequestInit; paramsGETRequest: string } {
-    const isBodyMethod = ["POST", "PUT", "PATCH"].includes(method);
-
-    const fetchParams: RequestInit = {
-        method,
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            ...headers,
-        },
-        body: body || (isBodyMethod ? JSON.stringify(params) : null),
-        redirect: "follow",
-        cache: cache ? "force-cache" : "no-store",
-        signal,
-    };
-
-    let paramsGETRequest = "";
-    if (!isBodyMethod) {
-        paramsGETRequest = (Object.keys(params).length ? "?" : "") + new URLSearchParams(params).toString();
-    }
-
-    return { fetchParams, paramsGETRequest };
-}
+export { prepareFetchRequest } from "./request-prep";
 
 /**
  * Executes the request, either via mock or actual fetch.
@@ -50,7 +19,9 @@ export async function executeRequest(
     paramsGETRequest: string,
     fetchParams: RequestInit,
     params: any,
-    onStream: any
+    onStream: any,
+    unzip?: boolean,
+    dom?: string | boolean,
 ): Promise<any> {
     const target = (typeof window !== "undefined" ? window.grab : (globalThis as any).grab) as GrabFunction;
     const mockHandler = target?.mock?.[path] as GrabMockHandler;
@@ -74,15 +45,29 @@ export async function executeRequest(
         return null;
     }
 
-    const type = fetchRes.headers.get("content-type");
+    const type = fetchRes.headers.get("content-type") ?? "";
+
+    const isZip = unzip || type.includes("application/zip") || type.includes("application/x-zip");
+    const isHtml = dom !== undefined ? !!dom : type.includes("text/html");
+
+    if (isZip) {
+        const buffer = await fetchRes.arrayBuffer().catch(e => { throw new Error("Error reading zip: " + e); });
+        return { data: await processZipResponse(buffer) };
+    }
+
+    if (isHtml) {
+        const html = await fetchRes.text().catch(e => { throw new Error("Error reading html: " + e); });
+        return { data: await processDomResponse(html, dom ?? true) };
+    }
+
     return await (
-        type
-            ? type.includes("application/json")
-                ? fetchRes.json()
-                : type.includes("application/pdf") || type.includes("application/octet-stream")
-                    ? fetchRes.blob()
-                    : fetchRes.text()
-            : fetchRes.json()
+        type.includes("application/json")
+            ? fetchRes.json()
+            : type.includes("application/pdf") || type.includes("application/octet-stream")
+                ? fetchRes.blob()
+                : type
+                    ? fetchRes.text()
+                    : fetchRes.json()
     ).catch(e => {
         throw new Error("Error parsing response: " + e);
     });

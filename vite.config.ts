@@ -29,28 +29,35 @@ const nodeBuiltins = [
 ];
 
 const externalPkgs = ["chalk", "cli-table3", "cli-progress", "cli-spinners"];
+const slimExternalPkgs = [...externalPkgs, "adm-zip", "linkedom"];
+
+const sharedAlias = {
+  "@grab-url/log": resolve(__dirname, "packages/log-json/log-json.ts"),
+  "@grab-url/grab-api": resolve(__dirname, "packages/grab-api/index.ts"),
+};
+
+const sharedPlugins = [
+  dts({
+    insertTypesEntry: true,
+    include: ["packages/**/*.ts"],
+    outDir: "dist",
+    rollupTypes: true,
+  }),
+];
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@grab-url/log": resolve(__dirname, "packages/log-json/log-json.ts"),
-      "@grab-url/grab-api": resolve(__dirname, "packages/grab-api/index.ts"),
-    },
+    alias: sharedAlias,
   },
-  plugins: [
-    dts({
-      insertTypesEntry: true,
-      include: ["packages/**/*.ts"],
-      outDir: "dist",
-      rollupTypes: true,
-    }),
-  ],
+  plugins: sharedPlugins,
   build: {
     target: "es2022",
     lib: {
       entry: {
         "grab-api": resolve(__dirname, "packages/grab-api/index.ts"),
-        icons: resolve(__dirname, "packages/loading-animations/svg/index.ts"),
+        "grab-api-slim": resolve(__dirname, "packages/grab-api/index.slim.ts"),
+        animations: resolve(__dirname, "packages/loading-animations/svg/index.ts"),
+        "quantum-sphere": resolve(__dirname, "packages/grab-api/icons/quantum-sphere/index.ts"),
         log: resolve(__dirname, "packages/log-json/log-json.ts"),
         "grab-url-cli": resolve(__dirname, "packages/grab-url-cli/index.ts"),
         "archiver-web": resolve(
@@ -79,10 +86,12 @@ export default defineConfig({
           return "";
         },
       },
-      external: (id) => {
+      external: (id, importer) => {
         if (id.startsWith("node:") || nodeBuiltins.includes(id)) return true;
         if (externalPkgs.includes(id)) return true;
         if (id === "jszip") return true;
+        // Externalize heavy deps for slim build entry
+        if (slimExternalPkgs.includes(id) && importer?.includes("index.slim")) return true;
         return false;
       },
     },

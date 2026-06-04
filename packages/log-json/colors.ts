@@ -38,41 +38,41 @@ export enum ColorName {
 }
 
 /**
- * Color mapping with ANSI codes and HTML hex values
+ * Color mapping with ANSI codes and HTML hex values (readable on white background)
  */
 const colorMap: Record<ColorName, [number, string]> = {
     [ColorName.RESET]: [0, '000000'],
-    [ColorName.BLACK]: [30, '000000'],
-    [ColorName.RED]: [31, 'ff0000'],
-    [ColorName.GREEN]: [32, '00ff00'],
-    [ColorName.YELLOW]: [33, 'ffff00'],
-    [ColorName.BLUE]: [34, '0000ff'],
-    [ColorName.MAGENTA]: [35, 'ff00ff'],
-    [ColorName.CYAN]: [36, '00ffff'],
-    [ColorName.WHITE]: [37, 'ffffff'],
-    [ColorName.GRAY]: [90, '808080'],
-    [ColorName.BRIGHT_RED]: [91, 'ff5555'],
-    [ColorName.BRIGHT_GREEN]: [92, '55ff55'],
-    [ColorName.BRIGHT_YELLOW]: [93, 'ffff55'],
-    [ColorName.BRIGHT_BLUE]: [94, '5555ff'],
-    [ColorName.BRIGHT_MAGENTA]: [95, 'ff55ff'],
-    [ColorName.BRIGHT_CYAN]: [96, '55ffff'],
-    [ColorName.BRIGHT_WHITE]: [97, 'ffffff'],
-    [ColorName.BG_BLACK]: [40, '000000'],
-    [ColorName.BG_RED]: [41, 'ff0000'],
-    [ColorName.BG_GREEN]: [42, '00ff00'],
-    [ColorName.BG_YELLOW]: [43, 'ffff00'],
-    [ColorName.BG_BLUE]: [44, '0000ff'],
-    [ColorName.BG_MAGENTA]: [45, 'ff00ff'],
-    [ColorName.BG_CYAN]: [46, '00ffff'],
-    [ColorName.BG_WHITE]: [47, 'ffffff'],
-    [ColorName.BG_GRAY]: [100, '808080'],
-    [ColorName.BG_BRIGHT_RED]: [101, 'ff8888'],
-    [ColorName.BG_BRIGHT_GREEN]: [102, '88ff88'],
-    [ColorName.BG_BRIGHT_YELLOW]: [103, 'ffff88'],
-    [ColorName.BG_BRIGHT_BLUE]: [104, '8888ff'],
-    [ColorName.BG_BRIGHT_MAGENTA]: [105, 'ff88ff'],
-    [ColorName.BG_BRIGHT_CYAN]: [106, '88ffff'],
+    [ColorName.BLACK]: [30, '1f2937'],
+    [ColorName.RED]: [31, 'dc2626'],
+    [ColorName.GREEN]: [32, '2d6a4f'],
+    [ColorName.YELLOW]: [33, '92400e'],
+    [ColorName.BLUE]: [34, '1a56db'],
+    [ColorName.MAGENTA]: [35, '6d28d9'],
+    [ColorName.CYAN]: [36, '0e7490'],
+    [ColorName.WHITE]: [37, '374151'],
+    [ColorName.GRAY]: [90, '6b7280'],
+    [ColorName.BRIGHT_RED]: [91, 'ef4444'],
+    [ColorName.BRIGHT_GREEN]: [92, '059669'],
+    [ColorName.BRIGHT_YELLOW]: [93, 'd97706'],
+    [ColorName.BRIGHT_BLUE]: [94, '3b82f6'],
+    [ColorName.BRIGHT_MAGENTA]: [95, '8b5cf6'],
+    [ColorName.BRIGHT_CYAN]: [96, '06b6d4'],
+    [ColorName.BRIGHT_WHITE]: [97, 'f9fafb'],
+    [ColorName.BG_BLACK]: [40, '111827'],
+    [ColorName.BG_RED]: [41, 'fca5a5'],
+    [ColorName.BG_GREEN]: [42, 'a7f3d0'],
+    [ColorName.BG_YELLOW]: [43, 'fde68a'],
+    [ColorName.BG_BLUE]: [44, 'bfdbfe'],
+    [ColorName.BG_MAGENTA]: [45, 'ddd6fe'],
+    [ColorName.BG_CYAN]: [46, 'a5f3fc'],
+    [ColorName.BG_WHITE]: [47, 'f9fafb'],
+    [ColorName.BG_GRAY]: [100, 'd1d5db'],
+    [ColorName.BG_BRIGHT_RED]: [101, 'fee2e2'],
+    [ColorName.BG_BRIGHT_GREEN]: [102, 'd1fae5'],
+    [ColorName.BG_BRIGHT_YELLOW]: [103, 'fef3c7'],
+    [ColorName.BG_BRIGHT_BLUE]: [104, 'dbeafe'],
+    [ColorName.BG_BRIGHT_MAGENTA]: [105, 'ede9fe'],
+    [ColorName.BG_BRIGHT_CYAN]: [106, 'cffafe'],
     [ColorName.BG_BRIGHT_WHITE]: [107, 'ffffff'],
 };
 
@@ -88,7 +88,13 @@ const colorMap: Record<ColorName, [number, string]> = {
 export function getColors(format: 'html' | 'ansi' = 'ansi'): Record<ColorName, string> {
     const colors: Record<ColorName, string> = {} as Record<ColorName, string>;
     for (const [name, [ansiCode, hexCode]] of Object.entries(colorMap)) {
-        colors[name as ColorName] = format === 'html' ? '#' + hexCode : '\x1b[' + ansiCode + 'm';
+        if (format === 'html') {
+            colors[name as ColorName] = name === ColorName.RESET
+                ? '</span>'
+                : `<span style="color:#${hexCode}">`;
+        } else {
+            colors[name as ColorName] = '\x1b[' + ansiCode + 'm';
+        }
     }
     return colors;
 }
