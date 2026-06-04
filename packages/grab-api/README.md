@@ -42,6 +42,8 @@ log(res);
 15. **Debug logging** — `log()` prints colored JSON structure, response, and timing.
 16. **Rate limiting** — require a minimum delay between requests to prevent cascading multi-click responses.
 17. **Repeat / polling** — repeat N times or every X seconds.
+18. **Auto-unzip** — automatically extracts ZIP responses using archiver-web. Set `unzip: false` to disable.
+19. **DOM parsing** — automatically parses HTML responses using linkedom. Pass `dom: "selector"` for CSS selector extraction or `dom: false` to disable.
 
 ## Usage
 

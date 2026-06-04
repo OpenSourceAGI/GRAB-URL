@@ -47,8 +47,10 @@ export async function executeRequest(
 
     const type = fetchRes.headers.get("content-type") ?? "";
 
-    const isZip = unzip || type.includes("application/zip") || type.includes("application/x-zip");
-    const isHtml = dom !== undefined ? !!dom : type.includes("text/html");
+    // Auto-detect ZIP unless explicitly disabled with unzip: false
+    const isZip = unzip !== false && (type.includes("application/zip") || type.includes("application/x-zip"));
+    // Auto-detect HTML unless explicitly disabled with dom: false
+    const isHtml = dom !== false && (typeof dom === "string" || type.includes("text/html"));
 
     if (isZip) {
         const buffer = await fetchRes.arrayBuffer().catch(e => { throw new Error("Error reading zip: " + e); });
@@ -57,7 +59,7 @@ export async function executeRequest(
 
     if (isHtml) {
         const html = await fetchRes.text().catch(e => { throw new Error("Error reading html: " + e); });
-        return { data: await processDomResponse(html, dom ?? true) };
+        return { data: await processDomResponse(html, typeof dom === "string" ? dom : true) };
     }
 
     return await (

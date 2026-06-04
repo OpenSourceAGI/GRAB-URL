@@ -45,6 +45,8 @@ npm i grab-url
 18. **Rate Limiting**: Built-in rate limiting to prevent multi-click cascading responses, require to wait seconds between requests.
 19. **Repeat**: Repeat request this many times, or repeat every X seconds to poll for updates.
 20. **Loading Icons**: Import from `grab-url/icons` to get enhanced animated loading icons.
+21. **Auto-Unzip**: Automatically extracts ZIP responses into `{ data: { filename: content } }` using archiver-web. Set `unzip: false` to disable.
+22. **DOM Parsing**: Automatically parses HTML responses. Pass `dom: "selector"` for CSS selector extraction or `dom: false` to disable. Uses linkedom.
 
 ### Examples
 
@@ -70,6 +72,18 @@ await grab('search', {
 })
 
 grab('user').then(log)
+
+// Auto-extract ZIP files
+const zipData = await grab('https://example.com/archive.zip', { 
+  unzip: true 
+})
+// { data: { "file1.txt": "content...", "file2.js": "..." } }
+
+// Parse HTML and extract elements
+const title = await grab('https://example.com', { 
+  dom: 'h1' 
+})
+// { data: "Page Title" }
 
 //in svelte component
 {#if res.results}
