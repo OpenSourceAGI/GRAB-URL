@@ -1,6 +1,6 @@
 {
   "name": "archiver-web",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Universal Archive Extractor & Creator using JSZip. Frontend-only, no WASM.",
   "type": "module",
   "main": "./src/index.ts",
