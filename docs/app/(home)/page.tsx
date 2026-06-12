@@ -23,7 +23,7 @@ export default function Home() {
       <CodeExample />
       <ComparisonTable />
       {/* <API2AILanding /> */}
-      <Footer />
+      {/* <Footer /> */}
     </main>
   )
 }

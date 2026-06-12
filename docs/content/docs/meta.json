@@ -9,6 +9,7 @@
     "configuration",
     "---Essentials---",
     "cli",
+    "grab-options",
     "examples",
     "testing",
     "---Features---",

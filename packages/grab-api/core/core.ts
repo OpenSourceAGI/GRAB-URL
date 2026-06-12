@@ -46,7 +46,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     cache,
     timeout = 30,
     baseURL = (typeof process !== "undefined" && process.env.SERVER_API_URL) ||
-      "/api/",
+      "",
     cancelOngoingIfNew,
     cancelNewIfOngoing,
     rateLimit,
@@ -59,6 +59,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     onStream,
     unzip,
     dom,
+    unescapeHTML,
     body,
     post,
     put,
@@ -165,6 +166,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
       onStream,
       unzip,
       dom,
+      unescapeHTML,
     );
 
     // Clear loading state

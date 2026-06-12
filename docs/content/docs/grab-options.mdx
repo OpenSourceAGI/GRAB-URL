@@ -1,0 +1,179 @@
+---
+title: Grab Options
+description: Full reference of all options accepted by the grab() request function.
+icon: Settings2
+---
+
+import { TypeTable } from '@/components/fumadocs/code-tree/type-table';
+
+# Grab Options
+
+Every option below can be passed in the second argument of `grab(path, options)`, or set
+globally as defaults with `grab(path, { setDefaults: true, ...options })`.
+
+<TypeTable
+  type={{
+    headers: {
+      type: 'Record<string, string>',
+      description: 'Include headers and authorization in the request.',
+    },
+    response: {
+      type: 'TResponse | ((params) => TResponse)',
+      description:
+        'Pre-initialized object which becomes the response JSON, so there is no need for .data.',
+    },
+    method: {
+      type: '"GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD"',
+      description: 'The HTTP method to use.',
+      default: '"GET"',
+    },
+    cache: {
+      type: 'boolean',
+      description: 'Whether to cache the request and serve from the frontend cache.',
+      default: 'false',
+    },
+    cacheForTime: {
+      type: 'number',
+      description: 'Seconds to consider data stale and invalidate cache.',
+      default: '60',
+    },
+    timeout: {
+      type: 'number',
+      description: 'The timeout for the request in seconds.',
+      default: '30',
+    },
+    baseURL: {
+      type: 'string',
+      description: 'Base URL prepended to relative request paths.',
+    },
+    cancelOngoingIfNew: {
+      type: 'boolean',
+      description: 'Cancel previous requests to the same path.',
+      default: 'true',
+    },
+    cancelNewIfOngoing: {
+      type: 'boolean',
+      description: 'Cancel the new request if a request to the path is already in progress.',
+      default: 'false',
+    },
+    rateLimit: {
+      type: 'number',
+      description: 'If set, how many seconds to wait between requests.',
+      default: 'false',
+    },
+    debug: {
+      type: 'boolean',
+      description: 'Whether to log the request and response.',
+      default: 'false',
+    },
+    infiniteScroll: {
+      type: '[string, string, string | HTMLElement]',
+      description:
+        '[page key, response field to concatenate, element with results].',
+      default: 'null',
+    },
+    setDefaults: {
+      type: 'boolean',
+      description:
+        'Pass this with options to set those options as defaults for all requests.',
+      default: 'false',
+    },
+    retryAttempts: {
+      type: 'number',
+      description: 'Retry failed requests this many times.',
+      default: '0',
+    },
+    logger: {
+      type: '(...args) => void',
+      description: 'Custom logger to override the built-in color JSON log().',
+      default: 'log',
+    },
+    onRequest: {
+      type: '(...args) => any',
+      description:
+        'Set with defaults to modify each request. Takes and returns in order: path, response, params, fetchParams.',
+    },
+    onResponse: {
+      type: '(...args) => any',
+      description:
+        'Set with defaults to modify each response. Takes and returns in order: path, response, params, fetchParams.',
+    },
+    onError: {
+      type: '(...args) => any',
+      description:
+        'Set with defaults to handle errors. Takes and returns in order: error, path, params.',
+    },
+    onStream: {
+      type: '(...args) => any',
+      description:
+        'Set with defaults to process the response as a stream (e.g. for instant unzip).',
+    },
+    unzip: {
+      type: 'boolean',
+      description:
+        'Auto-extract ZIP responses into { data: { filename: content } }. Set false to disable. Uses archiver-web.',
+      default: 'auto-detect',
+    },
+    dom: {
+      type: 'string | boolean',
+      description:
+        'CSS selector to extract from HTML, true for full document, false to disable. Auto-parses HTML responses. Uses linkedom.',
+      default: 'auto-detect',
+    },
+    unescapeHTML: {
+      type: 'boolean',
+      description:
+        'Unescape URL-safe HTML entities (e.g. &amp; &#39; &lt;) in text responses. Auto-applied when entities are detected; set false to disable, true to force.',
+      default: 'auto-detect',
+    },
+    repeat: {
+      type: 'number',
+      description: 'Repeat the request this many times.',
+      default: '0',
+    },
+    repeatEvery: {
+      type: 'number',
+      description: 'Repeat the request every N seconds.',
+      default: 'null',
+    },
+    debounce: {
+      type: 'number',
+      description:
+        'Seconds to debounce the request, waiting to execute so other requests may override.',
+      default: '0',
+    },
+    regrabOnStale: {
+      type: 'boolean',
+      description: 'Refetch when cache is past cacheForTime.',
+      default: 'false',
+    },
+    regrabOnFocus: {
+      type: 'boolean',
+      description: 'Refetch on window refocus.',
+      default: 'false',
+    },
+    regrabOnNetwork: {
+      type: 'boolean',
+      description: 'Refetch on network change.',
+      default: 'false',
+    },
+    post: {
+      type: 'boolean',
+      description: 'Shortcut for method: "POST".',
+    },
+    put: {
+      type: 'boolean',
+      description: 'Shortcut for method: "PUT".',
+    },
+    patch: {
+      type: 'boolean',
+      description: 'Shortcut for method: "PATCH".',
+    },
+    body: {
+      type: 'any',
+      description:
+        'The body of the POST/PUT/PATCH request (can also be passed into the main params).',
+      default: 'null',
+    },
+  }}
+/>

@@ -76,7 +76,7 @@
     "linkedom": "^0.18.12"
   },
   "devDependencies": {
-    "@grab-url/animations": "workspace:*",
+    "@grab-url/loading-animations": "workspace:*",
     "@types/node": "^25.5.0",
     "@vitest/ui": "^4.0.18",
     "export-svg-typescript": "^0.1.15",

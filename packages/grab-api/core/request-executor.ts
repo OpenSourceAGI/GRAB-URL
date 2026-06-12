@@ -5,7 +5,7 @@
  */
 
 import { GrabFunction, GrabMockHandler } from "../common/types";
-import { wait } from "../common/utils";
+import { wait, hasHTMLEntities, convertURLSafeHTMLToHTML } from "../common/utils";
 import { processZipResponse, processDomResponse } from "./content-processors";
 
 export { prepareFetchRequest } from "./request-prep";
@@ -22,6 +22,7 @@ export async function executeRequest(
     onStream: any,
     unzip?: boolean,
     dom?: string | boolean,
+    unescapeHTML?: boolean,
 ): Promise<any> {
     const target = (typeof window !== "undefined" ? window.grab : (globalThis as any).grab) as GrabFunction;
     const mockHandler = target?.mock?.[path] as GrabMockHandler;
@@ -62,7 +63,7 @@ export async function executeRequest(
         return { data: await processDomResponse(html, typeof dom === "string" ? dom : true) };
     }
 
-    return await (
+    const data = await (
         type.includes("application/json")
             ? fetchRes.json()
             : type.includes("application/pdf") || type.includes("application/octet-stream")
@@ -73,4 +74,13 @@ export async function executeRequest(
     ).catch(e => {
         throw new Error("Error parsing response: " + e);
     });
+
+    // Unescape URL-safe HTML entities in text responses unless disabled with
+    // unescapeHTML: false — auto-applied only when entities are detected.
+    if (typeof data === "string" && unescapeHTML !== false &&
+        (unescapeHTML || hasHTMLEntities(data))) {
+        return convertURLSafeHTMLToHTML(data, true);
+    }
+
+    return data;
 }

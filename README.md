@@ -5,6 +5,7 @@
   <a href="https://grab.js.org/docs/examples">🎯 Examples</a>
 </h3>
 <p align="center">
+  <a href="https://deepwiki.com/vtempest/GRAB-URL"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://discord.gg/SJdBqBz3tV"><img src="https://img.shields.io/discord/1110227955554209923.svg?label=Chat&logo=Discord&colorB=7289da&style=flat"
           alt="Join Discord" /></a>
   <a href="https://github.com/vtempest/GRAB-URL/discussions"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/vtempest/GRAB-URL" /></a>

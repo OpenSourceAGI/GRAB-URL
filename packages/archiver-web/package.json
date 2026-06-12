@@ -17,7 +17,7 @@
     "build": "vite build --config ../../vite.config.ts",
     "test": "tsx test.ts"
   },
-  "dependencies": {
+  "optionalDependencies": {
     "jszip": "^3.10.1"
   },
   "devDependencies": {

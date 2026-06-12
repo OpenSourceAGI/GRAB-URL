@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: "https://registry.npmjs.org"
 
       - uses: oven-sh/setup-bun@v2
@@ -50,12 +50,18 @@ jobs:
             fi
 
             name=$(node -e "const p=require('./$pkg'); console.log(p.name)")
+            current_version=$(node -e "const p=require('./$pkg'); console.log(p.version)")
+
+            # Check if this version is already published
+            if npm view "$name@$current_version" version &>/dev/null; then
+              echo "⏭ Skipping $name@$current_version (already published)"
+              continue
+            fi
+
             echo "📦 Publishing $name ($dir)"
 
             (
               cd "$dir"
-
-              npm version patch --no-git-tag-version
 
               # Skip postinstall hooks (e.g. drizzle-kit push, fumadocs-mdx) that require
               # runtime env vars not available in CI — build script is run explicitly below
@@ -78,11 +84,3 @@ jobs:
             exit 1
           fi
 
-      - name: Commit version bumps
-        if: always()
-        run: |
-          git add packages/*/package.json
-          if [ -f package-lock.json ]; then git add package-lock.json; fi
-          git diff --staged --quiet && echo "No version changes to commit" && exit 0
-          git commit -m "chore: bump package versions [skip ci]"
-          git push

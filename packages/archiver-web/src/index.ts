@@ -7,13 +7,49 @@
  * const archiveBlob = await compress({ files: [...], outputName: 'out.zip' });
  */
 
-import JSZip from "jszip";
-
 import type {
   ExtractEvent,
   CreateOptions,
   ArchiveFile,
 } from "./types.js";
+
+/** CDN fallback for JSZip when it is not installed locally. */
+const JSZIP_CDN_URL = "https://esm.sh/jszip@3.10.1";
+
+let jsZipPromise: Promise<any> | null = null;
+
+/**
+ * Resolve the JSZip constructor. JSZip is kept out of the bundle and loaded on
+ * demand: first from a pre-loaded global, then a local install, then the CDN.
+ */
+function getJSZip(): Promise<any> {
+  return (jsZipPromise ??= loadJSZip());
+}
+
+async function loadJSZip(): Promise<any> {
+  // 1. Already available as a global (e.g. loaded via a <script> tag).
+  const preloaded = (globalThis as any).JSZip;
+  if (preloaded) return preloaded;
+
+  // 2. Try a local install / bundler-resolved module.
+  try {
+    const mod = await import("jszip");
+    return mod.default ?? mod;
+  } catch {
+    // Not installed locally — fall through to the CDN.
+  }
+
+  // 3. Fall back to the CDN (browsers and runtimes that support https imports).
+  try {
+    const mod = await import(/* @vite-ignore */ JSZIP_CDN_URL);
+    return mod.default ?? mod;
+  } catch (err) {
+    throw new Error(
+      `JSZip could not be loaded. Install it ("npm i jszip") or ensure network ` +
+        `access to ${JSZIP_CDN_URL}. Cause: ${(err as Error)?.message ?? err}`,
+    );
+  }
+}
 
 /**
  * Extract files from a ZIP ArrayBuffer.
@@ -38,6 +74,7 @@ export async function extract(options: {
     throw new Error("Password-protected archives are not supported");
   }
 
+  const JSZip = await getJSZip();
   const zip = await JSZip.loadAsync(archiveBuffer);
   const files: ExtractEvent[] = [];
 
@@ -83,6 +120,7 @@ export async function compress(options: CreateOptions): Promise<ArchiveFile> {
     compressionLevel = 6,
   } = options;
 
+  const JSZip = await getJSZip();
   const zip = new JSZip();
 
   for (const { path, content } of files) {

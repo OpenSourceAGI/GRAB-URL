@@ -39,6 +39,7 @@ export type GrabOptions<TResponse = any, TParams = any> = {
   cacheForTime?: number;
   /** default=30 The timeout for the request in seconds */
   timeout?: number;
+  /** default=auto-detect Base URL to prepend to path, auto-detects from SERVER_API_URL env var  */
   baseURL?: string;
   /** default=true Cancel previous requests to same path */
   cancelOngoingIfNew?: boolean;
@@ -68,6 +69,8 @@ export type GrabOptions<TResponse = any, TParams = any> = {
   unzip?: boolean;
   /** default=auto-detect CSS selector to extract from HTML, true for full document, false to disable. Auto-parses HTML responses. Uses linkedom. */
   dom?: string | boolean;
+  /** default=auto-detect Unescape URL-safe HTML entities (e.g. &amp; &#39; &lt;) in text responses back to standard characters. Auto-applied when entities are detected; set false to disable, true to force. Uses convertURLSafeHTMLToHTML. */
+  unescapeHTML?: boolean;
   /** default=0 Repeat request this many times */
   repeat?: number;
   /** default=null Repeat request every seconds */
