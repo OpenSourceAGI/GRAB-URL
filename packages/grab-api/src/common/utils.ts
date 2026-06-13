@@ -26,11 +26,37 @@ export const debouncer = async (func: Function, wait: number) => {
 
 /**
  * Helper function to wait for a specified number of seconds.
- * 
+ *
  * @param s - Seconds to wait.
  * @returns A promise that resolves after the timeout.
  */
 export const wait = (s: number) => new Promise((res) => setTimeout(res, s * 1000 || 0));
+
+/**
+ * Detects whether the code is running in a local development environment.
+ * Used to enable logging and visual dev tools on localhost only, keeping
+ * them disabled in production by default.
+ *
+ * @returns True when running on localhost / a loopback host, or when
+ * NODE_ENV is "development" in a Node.js environment.
+ * @category Utilities
+ */
+export const isLocalhost = (): boolean => {
+    if (typeof window !== "undefined" && window.location) {
+        const host = window.location.hostname;
+        return (
+            host === "localhost" ||
+            host === "127.0.0.1" ||
+            host === "[::1]" ||
+            host === "0.0.0.0" ||
+            host.endsWith(".localhost")
+        );
+    }
+    if (typeof process !== "undefined" && process.env) {
+        return process.env.NODE_ENV === "development";
+    }
+    return false;
+};
 
 /**
  * Normalizes and builds a URL from a base and relative path.

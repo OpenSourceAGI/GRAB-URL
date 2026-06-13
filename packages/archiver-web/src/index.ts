@@ -15,8 +15,11 @@ import type {
 
 /** CDN fallback for JSZip when it is not installed locally. */
 const JSZIP_CDN_URL = "https://esm.sh/jszip@3.10.1";
+/** CDN fallback for fflate (streaming unzip) when it is not installed locally. */
+const FFLATE_CDN_URL = "https://esm.sh/fflate@0.8.2";
 
 let jsZipPromise: Promise<any> | null = null;
+let fflatePromise: Promise<any> | null = null;
 
 /**
  * Resolve the JSZip constructor. JSZip is kept out of the bundle and loaded on
@@ -49,6 +52,147 @@ async function loadJSZip(): Promise<any> {
         `access to ${JSZIP_CDN_URL}. Cause: ${(err as Error)?.message ?? err}`,
     );
   }
+}
+
+/**
+ * Resolve the fflate module. Like JSZip, it is kept out of the bundle and
+ * loaded on demand: first from a local install, then the CDN. fflate is used
+ * for streaming extraction (entries are emitted as the archive arrives).
+ */
+function getFflate(): Promise<any> {
+  return (fflatePromise ??= loadFflate());
+}
+
+async function loadFflate(): Promise<any> {
+  // 1. Already available as a global.
+  const preloaded = (globalThis as any).fflate;
+  if (preloaded) return preloaded;
+
+  // 2. Try a local install / bundler-resolved module.
+  try {
+    return await import("fflate");
+  } catch {
+    // Not installed locally — fall through to the CDN.
+  }
+
+  // 3. Fall back to the CDN.
+  try {
+    return await import(/* @vite-ignore */ FFLATE_CDN_URL);
+  } catch (err) {
+    throw new Error(
+      `fflate could not be loaded. Install it ("npm i fflate") or ensure ` +
+        `network access to ${FFLATE_CDN_URL}. Cause: ${(err as Error)?.message ?? err}`,
+    );
+  }
+}
+
+/** Decode entry bytes as UTF-8 text, falling back to base64 for binary data. */
+function decodeEntry(data: Uint8Array): string {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(data);
+  } catch {
+    let binary = "";
+    for (let i = 0; i < data.length; i += 0x8000) {
+      binary += String.fromCharCode(...data.subarray(i, i + 0x8000));
+    }
+    return btoa(binary);
+  }
+}
+
+/**
+ * Stream-extract files from a ZIP as the bytes arrive, without buffering the
+ * whole archive first. Each completed entry is passed to `onFile` immediately,
+ * so consumers can begin processing files before the download finishes.
+ * @param options - Stream extract configuration
+ * @param options.stream - ReadableStream of the ZIP archive bytes
+ * @param options.folderPath - Folder to extract (e.g., 'src/'), empty=root
+ * @param options.onFile - Called with each entry as soon as it is extracted
+ * @returns Array of all extracted files (resolved once the stream ends)
+ */
+export async function extractStream(options: {
+  stream: ReadableStream<Uint8Array>;
+  folderPath?: string;
+  onFile?: (file: ExtractEvent) => void;
+}): Promise<ExtractEvent[]> {
+  const { stream, folderPath = "", onFile } = options;
+
+  if (!stream) {
+    throw new Error("Must provide stream");
+  }
+
+  const { Unzip, UnzipInflate } = await getFflate();
+  const files: ExtractEvent[] = [];
+
+  await new Promise<void>((resolve, reject) => {
+    const unzip = new Unzip();
+    unzip.register(UnzipInflate);
+
+    let streamDone = false;
+    let pending = 0;
+    const maybeResolve = () => {
+      if (streamDone && pending === 0) resolve();
+    };
+
+    unzip.onfile = (file: any) => {
+      const name: string = file.name;
+      const inFolder = !folderPath || name.startsWith(folderPath);
+      const strippedPath = folderPath
+        ? name.slice(folderPath.length).replace(/^\//, "")
+        : name;
+
+      // Skip directories and entries outside the requested folder, but still
+      // drain them so the stream parser can advance to later entries.
+      if (!inFolder || !strippedPath || name.endsWith("/")) {
+        file.ondata = () => {};
+        file.start();
+        return;
+      }
+
+      const chunks: Uint8Array[] = [];
+      pending++;
+      file.ondata = (err: Error | null, chunk: Uint8Array, final: boolean) => {
+        if (err) return reject(err);
+        if (chunk) chunks.push(chunk);
+        if (!final) return;
+
+        const size = chunks.reduce((n, c) => n + c.length, 0);
+        const data = new Uint8Array(size);
+        let offset = 0;
+        for (const c of chunks) {
+          data.set(c, offset);
+          offset += c.length;
+        }
+
+        const event: ExtractEvent = {
+          path: strippedPath,
+          size,
+          content: decodeEntry(data),
+          mime: "application/octet-stream",
+        };
+        files.push(event);
+        onFile?.(event);
+        pending--;
+        maybeResolve();
+      };
+      file.start();
+    };
+
+    const reader = stream.getReader();
+    const pump = (): Promise<void> =>
+      reader.read().then(({ done, value }) => {
+        if (done) {
+          unzip.push(new Uint8Array(0), true);
+          streamDone = true;
+          maybeResolve();
+          return;
+        }
+        unzip.push(value, false);
+        return pump();
+      });
+    pump().catch(reject);
+  });
+
+  return files;
 }
 
 /**

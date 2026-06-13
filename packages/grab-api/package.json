@@ -2,9 +2,10 @@
   "name": "@grab-url/grab-api",
   "private": true,
   "type": "module",
-  "main": "./index.ts",
+  "main": "./src/index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./src/index.ts",
+    "./slim": "./src/index.slim.ts"
   },
   "scripts": {
     "build": "vite build --config vite.config.ts"

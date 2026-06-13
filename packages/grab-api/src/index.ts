@@ -3,6 +3,7 @@ import { executeRequest } from "./core/request-executor";
 const coreGrab = createGrab(executeRequest);
 import { setupDevTools } from "./devtools/devtools";
 import { GrabFunction, GrabOptions } from "./common/types";
+import { isLocalhost } from "./common/utils";
 import { log } from "@grab-url/log";
 
 // Add instance method to the core grab function
@@ -30,8 +31,8 @@ if (typeof window !== "undefined") {
   window.log = log;
   window.grab = grab;
 
-  // Setup visual dev tools
-  setupDevTools();
+  // Setup visual dev tools on localhost only — keep them disabled in production
+  if (isLocalhost()) setupDevTools();
 
   // Restore scroll position when page loads for infinite scroll persistence
   document.addEventListener("DOMContentLoaded", () => {

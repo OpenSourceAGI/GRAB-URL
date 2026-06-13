@@ -17,7 +17,7 @@ export async function executeRequest(
     params: any,
     onStream: any,
     _unzip?: boolean,
-    _dom?: string | boolean,
+    _parseDOM?: string | boolean,
     unescapeHTML?: boolean,
 ): Promise<any> {
     const target = (typeof window !== "undefined" ? window.grab : (globalThis as any).grab) as GrabFunction;

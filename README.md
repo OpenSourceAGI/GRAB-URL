@@ -29,7 +29,7 @@ npm i grab-url
 1.  **GRAB is the FBEST Request Manager: Functionally Brilliant, Elegantly Simple Tool**: One Function, no dependencies, minimalist syntax, [more features than alternatives](https://grab.js.org/docs/Comparisons)
 2.  **Auto-JSON Convert**: Pass parameters and get response or error in JSON, handling other data types as is.
 3.  **isLoading Status**: Sets `.isLoading=true` on the pre-initialized response object so you can show a "Loading..." in any framework
-4.  **[Claude Skill](https://grab.js.org/docs/claude-skill)** Copy this link as markdown and paste into ~/.claude/skills/use-grab-request/SKILL.md or similar for Antigravity, Cursor, Gemini, Codex, etc...
+4.  **[Agent Skill](https://grab.js.org/docs/claude-skill)** Install the skill into any agent (Claude, Cursor, Gemini, Codex, Antigravity, etc.) with one command: `npx skills add vtempest/GRAB-URL@use-grab-request`. Or copy [SKILL.md](skills/use-grab-request/SKILL.md) into `~/.claude/skills/use-grab-request/SKILL.md`.
 5.  **Mock Server Support**: Configure `window.grab.mock` for development and testing environments
 6.  **Cancel Duplicates**: Prevent this request if one is ongoing to same path & params, or cancel the ongoing request.
 7.  **Timeout & Retry**: Customizable request timeout, default 30s, and auto-retry on error

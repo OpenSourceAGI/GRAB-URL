@@ -2,9 +2,9 @@
   "name": "@grab-url/log",
   "private": true,
   "type": "module",
-  "main": "./log-json.ts",
+  "main": "./src/log-json.ts",
   "exports": {
-    ".": "./log-json.ts"
+    ".": "./src/log-json.ts"
   },
   "scripts": {
     "build": "vite build --config vite.config.ts"

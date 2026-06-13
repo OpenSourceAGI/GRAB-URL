@@ -7,7 +7,7 @@
 
 import { printJSONStructure, log } from "@grab-url/log";
 import { GrabOptions, GrabResponse, GrabFunction } from "../common/types";
-import { buildUrl } from "../common/utils";
+import { buildUrl, isLocalhost } from "../common/utils";
 import { showAlert } from "../devtools/devtools";
 
 import { getMergedOptions, handleFlowControl } from "./flow-control";
@@ -50,7 +50,9 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     cancelOngoingIfNew,
     cancelNewIfOngoing,
     rateLimit,
-    debug,
+    // Enable request/error logging on localhost by default; off in production
+    // unless explicitly set to true.
+    debug = isLocalhost(),
     infiniteScroll,
     logger = log,
     onRequest,
@@ -58,7 +60,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     onError,
     onStream,
     unzip,
-    dom,
+    parseDOM,
     unescapeHTML,
     body,
     post,
@@ -165,7 +167,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
       params,
       onStream,
       unzip,
-      dom,
+      parseDOM,
       unescapeHTML,
     );
 

@@ -18,6 +18,11 @@
       "import": "./src/react/index.ts",
       "require": "./src/react/index.ts"
     },
+    "./icons": {
+      "types": "./dist/icons.d.ts",
+      "import": "./dist/icons.mjs",
+      "require": "./dist/icons.js"
+    },
     "./svelte": {
       "types": "./src/types/QuantumOrbital.d.ts",
       "svelte": "./src/svelte/QuantumOrbital.svelte"

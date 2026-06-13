@@ -2,9 +2,9 @@
   "name": "@grab-url/cli",
   "private": true,
   "type": "module",
-  "main": "./index.ts",
+  "main": "./src/index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./src/index.ts"
   },
   "dependencies": {
     "@grab-url/loading-animations": "*",

@@ -32,15 +32,21 @@ const externalPkgs = ["chalk", "cli-table3", "cli-progress", "cli-spinners"];
 const slimExternalPkgs = [...externalPkgs, "archiver-web", "linkedom"];
 
 const sharedAlias = {
-  "@grab-url/log": resolve(__dirname, "packages/log-json/log-json.ts"),
-  "@grab-url/grab-api": resolve(__dirname, "packages/grab-api/index.ts"),
+  "@grab-url/log": resolve(__dirname, "packages/log-json/src/log-json.ts"),
+  "@grab-url/grab-api": resolve(__dirname, "packages/grab-api/src/index.ts"),
 };
 
 const sharedPlugins = [
   dts({
     insertTypesEntry: true,
     include: ["packages/**/*.ts", "packages/**/*.tsx"],
-    exclude: ["packages/quantum-sphere-loading-animation/**"],
+    exclude: [
+      "packages/quantum-sphere-loading-animation/svelte/**",
+      "packages/quantum-sphere-loading-animation/src/svelte/**",
+      "packages/quantum-sphere-loading-animation/demo/**",
+      "packages/quantum-sphere-loading-animation/dist/**",
+      "packages/quantum-sphere-loading-animation/node_modules/**",
+    ],
     outDir: "dist",
     rollupTypes: false,
   }),
@@ -55,12 +61,12 @@ export default defineConfig({
     target: "es2022",
     lib: {
       entry: {
-        "grab-api": resolve(__dirname, "packages/grab-api/index.ts"),
-        "grab-api-slim": resolve(__dirname, "packages/grab-api/index.slim.ts"),
-        animations: resolve(__dirname, "packages/loading-animations/svg/index.ts"),
-        "quantum-sphere": resolve(__dirname, "packages/grab-api/icons/quantum-sphere/index.ts"),
-        log: resolve(__dirname, "packages/log-json/log-json.ts"),
-        "grab-url-cli": resolve(__dirname, "packages/grab-url-cli/index.ts"),
+        "grab-api": resolve(__dirname, "packages/grab-api/src/index.ts"),
+        "grab-api-slim": resolve(__dirname, "packages/grab-api/src/index.slim.ts"),
+        animations: resolve(__dirname, "packages/loading-animations/src/svg/index.ts"),
+        "quantum-sphere": resolve(__dirname, "packages/quantum-sphere-loading-animation/src/icons.ts"),
+        log: resolve(__dirname, "packages/log-json/src/log-json.ts"),
+        "grab-url-cli": resolve(__dirname, "packages/grab-url-cli/src/index.ts"),
         "archiver-web": resolve(
           __dirname,
           "packages/archiver-web/src/index.ts",

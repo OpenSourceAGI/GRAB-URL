@@ -19,10 +19,10 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true, // Required for Vite
     "paths": {
-      "@grab-url/grab-api": ["./packages/grab-api/index.ts"],
-      "@grab-url/log": ["./packages/log-json/log-json.ts"],
-      "@grab-url/loading-animations": ["./packages/loading-animations/svg/index.ts"],
-      "@grab-url/grab-url-cli": ["./packages/grab-url-cli/index.ts"],
+      "@grab-url/grab-api": ["./packages/grab-api/src/index.ts"],
+      "@grab-url/log": ["./packages/log-json/src/log-json.ts"],
+      "@grab-url/loading-animations": ["./packages/loading-animations/src/svg/index.ts"],
+      "@grab-url/grab-url-cli": ["./packages/grab-url-cli/src/index.ts"],
       "@grab-url/archiver-web": ["./packages/archiver-web/src/index.ts"]
     }
   },

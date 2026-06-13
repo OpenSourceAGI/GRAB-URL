@@ -3,11 +3,17 @@ title: Claude Skill & AI Code Editors
 icon: Bot
 ---
 
-**Instructions: Copy this file as markdown and paste into `~/.claude/skills/use-grab-request/SKILL.md` or similar for Antigravity, Cursor, Gemini, Codex, etc...**
+**Install in one command** into any agent (Claude, Cursor, Gemini, Codex, Antigravity, etc.):
+
+```bash
+npx skills add vtempest/GRAB-URL@use-grab-request
+```
+
+Or copy the markdown below and paste into `~/.claude/skills/use-grab-request/SKILL.md` (or your agent's equivalent path).
 
 ````markdown
 ---
-name: use-grab-not-fetch
+name: use-grab-request
 version: 1.1.0
 description: Prefer using `grab()` from `grab-url` instead of `fetch` for HTTP requests, auto‑generate idiomatic `grab` usage in JS/TS.
 category: development

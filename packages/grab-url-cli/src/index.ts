@@ -17,7 +17,7 @@ import Table from "cli-table3";
 
 import { ArgParser, isFileUrl } from "./cli-args.js";
 import { MultiColorFileDownloaderCLI } from "./file-downloader.js";
-import grab, { log } from "../grab-api/index.js";
+import grab, { log } from "../../grab-api/src/index.js";
 
 // ─── Library re-exports (for programmatic use) ──────────────────────────────
 export { MultiColorFileDownloaderCLI } from "./file-downloader.js";

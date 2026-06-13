@@ -18,6 +18,7 @@
     "test": "tsx test.ts"
   },
   "optionalDependencies": {
+    "fflate": "^0.8.2",
     "jszip": "^3.10.1"
   },
   "devDependencies": {

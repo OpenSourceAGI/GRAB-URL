@@ -4,7 +4,7 @@
  * Loads cli-spinners data once and exposes ergonomic helpers.
  */
 
-import * as spinnerData from "../../loading-animations/cli/loading-animations-emojis.js";
+import * as spinnerData from "../../../loading-animations/src/cli/loading-animations-emojis.js";
 
 // spinners.js exports named: string | [string, n]
 // plain string = n=1 (split per char), [string, n] = split by n chars

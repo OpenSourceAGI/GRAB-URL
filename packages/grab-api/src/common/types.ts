@@ -47,7 +47,7 @@ export type GrabOptions<TResponse = any, TParams = any> = {
   cancelNewIfOngoing?: boolean;
   /** default=false If set, how many seconds to wait between requests */
   rateLimit?: number;
-  /** default=false Whether to log the request and response */
+  /** default=true on localhost, false in production. Whether to log the request and response */
   debug?: boolean;
   /** default=null [page key, response field to concatenate, element with results] */
   infiniteScroll?: [string, string, string | HTMLElement];
@@ -63,12 +63,14 @@ export type GrabOptions<TResponse = any, TParams = any> = {
   onResponse?: (...args: any[]) => any;
   /** Set with defaults to modify each request data. Takes and returns in order: error, path, params */
   onError?: (...args: any[]) => any;
-  /** Set with defaults to process the response as a stream (i.e., for instant unzip) */
+  /** Process the response as a stream. For ZIP responses, called with each
+   * `{ path, content, size }` entry as it is extracted (instant unzip, no wait
+   * for full download); otherwise called once with the raw ReadableStream body. */
   onStream?: (...args: any[]) => any;
   /** default=auto-detect Auto-extract ZIP responses into { data: { filename: content } }. Set false to disable. Uses archiver-web. */
   unzip?: boolean;
   /** default=auto-detect CSS selector to extract from HTML, true for full document, false to disable. Auto-parses HTML responses. Uses linkedom. */
-  dom?: string | boolean;
+  parseDOM?: string | boolean;
   /** default=auto-detect Unescape URL-safe HTML entities (e.g. &amp; &#39; &lt;) in text responses back to standard characters. Auto-applied when entities are detected; set false to disable, true to force. Uses convertURLSafeHTMLToHTML. */
   unescapeHTML?: boolean;
   /** default=0 Repeat request this many times */

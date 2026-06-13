@@ -2,6 +2,7 @@ import { createGrab } from "./core/core";
 import { executeRequest } from "./core/request-executor-slim";
 import { setupDevTools } from "./devtools/devtools";
 import { GrabFunction, GrabOptions } from "./common/types";
+import { isLocalhost } from "./common/utils";
 import { log } from "@grab-url/log";
 
 const grab: GrabFunction = createGrab(executeRequest) as any;
@@ -18,7 +19,7 @@ if (typeof window !== "undefined") {
   // @ts-ignore
   window.log = log;
   window.grab = grab;
-  setupDevTools();
+  if (isLocalhost()) setupDevTools();
 
   document.addEventListener("DOMContentLoaded", () => {
     try {
