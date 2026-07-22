@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
@@ -105,5 +106,24 @@ export default defineConfig({
     minify: "terser",
     sourcemap: true,
     emptyOutDir: true,
+  },
+  test: {
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "lcov"],
+      reportsDirectory: "./coverage",
+      reportOnFailure: true,
+      include: ["packages/**/src/**"],
+      exclude: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/*.d.ts",
+        "**/*.test.ts",
+        "**/*.svelte",
+        "**/svelte/**",
+        "**/svg/**",
+        "**/demo/**",
+      ],
+    },
   },
 });

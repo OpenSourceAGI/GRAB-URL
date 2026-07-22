@@ -67,6 +67,7 @@
     "ship": "bun x standard-version --release-as patch;rm CHANGELOG.md; npm publish",
     "test:ui": "vitest --ui",
     "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:cli": "bun src/grab-url-cli/index.ts https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso"
   },
   "dependencies": {
@@ -78,6 +79,7 @@
   "devDependencies": {
     "@grab-url/loading-animations": "workspace:*",
     "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
     "export-svg-typescript": "^0.1.15",
     "lucide-react": "^0.555.0",
