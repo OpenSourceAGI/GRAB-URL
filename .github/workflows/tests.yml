@@ -16,10 +16,19 @@ jobs:
       - name: Set up Node.js # change if you use Python, Go, etc.
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage reports to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: OpenSourceAGI/grab-url
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
