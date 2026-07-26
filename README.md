@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="350px" src="https://i.imgur.com/RH80JGZ.png" />
+        <img  src="https://i.imgur.com/xzFQmrD.jpeg" />
 <h3 align="center">
    <a href="https://grab.js.org">📑 Docs</a>
   <a href="https://grab.js.org/docs/examples">🎯 Examples</a>
