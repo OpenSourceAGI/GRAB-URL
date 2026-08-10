@@ -67,6 +67,17 @@ const emptyData = (parseAs: Config["parseAs"]) => {
   }
 };
 
+/**
+ * Whether the installed grab reports the `onRawResponse` hook, added in
+ * grab-url 1.6.23. Instances made with `grab.instance()` do not carry the
+ * flag, so the imported grab answers for the library as a whole.
+ *
+ * Without it the client still works, but a failed request reports grab's
+ * error message instead of the response status and parsed error payload.
+ */
+const supportsRawResponse = (grab: any): boolean =>
+  (grab?.supports ?? (defaultGrab as any)?.supports)?.onRawResponse === true;
+
 /** Drops unset entries so grab never receives `undefined` as a value. */
 const defined = <T extends Record<string, any>>(options: T): T => {
   for (const key of Object.keys(options))
@@ -171,16 +182,10 @@ export const createClient = (config: Config = {}): Client => {
       // matching its header, and so `null` means "no body" rather than "{}".
       body: hasBody ? await request.clone().arrayBuffer() : null,
       baseURL,
-      // Body handling belongs to the OpenAPI contract, so grab's HTML and ZIP
-      // post-processing stays off unless it was asked for explicitly.
-      parseDOM: opts.parseDOM ?? false,
-      unzip: opts.unzip ?? false,
-      unescapeHTML: opts.unescapeHTML ?? false,
       cache: opts.cache,
-      cacheForTime: opts.cacheForTime,
       timeout: opts.timeout,
-      retryAttempts: opts.retryAttempts,
       rateLimit: opts.rateLimit,
+      unzip: opts.unzip ?? false,
       cancelOngoingIfNew: opts.cancelOngoingIfNew,
       cancelNewIfOngoing: opts.cancelNewIfOngoing,
       debug: opts.debug,
@@ -189,12 +194,24 @@ export const createClient = (config: Config = {}): Client => {
       ...(opts.parseAs === "stream"
         ? { onStream: (body: ReadableStream) => void (stream = body) }
         : {}),
-      onRawResponse: (raw: Response) => {
-        response = raw;
-        // grab throws on a failed status without touching the body, so it is
-        // still ours to read for the error payload.
-        if (!raw.ok) errorBody = raw.text().catch(() => "");
-      },
+      // Options a pre-1.6.23 grab does not know about would be serialized
+      // into the query string, so they are only sent when it can handle them.
+      ...(supportsRawResponse(grab)
+        ? {
+            // Body handling belongs to the OpenAPI contract, so grab's HTML
+            // post-processing stays off unless it was asked for explicitly.
+            parseDOM: opts.parseDOM ?? false,
+            unescapeHTML: opts.unescapeHTML ?? false,
+            cacheForTime: opts.cacheForTime,
+            retryAttempts: opts.retryAttempts,
+            onRawResponse: (raw: Response) => {
+              response = raw;
+              // grab throws on a failed status without touching the body, so
+              // it is still ours to read for the error payload.
+              if (!raw.ok) errorBody = raw.text().catch(() => "");
+            },
+          }
+        : {}),
     }));
 
     if (response)

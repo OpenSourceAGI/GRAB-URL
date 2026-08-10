@@ -152,6 +152,10 @@ export interface GrabGlobal {
   mock: Record<string, GrabMockHandler>;
   /** Create a separate instance of grab with separate default options */
   instance: (defaultOptions?: Partial<GrabOptions>) => GrabFunction;
+
+  /** Feature flags for options added after the initial release, so
+   * integrations can detect support instead of guessing from a version */
+  supports?: { onRawResponse?: boolean };
 }
 
 /**
@@ -203,6 +207,10 @@ export interface GrabFunction {
 
   /** Create a separate instance of grab with separate default options */
   instance: (defaultOptions?: Partial<GrabOptions>) => GrabFunction;
+
+  /** Feature flags for options added after the initial release, so
+   * integrations can detect support instead of guessing from a version */
+  supports?: { onRawResponse?: boolean };
 }
 
 /**

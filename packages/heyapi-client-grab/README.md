@@ -131,7 +131,7 @@ if (error) console.log(response.status, error); // 404 { message: "Pet not found
 
 ## Requirements
 
-`grab-url` ≥ 1.6.23, which added the `onRawResponse` hook this client uses to report status codes, headers and error payloads.
+Works with any `grab-url` ≥ 1.6.22. On 1.6.23 and later it also uses the `onRawResponse` hook to report the response status, headers and parsed error payloads; on older versions those degrade to grab's error message (`"HTTP error: 404 Not Found"`) and a synthesized 200 response. The client detects support and never sends options an older grab would turn into query parameters.
 
 ## What's in this package
 

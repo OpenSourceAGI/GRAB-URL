@@ -25,6 +25,10 @@ grab.log = [];
 grab.mock = {};
 grab.defaults = {};
 
+// Feature flags so integrations can detect what this version supports and
+// avoid passing options an older grab would treat as query parameters.
+grab.supports = { onRawResponse: true };
+
 // Handle global registration for both Browser and Node.js environments
 if (typeof window !== "undefined") {
   // @ts-ignore

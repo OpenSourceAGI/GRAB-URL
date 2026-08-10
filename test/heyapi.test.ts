@@ -191,6 +191,27 @@ describe('grab features reaching generated SDKs', () => {
     expect(result.data).toEqual({ id: '1' });
   });
 
+  it('sends no unknown options to a grab that predates onRawResponse', async () => {
+    const supports = grab.supports;
+    delete (grab as any).supports;
+
+    try {
+      mockJson({ id: '1' });
+      const result = await client.get({ cacheForTime: 120, url: '/pets/1' });
+
+      // No option leaks into the query string, and data still comes back.
+      expect(lastUrl()).toBe(`${BASE}/pets/1`);
+      expect(result.data).toEqual({ id: '1' });
+
+      // Without the hook a failure reports grab's message, not the payload.
+      mockJson({ message: 'gone' }, 404);
+      const failed = await client.get({ url: '/pets/1' });
+      expect(failed.error).toContain('404');
+    } finally {
+      (grab as any).supports = supports;
+    }
+  });
+
   it('records every request in the shared grab log', async () => {
     mockJson({ id: '1' });
 
