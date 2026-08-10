@@ -160,6 +160,16 @@ describe('grab() — Mock server', () => {
     const result = await grab('broken');
     expect(result.error).toBe('Mock error');
   });
+
+  it('matches a mock key written with or without a leading slash', async () => {
+    grab.mock['/pets'] = { response: { pets: ['Rex'] } };
+    expect((await grab('pets')).data).toEqual({ pets: ['Rex'] });
+
+    grab.mock = { 'orders': { response: { orders: [] } } };
+    expect((await grab('/orders')).data).toEqual({ orders: [] });
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
 });
 
 // ─── Caching ─────────────────────────────────────────────────────────────────

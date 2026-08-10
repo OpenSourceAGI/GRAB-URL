@@ -4,6 +4,8 @@
  * Includes helpers for debouncing, URL building, and asynchronous waiting.
  */
 
+import type { GrabMockHandler } from "./types";
+
 /**
  * Delays execution so that future calls may override and only executes the last one.
  * Useful for search inputs or other high-frequency events.
@@ -82,6 +84,24 @@ export const buildUrl = (baseURL: string, path: string) => {
 };
 
 
+
+/**
+ * Looks up the mock handler registered for a request path.
+ * Paths are normalized to start with "/" before the request is made, so a
+ * mock registered as either `grab.mock["pets"]` or `grab.mock["/pets"]`
+ * matches — whichever way it was written.
+ *
+ * @param target - The global grab object holding the mock handlers.
+ * @param path - The normalized request path.
+ * @returns The matching handler, or undefined if none is registered.
+ * @category Utilities
+ */
+export const findMockHandler = (target: any, path: string): GrabMockHandler | undefined => {
+    const mocks = target?.mock;
+    if (!mocks || !path) return undefined;
+
+    return mocks[path] ?? mocks[path.startsWith("/") ? path.slice(1) : "/" + path];
+};
 
 /**
  * Detects whether a string contains URL-safe / escaped HTML entities,

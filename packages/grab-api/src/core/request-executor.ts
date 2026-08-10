@@ -4,8 +4,8 @@
  * Handles both mock responses and real network fetch calls.
  */
 
-import { GrabFunction, GrabMockHandler } from "../common/types";
-import { wait, hasHTMLEntities, convertURLSafeHTMLToHTML } from "../common/utils";
+import { GrabFunction } from "../common/types";
+import { wait, hasHTMLEntities, convertURLSafeHTMLToHTML, findMockHandler } from "../common/utils";
 import { processZipResponse, processZipStream, processDomResponse } from "./content-processors";
 
 export { prepareFetchRequest } from "./request-prep";
@@ -26,7 +26,7 @@ export async function executeRequest(
     onRawResponse?: (response: Response) => void,
 ): Promise<any> {
     const target = (typeof window !== "undefined" ? window.grab : (globalThis as any).grab) as GrabFunction;
-    const mockHandler = target?.mock?.[path] as GrabMockHandler;
+    const mockHandler = findMockHandler(target, path);
     const paramsAsText = JSON.stringify(params);
 
     if (mockHandler &&

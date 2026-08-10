@@ -104,7 +104,7 @@ Accepted client-wide in `createConfig()`/`setConfig()` and per request. See [gra
 
 ### Mocking endpoints
 
-`grab.mock` keys are request paths, so any SDK endpoint can be stubbed without touching the network:
+`grab.mock` keys are request paths (with or without a leading slash), so any SDK endpoint can be stubbed without touching the network:
 
 ```ts
 import { grab } from "grab-url";
