@@ -4,8 +4,8 @@
  * Used by the grab-api/slim build entry.
  */
 
-import { GrabFunction, GrabMockHandler } from "../common/types";
-import { wait, hasHTMLEntities, convertURLSafeHTMLToHTML } from "../common/utils";
+import { GrabFunction } from "../common/types";
+import { wait, hasHTMLEntities, convertURLSafeHTMLToHTML, findMockHandler } from "../common/utils";
 
 export { prepareFetchRequest } from "./request-prep";
 
@@ -19,9 +19,10 @@ export async function executeRequest(
     _unzip?: boolean,
     _parseDOM?: string | boolean,
     unescapeHTML?: boolean,
+    onRawResponse?: (response: Response) => void,
 ): Promise<any> {
     const target = (typeof window !== "undefined" ? window.grab : (globalThis as any).grab) as GrabFunction;
-    const mockHandler = target?.mock?.[path] as GrabMockHandler;
+    const mockHandler = findMockHandler(target, path);
     const paramsAsText = JSON.stringify(params);
 
     if (mockHandler &&
@@ -34,6 +35,10 @@ export async function executeRequest(
     const fetchRes = await fetch(baseURL + path + paramsGETRequest, fetchParams).catch(e => {
         throw new Error(e.message);
     });
+
+    // Hand the untouched Response to the caller before parsing so status,
+    // statusText and headers stay reachable — the parsed result drops them.
+    if (typeof onRawResponse === "function") onRawResponse(fetchRes);
 
     if (!fetchRes.ok) throw new Error(`HTTP error: ${fetchRes.status} ${fetchRes.statusText}`);
 

@@ -21,7 +21,11 @@ export function prepareFetchRequest(
             Accept: "application/json",
             ...headers,
         },
-        body: body || (isBodyMethod ? JSON.stringify(params) : null),
+        // Only an omitted body falls back to the params for POST/PUT/PATCH —
+        // an explicit `body: null` sends no body at all.
+        body: body === undefined
+            ? (isBodyMethod ? JSON.stringify(params) : null)
+            : body,
         redirect: "follow",
         cache: cache ? "force-cache" : "no-store",
         signal,

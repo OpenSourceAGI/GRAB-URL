@@ -48,6 +48,7 @@ npm i grab-url
 20. **Loading Icons**: Import from `grab-url/icons` to get enhanced animated loading icons.
 21. **Auto-Unzip**: Automatically extracts ZIP responses into `{ data: { filename: content } }` using archiver-web. Set `unzip: false` to disable.
 22. **DOM Parsing**: Automatically parses HTML responses. Pass `dom: "selector"` for CSS selector extraction or `dom: false` to disable. Uses linkedom.
+23. **[OpenAPI SDKs](https://grab.js.org/docs/openapi-services/heyapi-client-grab)**: Generate a typed client from any OpenAPI spec with [Hey API](https://heyapi.dev) and have it send requests with grab instead of axios: `npx heyapi-grab ./openapi.yaml ./src/client`. Every endpoint gets caching, retries, rate limiting, dedupe and mocks.
 
 ### Examples
 

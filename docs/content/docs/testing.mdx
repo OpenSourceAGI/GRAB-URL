@@ -6,6 +6,8 @@ icon: Monitor
 
 ### Mock Server for Testing
 
+Mock keys are request paths, matched with or without a leading slash — `grab.mock.users`, `grab.mock["users"]` and `grab.mock["/users"]` all intercept `grab("users")`.
+
 ```javascript
 // Setup mock responses for testing
 grab.mock.users = {

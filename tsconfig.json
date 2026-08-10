@@ -19,7 +19,9 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true, // Required for Vite
     "paths": {
+      "grab-url": ["./packages/grab-api/src/index.ts"],
       "@grab-url/grab-api": ["./packages/grab-api/src/index.ts"],
+      "heyapi-client-grab": ["./packages/heyapi-client-grab/src/index.ts"],
       "@grab-url/log": ["./packages/log-json/src/log-json.ts"],
       "@grab-url/loading-animations": ["./packages/loading-animations/src/svg/index.ts"],
       "@grab-url/grab-url-cli": ["./packages/grab-url-cli/src/index.ts"],
