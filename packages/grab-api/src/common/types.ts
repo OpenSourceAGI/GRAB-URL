@@ -63,6 +63,11 @@ export type GrabOptions<TResponse = any, TParams = any> = {
   onResponse?: (...args: any[]) => any;
   /** Set with defaults to modify each request data. Takes and returns in order: error, path, params */
   onError?: (...args: any[]) => any;
+  /** Called with the raw fetch Response as soon as it arrives, before status
+   * checks and body parsing. Use it to read status, statusText and headers,
+   * which the parsed response object does not carry. Not called for mocked
+   * requests since those never hit the network. */
+  onRawResponse?: (response: Response) => void;
   /** Process the response as a stream. For ZIP responses, called with each
    * `{ path, content, size }` entry as it is extracted (instant unzip, no wait
    * for full download); otherwise called once with the raw ReadableStream body. */

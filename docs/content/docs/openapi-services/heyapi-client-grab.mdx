@@ -1,0 +1,151 @@
+---
+title: Hey API - OpenAPI SDK with GRAB
+description: Generate a typed client from an OpenAPI spec with Hey API, and send every request with grab instead of axios or fetch.
+icon: FileCode
+---
+
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+
+<InlineTOC items={toc} defaultOpen="true" />
+
+# Hey API: OpenAPI SDK powered by GRAB
+
+[Hey API](https://heyapi.dev) turns an OpenAPI spec into a fully typed SDK — one function and one set of types per endpoint. It ships clients built on fetch, axios, ky and others; [`heyapi-client-grab`](https://github.com/vtempest/GRAB-URL/tree/master/packages/heyapi-client-grab) adds one built on grab.
+
+The generated code does not change. The same `getPet()` and `createPet()` functions, the same types — only the transport underneath is swapped, so every endpoint in the SDK inherits caching, retries, rate limiting, request deduplication, the mock server and the shared request log.
+
+```ts
+import { getPet } from "./client";
+
+const { data, error, response } = await getPet({
+  path: { petId: "42" },
+  cache: true,        // grab options work per request
+  retryAttempts: 2,
+});
+```
+
+## Quick Start
+
+```bash
+npm i heyapi-client-grab
+npm i -D @hey-api/openapi-ts
+
+# generate the SDK and wire it to grab
+npx heyapi-grab https://petstore3.swagger.io/api/v3/openapi.json ./src/client
+```
+
+| Option                    | Purpose                                                              |
+| ------------------------- | -------------------------------------------------------------------- |
+| `-i, --input <path\|url>` | OpenAPI spec to generate from                                         |
+| `-o, --output <dir>`      | Where to write the SDK — default `./src/client`                       |
+| `-c, --client <name>`     | Hey API client to generate against — default `@hey-api/client-fetch`  |
+| `--rewire-only`           | Skip generation, rewire an SDK you already generated                  |
+| `--no-rewire`             | Generate without swapping in the grab client                          |
+
+Any other option is forwarded to the `openapi-ts` CLI. Already have an `openapi-ts.config.ts`? Keep it and rewire afterwards:
+
+```jsonc
+// package.json
+"scripts": {
+  "codegen": "openapi-ts && heyapi-grab --rewire-only ./src/client"
+}
+```
+
+From Node, the same thing:
+
+```ts
+import { generateFromOpenAPI } from "heyapi-client-grab";
+
+await generateFromOpenAPI({ input: "./openapi.yaml", output: "./src/client" });
+```
+
+## Configuration
+
+The generated `client.gen.ts` exports a `client` that configures the whole SDK at once:
+
+```ts
+import { client } from "./client/client.gen";
+
+client.setConfig({
+  baseUrl: "https://api.example.com",
+  auth: () => localStorage.getItem("token"),
+
+  // grab options, applied to every request in the SDK
+  cache: true,
+  cacheForTime: 60,
+  retryAttempts: 2,
+  rateLimit: 1,
+  timeout: 15,
+});
+```
+
+Or create a client directly:
+
+```ts
+import { createClient, createConfig } from "heyapi-client-grab";
+
+const client = createClient(createConfig({ baseUrl: "https://api.example.com" }));
+```
+
+### GRAB options
+
+Accepted client-wide in `createConfig()`/`setConfig()` and per request. See [grab options](/docs/grab-options) for the full reference.
+
+| Option                                     | Effect                                              |
+| ------------------------------------------ | --------------------------------------------------- |
+| `cache`, `cacheForTime`                    | Serve repeated requests from grab's frontend cache   |
+| `retryAttempts`                            | Retry failed requests                                |
+| `rateLimit`                                | Minimum seconds between requests to the same path    |
+| `timeout`                                  | Seconds before the request is aborted                |
+| `cancelOngoingIfNew`, `cancelNewIfOngoing` | Deduplicate concurrent requests to the same path     |
+| `debug`, `logger`                          | Log requests and responses                           |
+| `unzip`, `parseDOM`, `unescapeHTML`        | Opt back into grab's ZIP/HTML post-processing        |
+| `grab`                                     | Use a custom instance, e.g. `grab.instance({ ... })` |
+
+### Mocking endpoints
+
+`grab.mock` keys are request paths, so any SDK endpoint can be stubbed without touching the network:
+
+```ts
+import { grab } from "grab-url";
+
+grab.mock["/pets/42"] = { response: { id: "42", name: "Rex" } };
+
+const { data } = await getPet({ path: { petId: "42" } }); // { id: "42", name: "Rex" }
+```
+
+## Results
+
+The standard Hey API result — `{ data, error, request, response }`, or just `data` with `responseStyle: "data"`, or a thrown error with `throwOnError: true`:
+
+```ts
+const { data, error, response } = await getPet({ path: { petId: "99" } });
+
+if (error) console.log(response.status, error); // 404 { message: "Pet not found" }
+```
+
+`buildUrl()`, `interceptors.request/response/error`, `security`/`auth`, `bodySerializer`, `querySerializer`, `parseAs`, `responseValidator` and `responseTransformer` all behave as they do in the official clients.
+
+## Comparison
+
+| Feature                | `heyapi-client-grab` | `@hey-api/client-fetch` | `@hey-api/client-axios` |
+| ---------------------- | -------------------- | ----------------------- | ----------------------- |
+| Typed generated SDK    | ✅ Same codegen      | ✅ Yes                  | ✅ Yes                  |
+| Caching                | ✅ Built-in          | ❌ No                   | ❌ No                   |
+| Automatic retry        | ✅ `retryAttempts`   | ❌ Manual               | ⚠️ Via interceptors     |
+| Rate limiting          | ✅ `rateLimit`       | ❌ Manual               | ❌ Manual               |
+| Request deduplication  | ✅ Built-in          | ❌ No                   | ❌ No                   |
+| Mock server            | ✅ `grab.mock`       | ❌ Needs MSW/etc        | ❌ Needs MSW/etc        |
+| Request log            | ✅ `grab.log`        | ❌ No                   | ❌ No                   |
+| Interceptors           | ✅ Yes               | ✅ Yes                  | ✅ Yes                  |
+| Server-sent events     | ❌ Use fetch client  | ✅ Yes                  | ❌ No                   |
+
+## Differences from the fetch client
+
+- **Transport failures are returned, not thrown.** A timeout or connection failure comes back as `{ error }` (or throws when `throwOnError` is set), matching grab's "errors are data" behavior. HTTP error statuses behave the same as in the official clients.
+- **Bodies are parsed by grab.** `parseAs: "stream"` hands you the raw stream, and an explicit `parseAs` still decides the empty-response shape, but otherwise grab's content-type detection reads the body.
+- **grab sets JSON `Content-Type`/`Accept` defaults** on requests that do not specify their own, including body-less ones.
+- **Response interceptors run before parsing**, on a response whose body grab has already read.
+- **No `sse` helpers.** Server-sent event endpoints need the fetch client.
+
+Requires `grab-url` ≥ 1.6.23, which added the `onRawResponse` hook this client uses to report status codes, headers and error payloads.

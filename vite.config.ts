@@ -35,6 +35,9 @@ const slimExternalPkgs = [...externalPkgs, "archiver-web", "linkedom"];
 const sharedAlias = {
   "@grab-url/log": resolve(__dirname, "packages/log-json/src/log-json.ts"),
   "@grab-url/grab-api": resolve(__dirname, "packages/grab-api/src/index.ts"),
+  // The heyapi client imports the published package name; inside the
+  // monorepo that resolves to the same source.
+  "grab-url": resolve(__dirname, "packages/grab-api/src/index.ts"),
 };
 
 const sharedPlugins = [

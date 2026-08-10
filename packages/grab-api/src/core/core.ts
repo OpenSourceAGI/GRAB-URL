@@ -44,6 +44,17 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
           ? "PATCH"
           : "GET",
     cache,
+    // Read elsewhere from `merged` — pulled out here only so utility options
+    // never leak into `params` and end up as query string values.
+    cacheForTime,
+    retryAttempts,
+    setDefaults,
+    repeat,
+    repeatEvery,
+    debounce,
+    regrabOnStale,
+    regrabOnFocus,
+    regrabOnNetwork,
     timeout = 30,
     baseURL = (typeof process !== "undefined" && process.env.SERVER_API_URL) ||
       "",
@@ -59,6 +70,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     onResponse,
     onError,
     onStream,
+    onRawResponse,
     unzip,
     parseDOM,
     unescapeHTML,
@@ -169,6 +181,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
       unzip,
       parseDOM,
       unescapeHTML,
+      onRawResponse,
     );
 
     // Clear loading state

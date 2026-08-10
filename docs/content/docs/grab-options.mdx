@@ -108,6 +108,11 @@ globally as defaults with `grab(path, { setDefaults: true, ...options })`.
       description:
         'Set with defaults to process the response as a stream (e.g. for instant unzip).',
     },
+    onRawResponse: {
+      type: '(response: Response) => void',
+      description:
+        'Called with the raw fetch Response before status checks and body parsing, so status, statusText and headers stay reachable. Not called for mocked requests.',
+    },
     unzip: {
       type: 'boolean',
       description:

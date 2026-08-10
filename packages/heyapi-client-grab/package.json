@@ -1,0 +1,69 @@
+{
+  "name": "heyapi-client-grab",
+  "version": "1.0.0",
+  "description": "Hey API client that sends generated OpenAPI SDK requests with grab instead of axios or fetch, adding caching, retries, rate limiting, deduplication and mocks.",
+  "type": "module",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "heyapi-grab": "./dist/cli.es.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "vite build --config vite.config.ts"
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "hey-api",
+    "heyapi",
+    "codegen",
+    "client",
+    "sdk",
+    "grab",
+    "fetch",
+    "axios",
+    "typescript",
+    "rest"
+  ],
+  "dependencies": {
+    "grab-url": ">=1.6.23"
+  },
+  "peerDependencies": {
+    "@hey-api/openapi-ts": ">=0.60.0"
+  },
+  "peerDependenciesMeta": {
+    "@hey-api/openapi-ts": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "author": "vtempest",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vtempest/GRAB-URL.git",
+    "directory": "packages/heyapi-client-grab"
+  },
+  "bugs": {
+    "url": "https://github.com/vtempest/GRAB-URL/issues"
+  },
+  "homepage": "https://github.com/vtempest/GRAB-URL/tree/master/packages/heyapi-client-grab#readme"
+}
