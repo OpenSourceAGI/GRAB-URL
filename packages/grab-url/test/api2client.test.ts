@@ -9,12 +9,12 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { grab } from '../../packages/grab-api/src/index.js';
+import { grab } from '../grab-api/src/index.ts';
 import {
   createClient,
   createConfig,
   rewireGeneratedClient,
-} from '../../packages/api2client/src/index.js';
+} from '../api2client/src/index.ts';
 
 // ─── Mock fetch ───────────────────────────────────────────────────────────────
 

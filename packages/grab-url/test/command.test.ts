@@ -11,7 +11,7 @@ import path from 'path';
 import os from 'os';
 import http from 'http';
 
-import { MultiColorFileDownloaderCLI } from '../../packages/grab-url-cli/src/file-downloader.js';
+import { MultiColorFileDownloaderCLI } from '../grab-url-cli/src/file-downloader.ts';
 
 // ─── Tiny local HTTP server ───────────────────────────────────────────────────
 

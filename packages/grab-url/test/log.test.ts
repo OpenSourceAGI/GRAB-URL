@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { log } from '../../packages/log-json/src/log-json.js';
+import { log } from '../log-json/src/log-json.ts';
 
 beforeEach(() => {
     vi.spyOn(console, 'log').mockImplementation(() => { });

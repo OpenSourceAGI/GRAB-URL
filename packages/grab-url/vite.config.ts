@@ -141,6 +141,18 @@ export default defineConfig({
     emptyOutDir: true,
   },
   test: {
+    globals: true,
+    include: ["test/**/*.test.ts"],
+    resolve: {
+      alias: {
+        ...sharedAlias,
+      },
+    },
+    server: {
+      deps: {
+        inline: true,
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "lcov"],
