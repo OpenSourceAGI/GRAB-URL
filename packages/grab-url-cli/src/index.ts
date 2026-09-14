@@ -359,11 +359,12 @@ if (__isMain) {
 
   // --- yt-dlp installation (no URL needed) ---
   if (argv["install-ytdlp"]) {
-    // dist/grab-url-cli.es.js and packages/grab-url-cli/src/index.ts sit at
-    // different depths, so look for the script from both.
+    // The installer ships inside the published `grab-url` package, next to the
+    // `dist/` this file is bundled into. In the repo that same package is
+    // `packages/grab-url`, two levels up from this source file.
     const installer = [
       path.resolve(__dirname, "..", "scripts", "install-yt-dlp.mjs"),
-      path.resolve(__dirname, "..", "..", "..", "scripts", "install-yt-dlp.mjs"),
+      path.resolve(__dirname, "..", "..", "grab-url", "scripts", "install-yt-dlp.mjs"),
     ].find((candidate) => fs.existsSync(candidate));
 
     if (!installer) {

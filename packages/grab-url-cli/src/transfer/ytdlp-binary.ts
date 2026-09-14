@@ -10,10 +10,11 @@
  *      `externalBin` sidecar next to the app executable with the target-triple
  *      suffix stripped, so a packaged desktop build ships its own copy and
  *      never touches the user's PATH.
- *   3. The managed copy `scripts/install-yt-dlp.mjs` downloads on `npm install`
+ *   3. The managed copy `packages/grab-url/scripts/install-yt-dlp.mjs` downloads
  *      (into `~/.grab-url/bin`), then whatever `yt-dlp` is on PATH.
  *
- * The platform/asset mapping here is mirrored by `scripts/install-yt-dlp.mjs`,
+ * The platform/asset mapping here is mirrored by
+ * `packages/grab-url/scripts/install-yt-dlp.mjs`,
  * which cannot import this module — it runs as plain ESM during `postinstall`,
  * before any build output exists. Keep the two in step.
  */

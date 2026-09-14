@@ -10,9 +10,11 @@
   from the library bundles.
 - Match the surrounding file's style. This codebase documents decisions in
   `@file` headers and inline comments that name the failure a line prevents
-  (`vite.config.ts` is the clearest example) — write in that register.
+  (`packages/grab-url/vite.config.ts` is the clearest example) — write in that
+  register.
 - Prefer adding to an existing entry over creating a new published export; each
-  new entry means edits in `vite.config.ts`, `exports` and `files`.
+  new entry means edits in `packages/grab-url/vite.config.ts`, and in `exports`
+  and `files` in `packages/grab-url/package.json`.
 
 ## Commits
 
@@ -40,7 +42,7 @@ npm run test:cli         # a real download, end to end
 ```
 
 Tests live in `test/*.test.ts`; coverage is over `packages/**/src/**`, configured
-inside `vite.config.ts`. Add tests for behaviour changes — especially in
+inside the root `vitest.config.ts`. Add tests for behaviour changes — especially in
 `flow-control.ts` and the transfer layer, where the failure modes are timing and
 network shaped and only a test pins them down.
 
@@ -65,7 +67,8 @@ will be missing for consumers while working locally.
 ## Security
 
 - Never commit secrets, credentials or API keys.
-- `postinstall` downloads a yt-dlp binary (`scripts/install-yt-dlp.mjs`). Treat
+- `postinstall` downloads a yt-dlp binary
+  (`packages/grab-url/scripts/install-yt-dlp.mjs`). Treat
   changes to it as security-relevant: it fetches and executes a third-party
   binary on every consumer's machine.
 - The license is PROSPER; contributions are under it.

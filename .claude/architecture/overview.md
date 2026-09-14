@@ -2,8 +2,9 @@
 
 One npm package (`grab-url`) built from several source folders under
 `packages/`, plus a documentation site and an agent skill. There is no
-per-package build: the root `vite.config.ts` compiles every entry into one
-`dist/`, and `package.json`'s `exports` map is the public surface.
+per-package build: `packages/grab-url/vite.config.ts` compiles every entry into
+one `packages/grab-url/dist/`, and `packages/grab-url/package.json`'s `exports`
+map is the public surface.
 
 ## The packages
 
@@ -70,4 +71,5 @@ src/display/, download-spinners.ts, cancel-state.ts
 it drags in jsdom/linkedom. `extract-webpage-loader.ts` exists to keep that
 boundary; do not turn it into a static import.
 
-yt-dlp is installed by `scripts/install-yt-dlp.mjs`, which runs on `postinstall`.
+yt-dlp is installed by `packages/grab-url/scripts/install-yt-dlp.mjs`, which runs
+on `postinstall`.

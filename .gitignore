@@ -11,6 +11,12 @@ dist
 # not build output.
 !packages/native-app-wrapper/dist/
 
+# README/LICENSE/CHANGELOG copied into the published package by its `prepack`
+# (packages/grab-url/scripts/sync-package-docs.mjs). The tracked originals are
+# the ones at the repo root.
+packages/grab-url/README.md
+packages/grab-url/LICENSE.md
+
 # output
 out
 *.tgz

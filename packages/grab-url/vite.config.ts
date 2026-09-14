@@ -1,7 +1,16 @@
-/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
+
+/**
+ * `packages/`, one level up.
+ *
+ * `grab-url` is the published package, but its source lives in its sibling
+ * packages — this config is what bundles all of them into `dist/` here. Every
+ * entry below is resolved from this constant so the build does not depend on
+ * the directory it is invoked from.
+ */
+const monorepoPackages = resolve(__dirname, "..");
 
 const nodeBuiltins = [
   "fs",
@@ -39,12 +48,17 @@ const externalPkgs = ["chalk", "cli-table3", "cli-progress", "cli-spinners", "ex
 const reactExternals = ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"];
 const slimExternalPkgs = [...externalPkgs, "archiver-web", "linkedom"];
 
-const sharedAlias = {
-  "@grab-url/log": resolve(__dirname, "packages/log-json/src/log-json.ts"),
-  "@grab-url/grab-api": resolve(__dirname, "packages/grab-api/src/index.ts"),
+/**
+ * Source aliases shared by this build and the root Vitest config, so the tests
+ * resolve `grab-url` and the `@grab-url/*` internals to exactly the sources the
+ * shipped bundle is built from.
+ */
+export const sharedAlias = {
+  "@grab-url/log": resolve(monorepoPackages, "log-json/src/log-json.ts"),
+  "@grab-url/grab-api": resolve(monorepoPackages, "grab-api/src/index.ts"),
   // The heyapi client imports the published package name; inside the
   // monorepo that resolves to the same source.
-  "grab-url": resolve(__dirname, "packages/grab-api/src/index.ts"),
+  "grab-url": resolve(monorepoPackages, "grab-api/src/index.ts"),
 };
 
 /**
@@ -68,50 +82,47 @@ const useClientDirective = {
   },
 };
 
-const sharedPlugins = [
+const sharedPlugins = () => [
   useClientDirective,
   dts({
     insertTypesEntry: true,
-    include: ["packages/**/*.ts", "packages/**/*.tsx"],
+    include: [
+      resolve(monorepoPackages, "**/*.ts"),
+      resolve(monorepoPackages, "**/*.tsx"),
+    ],
     exclude: [
-      "packages/quantum-sphere-loading-animation/svelte/**",
-      "packages/quantum-sphere-loading-animation/src/svelte/**",
-      "packages/quantum-sphere-loading-animation/demo/**",
-      "packages/quantum-sphere-loading-animation/dist/**",
-      "packages/quantum-sphere-loading-animation/node_modules/**",
+      resolve(monorepoPackages, "grab-url/**"),
+      resolve(monorepoPackages, "native-app-wrapper/**"),
+      resolve(monorepoPackages, "quantum-sphere-loading-animation/svelte/**"),
+      resolve(monorepoPackages, "quantum-sphere-loading-animation/src/svelte/**"),
+      resolve(monorepoPackages, "quantum-sphere-loading-animation/demo/**"),
+      resolve(monorepoPackages, "quantum-sphere-loading-animation/dist/**"),
+      resolve(monorepoPackages, "**/node_modules/**"),
+      resolve(monorepoPackages, "**/dist/**"),
     ],
     outDir: "dist",
     rollupTypes: false,
   }),
 ];
 
-export default defineConfig({
+export default defineConfig(() => ({
   resolve: {
     alias: sharedAlias,
   },
-  plugins: sharedPlugins,
+  plugins: sharedPlugins(),
   build: {
     target: "es2022",
     lib: {
       entry: {
-        "grab-api": resolve(__dirname, "packages/grab-api/src/index.ts"),
-        "grab-api-slim": resolve(__dirname, "packages/grab-api/src/index.slim.ts"),
-        animations: resolve(__dirname, "packages/loading-animations/src/svg/index.ts"),
-        "quantum-sphere": resolve(__dirname, "packages/quantum-sphere-loading-animation/src/icons.ts"),
-        log: resolve(__dirname, "packages/log-json/src/log-json.ts"),
-        "grab-url-cli": resolve(__dirname, "packages/grab-url-cli/src/index.ts"),
-        "archiver-web": resolve(
-          __dirname,
-          "packages/archiver-web/src/index.ts",
-        ),
-        "bin-extract": resolve(
-          __dirname,
-          "packages/archiver-web/src/bin-extract.ts",
-        ),
-        "bin-compress": resolve(
-          __dirname,
-          "packages/archiver-web/src/bin-compress.ts",
-        ),
+        "grab-api": resolve(monorepoPackages, "grab-api/src/index.ts"),
+        "grab-api-slim": resolve(monorepoPackages, "grab-api/src/index.slim.ts"),
+        animations: resolve(monorepoPackages, "loading-animations/src/svg/index.ts"),
+        "quantum-sphere": resolve(monorepoPackages, "quantum-sphere-loading-animation/src/icons.ts"),
+        log: resolve(monorepoPackages, "log-json/src/log-json.ts"),
+        "grab-url-cli": resolve(monorepoPackages, "grab-url-cli/src/index.ts"),
+        "archiver-web": resolve(monorepoPackages, "archiver-web/src/index.ts"),
+        "bin-extract": resolve(monorepoPackages, "archiver-web/src/bin-extract.ts"),
+        "bin-compress": resolve(monorepoPackages, "archiver-web/src/bin-compress.ts"),
       },
       formats: ["es", "cjs"],
       fileName: (format, entryName) => `${entryName}.${format}.js`,
@@ -140,23 +151,4 @@ export default defineConfig({
     sourcemap: true,
     emptyOutDir: true,
   },
-  test: {
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "lcov"],
-      reportsDirectory: "./coverage",
-      reportOnFailure: true,
-      include: ["packages/**/src/**"],
-      exclude: [
-        "**/node_modules/**",
-        "**/dist/**",
-        "**/*.d.ts",
-        "**/*.test.ts",
-        "**/*.svelte",
-        "**/svelte/**",
-        "**/svg/**",
-        "**/demo/**",
-      ],
-    },
-  },
-});
+}));

@@ -8,6 +8,6 @@
     "./slim": "./src/index.slim.ts"
   },
   "scripts": {
-    "build": "vite build --config ../../vite.config.ts"
+    "build": "vite build --config ../grab-url/vite.config.ts"
   }
 }

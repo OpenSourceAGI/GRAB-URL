@@ -53,7 +53,7 @@ npm run build:desktop  # .msi / .dmg / .AppImage with yt-dlp inside
 There is only one non-example profile, so no `--profile` flag is needed anywhere.
 
 **The sidecar is downloaded, not compiled.** `profiles/grab-url.json` points `sidecar.build` at
-the repository's own [`scripts/install-yt-dlp.mjs`](../../scripts/install-yt-dlp.mjs), which
+the repository's own [`scripts/install-yt-dlp.mjs`](../grab-url/scripts/install-yt-dlp.mjs), which
 fetches the official standalone yt-dlp release for the target and writes it to the `{out}` path
 `build-sidecar.mjs` asks for:
 
@@ -62,7 +62,7 @@ fetches the official standalone yt-dlp release for the target and writes it to t
   "name": "yt-dlp",
   "args": ["--version"],                                        // for sidecar_output
   "downloadArgs": ["--newline", "--no-playlist", "…"],          // for download_media
-  "build": "node ../../scripts/install-yt-dlp.mjs --sidecar --out {out}"
+  "build": "node ../grab-url/scripts/install-yt-dlp.mjs --sidecar --out {out}"
 }
 ```
 

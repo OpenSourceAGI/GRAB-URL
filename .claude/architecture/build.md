@@ -1,12 +1,25 @@
 # The Build
 
-Everything published comes from **one** Vite build at the repo root. There is no
-per-package build step, and `packages/*/package.json` files are mostly metadata —
-editing one does not change what ships.
+Everything published comes from **one** Vite build, and it lives in
+`packages/grab-url`. That directory *is* the published `grab-url` package: its
+`package.json` carries the version, `exports`, `bin` and `files`, and its
+`vite.config.ts` bundles the sibling `packages/*` sources into
+`packages/grab-url/dist/`. The other `packages/*/package.json` files are mostly
+metadata — editing one does not change what ships.
+
+The repo root is a private workspace root (`grab-url-monorepo`). It has no
+entry points, no `exports`, and no `dist/`; it owns the workspace list, the dev
+toolchain, the test config and the `make` scripts.
 
 ```bash
-npm run build      # vite build --config vite.config.ts → dist/
+npm run build      # → npm run build --workspace grab-url → packages/grab-url/dist/
 npm run make       # icons → skill docs → docs site → build
+```
+
+Running the build from inside the package works the same way:
+
+```bash
+cd packages/grab-url && npm run build
 ```
 
 `npm run make` is the full refresh:
@@ -26,13 +39,22 @@ keeps a stale committed bundle from masking a broken build — which is exactly
 what had happened: the committed `dist/` predated a package reshuffle and no
 longer matched the source it claimed to be built from.
 
-Publishing is unaffected. `package.json` names `dist` in `files`, and **a
-`files` entry cannot be excluded by `.gitignore` or `.npmignore`**, so `npm
-pack` includes it; `prepublishOnly` runs `npm run build` first, so the tarball
-carries a bundle built from the commit being published. The same holds for the
-`packages/*` that publish on their own (`api2client`, `loading-animations`,
-`quantum-sphere-loading-icon`): each names `dist` in `files` and builds in
-`prepublishOnly`. Verify with `npm pack --dry-run`.
+Publishing is unaffected. `packages/grab-url/package.json` names `dist` in
+`files`, and **a `files` entry cannot be excluded by `.gitignore` or
+`.npmignore`**, so `npm pack` includes it; `prepublishOnly` runs `npm run build`
+first, so the tarball carries a bundle built from the commit being published.
+The same holds for the other `packages/*` that publish on their own
+(`api2client`, `loading-animations`, `quantum-sphere-loading-icon`): each names
+`dist` in `files` and builds in `prepublishOnly`. Verify with
+`npm pack --dry-run --workspace grab-url`.
+
+`README.md` and `LICENSE.md` are the other two files the tarball needs and the
+package directory does not track. They describe the whole project and stay at
+the repo root, where GitHub renders them, and npm cannot pack a file from
+outside the package directory — so `prepack` (which runs for both `npm pack`
+and `npm publish`) copies them in via
+`packages/grab-url/scripts/sync-package-docs.mjs`, and `.gitignore` drops the
+copies. One tracked original each, no drift.
 
 The exception is **`packages/native-app-wrapper/dist/index.html`**, which stays
 tracked. It is not build output — it is the hand-written UI Tauri serves as
@@ -59,8 +81,12 @@ Each key becomes `dist/<name>.{es,cjs}.js` plus a `.d.ts`, and is wired into
 | `archiver-web`, `bin-extract`, `bin-compress` | `packages/archiver-web/src/` | `archiver-web` and its bins |
 
 **Adding an entry means editing three places**: `build.lib.entry` in
-`vite.config.ts`, `exports` in `package.json`, and `files` if it needs new source
-shipped.
+`packages/grab-url/vite.config.ts`, `exports` in
+`packages/grab-url/package.json`, and `files` if it needs new source shipped.
+
+Every entry path is resolved from `monorepoPackages` (`packages/`, one level up
+from the config), never from the working directory, so the build produces the
+same bundle wherever it is invoked from.
 
 ## Externals — each one is load-bearing
 
@@ -100,10 +126,17 @@ name `grab-url`** to the in-repo source, so the generated Hey API client — whi
 imports `grab-url` by package name — resolves to the same source inside the
 monorepo as it does for a consumer.
 
+The map is exported as `sharedAlias` and imported by the root
+`vitest.config.ts`, so the tests and the shipped bundle resolve those specifiers
+to the same files. That is also why the config's default export is a function:
+importing the module for `sharedAlias` must not instantiate the dts plugin.
+
 ## Tests
 
-Vitest is configured inside `vite.config.ts` (`test.coverage`), with tests in
-`test/*.test.ts` and coverage over `packages/**/src/**`.
+Vitest is configured in **`vitest.config.ts` at the repo root**, not in the
+build config — the suite covers every package at once, so it does not belong to
+any one of them. Tests are in `test/*.test.ts` with coverage over
+`packages/**/src/**`.
 
 ```bash
 npm test                 # watch

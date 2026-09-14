@@ -6,6 +6,9 @@
 "workspaces": ["packages/*", "!packages/native-app-wrapper", "grab-help-docs"]
 ```
 
+The root itself is `grab-url-monorepo` and is `"private": true` — it publishes
+nothing. The package npm knows as `grab-url` is `packages/grab-url`.
+
 Note the **negation**: `packages/native-app-wrapper` is deliberately excluded.
 It is a Tauri scaffold with a Rust toolchain requirement — it is not installed
 by a root `npm install` and nothing at the root builds or tests it.
@@ -29,17 +32,30 @@ This is the one repo in this family that is not on Bun. `bun x standard-version`
 appears in the `ship` script, and `npm-publish.yml` sets up Bun, but installs
 and tests are npm.
 
-## Two kinds of package
+## Kinds of package
 
 | Kind | Directories | What "publishing" means |
 | --- | --- | --- |
-| **Internal** | `grab-api`, `grab-url-cli`, `log-json` (`@grab-url/*`, all `"private": true`) | Never published. Compiled into `grab-url`'s `dist/` by the root build. |
+| **The product** | `grab-url` | Published as `grab-url`. Holds no source of its own — its `vite.config.ts` bundles the siblings below into `packages/grab-url/dist/`, and its `package.json` is the public surface. |
+| **Internal** | `grab-api`, `grab-url-cli`, `log-json` (`@grab-url/*`, all `"private": true`) | Never published. Compiled into `grab-url`'s `dist/`. |
 | **Published** | `api2client`, `archiver-web`, `loading-animations`, `quantum-sphere-loading-animation` | Published on their own **and** bundled into a `grab-url` entry |
 | **Excluded** | `native-app-wrapper` | Outside the workspace; its own thing |
 
 Consequence: editing `packages/grab-api/src` changes the `grab-url` package.
 There is no separate `@grab-url/grab-api` for a consumer to install, so its
 "public API" is really `grab-url`'s.
+
+`packages/grab-url` declares `archiver-web`, `fflate`, `jszip` and the Vite
+toolchain as devDependencies even though a root workspace install already hoists
+them. They are what makes `cd packages/grab-url && npm install && npm run build`
+work on its own: an install inside the directory links only what that package
+declares, and without those four the build cannot resolve what it bundles.
+
+`npm-publish.yml` iterates `packages/*` and publishes each changed, non-private
+one — but it **skips `grab-url`**, which is still released by hand with
+`npm run ship`. "Did this directory change" is the wrong question for a package
+that bundles all the others: editing `packages/grab-api` changes what `grab-url`
+ships without touching `packages/grab-url` at all.
 
 ## Turbo
 
@@ -57,8 +73,9 @@ turbo filters expecting the other repos' task graph; it isn't there.
 ## Tests
 
 All tests live in the **root `test/` folder** and run under Vitest through the
-same `vite.config.ts` as the build — so they see the same aliases and externals
-the shipped bundle does.
+root `vitest.config.ts`, which imports `sharedAlias` from
+`packages/grab-url/vite.config.ts` — so they resolve `grab-url` and the
+`@grab-url/*` internals to the same sources the shipped bundle is built from.
 
 ```
 test/grab.test.ts          test/downloader.test.ts   test/ytdlp.test.ts
@@ -85,7 +102,9 @@ part of the suite — don't wire it into CI.
 
 ## `postinstall` downloads yt-dlp
 
-`scripts/install-yt-dlp.mjs --postinstall` runs on every install. If an install
+`packages/grab-url/scripts/install-yt-dlp.mjs --postinstall` runs on every
+install — from the root `postinstall` in the repo, and from the published
+package's own `postinstall` for a consumer. If an install
 appears to hang or fails behind a proxy, that is where to look:
 
 ```bash

@@ -2,6 +2,9 @@
 
 ## Packages
 
+* [grab-url](packages/grab-url/)
+	+ Description: The published `grab-url` package — the build and the `package.json` that bundle every package below into one `dist/`
+	+ [README](../README.md) · [CLAUDE.md](grab-url/CLAUDE.md)
 * [quantum-sphere-loading-animation](packages/quantum-sphere-loading-animation/)
 	+ Description: Loading animation package
 	+ GitHub: [quantum-sphere-loading-animation](https://github.com/username/quantum-sphere-loading-animation)

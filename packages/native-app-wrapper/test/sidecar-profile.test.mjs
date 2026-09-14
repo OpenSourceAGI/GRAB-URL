@@ -124,7 +124,7 @@ describe("loadProfile() — sidecar validation", () => {
 
   it("still rejects a build command that ignores {out}", () => {
     const profile = grabUrlProfile();
-    profile.sidecar.build = "node ../../scripts/install-yt-dlp.mjs --sidecar";
+    profile.sidecar.build = "node ../grab-url/scripts/install-yt-dlp.mjs --sidecar";
     withProfile("no-out", profile);
     expect(() => loadProfile(workDir, "no-out")).toThrow(/must contain "\{out\}"/);
   });

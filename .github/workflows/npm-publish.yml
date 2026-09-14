@@ -54,6 +54,16 @@ jobs:
               continue
             fi
 
+            # grab-url is released by hand with `npm run ship`, not on every
+            # push. It bundles every other package, so "did this directory
+            # change" is the wrong question for it — a change to
+            # packages/grab-api changes what grab-url ships without touching
+            # packages/grab-url at all.
+            if [ "$name" = "grab-url" ]; then
+              echo "⏭ Skipping $name (released manually via npm run ship)"
+              continue
+            fi
+
             if git diff --quiet HEAD^ HEAD -- "$dir"; then
               echo "⏭ Skipping $name (no changes)"
               continue

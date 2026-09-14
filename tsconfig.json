@@ -34,6 +34,8 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    // The published package's build config, not library source.
+    "packages/grab-url/vite.config.ts"
   ]
 }

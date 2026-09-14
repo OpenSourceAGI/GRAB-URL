@@ -1,0 +1,109 @@
+{
+  "name": "grab-url",
+  "description": "Generate Request to API from Browser",
+  "type": "module",
+  "version": "2.0.0",
+  "author": "vtempest",
+  "license": "rights.institute/prosper",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenSourceAGI/GRAB-URL",
+    "directory": "packages/grab-url"
+  },
+  "main": "./dist/grab-api.cjs.js",
+  "types": "./dist/grab-api.d.ts",
+  "module": "./dist/grab-api.es.js",
+  "bin": {
+    "grab-url": "./dist/grab-url-cli.es.js",
+    "grab": "./dist/grab-url-cli.es.js",
+    "g": "./dist/grab-url-cli.es.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/grab-api.d.ts",
+      "import": "./dist/grab-api.es.js",
+      "require": "./dist/grab-api.cjs.js"
+    },
+    "./slim": {
+      "types": "./dist/grab-api-slim.d.ts",
+      "import": "./dist/grab-api-slim.es.js",
+      "require": "./dist/grab-api-slim.cjs.js"
+    },
+    "./animations": {
+      "types": "./dist/animations.d.ts",
+      "import": "./dist/animations.es.js",
+      "require": "./dist/animations.cjs.js"
+    },
+    "./icons/quantum-sphere": {
+      "types": "./dist/quantum-sphere.d.ts",
+      "import": "./dist/quantum-sphere.es.js",
+      "require": "./dist/quantum-sphere.cjs.js"
+    },
+    "./log": {
+      "types": "./dist/log.d.ts",
+      "import": "./dist/log.es.js",
+      "require": "./dist/log.cjs.js"
+    },
+    "./cli": {
+      "types": "./dist/grab-url-cli.d.ts",
+      "import": "./dist/grab-url-cli.es.js",
+      "require": "./dist/grab-url-cli.cjs.js"
+    }
+  },
+  "files": [
+    "dist",
+    "scripts/install-yt-dlp.mjs"
+  ],
+  "scripts": {
+    "build": "vite build --config vite.config.ts",
+    "prepack": "node ./scripts/sync-package-docs.mjs",
+    "prepublishOnly": "npm run build",
+    "postinstall": "node ./scripts/install-yt-dlp.mjs --postinstall",
+    "ytdlp": "node ./scripts/install-yt-dlp.mjs --force",
+    "ytdlp:sidecar": "node ./scripts/install-yt-dlp.mjs --sidecar"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0",
+    "extract-webpage": ">=1.2.310"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "extract-webpage": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "cli-progress": "^3.12.0",
+    "cli-table3": "^0.6.3",
+    "linkedom": "^0.18.12"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "archiver-web": "*",
+    "fflate": "^0.8.2",
+    "jszip": "^3.10.1",
+    "terser": "^5.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "keywords": [
+    "api",
+    "axios",
+    "request",
+    "browser",
+    "tanstack",
+    "query",
+    "post",
+    "mock-api",
+    "fetch",
+    "http"
+  ]
+}
