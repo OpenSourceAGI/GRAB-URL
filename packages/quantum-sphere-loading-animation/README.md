@@ -1,24 +1,33 @@
 <p align="center">
     <img width="350px" src="https://i.imgur.com/wySaMJl.png" />
+</p>
+
 <h3 align="center">
    <a href="https://grab.js.org">📑 Docs</a>
   <a href="https://grab.js.org/docs/examples">🎯 Examples</a>
 </h3>
+
+<!-- template-git-repo:badges:start -->
 <p align="center">
-  <a href="https://discord.gg/SJdBqBz3tV"><img src="https://img.shields.io/discord/1110227955554209923.svg?label=Chat&logo=Discord&colorB=7289da&style=flat"
-          alt="Join Discord" /></a>
-  <a href="https://github.com/vtempest/GRAB-URL/discussions"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/vtempest/GRAB-URL" /></a>
-  <a href="https://github.com/vtempest/GRAB-URL/discussions"><img alt="GitHub Discussions"
-      src="https://img.shields.io/github/discussions/vtempest/GRAB-URL" /></a>
-  <br />
-  <a href="https://github.com/vtempest/GRAB-URL/pulse"><img src="https://img.shields.io/github/commit-activity/m/vtempest/GRAB-URL" alt="Activity" /></a>
-  <a href="https://github.com/vtempest/GRAB-URL/commits/master/"><img src="https://img.shields.io/github/last-commit/vtempest/GRAB-URL.svg" alt="GitHub last commit" /></a>
-  <br />
-  <img src="https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=fff" alt="Claude AI">
-  <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" /></a>
-  <a href="https://codespaces.new/vtempest/GRAB-URL"><img src="https://github.com/codespaces/badge.svg" width="150" height="20" alt="GitHub Codespaces" /></a>
-  <a href="https://stackblitz.com/github/OpenSourceAGI/GRAB-URL/tree/master/packages/quantum-sphere-loading-animation"><img height="20px" src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" /></a>
+    <a href="https://grab.js.org"><img src="https://img.shields.io/badge/Docs-blue?logo=ReadTheDocs&logoColor=white" alt="Documentation" /></a>
+    <a href="https://stackblitz.com/github/OpenSourceAGI/GRAB-URL/tree/master/packages/quantum-sphere-loading-animation"><img height="20px" src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" /></a>
+    <br />
+    <a href="https://www.npmjs.com/package/quantum-sphere-loading-icon"><img src="https://img.shields.io/npm/dm/quantum-sphere-loading-icon.svg" alt="NPM Monthly Downloads" /></a>
+    <a href="https://www.npmjs.com/package/quantum-sphere-loading-icon"><img src="https://img.shields.io/npm/v/quantum-sphere-loading-icon.svg" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/quantum-sphere-loading-icon"><img src="https://img.shields.io/npm/dt/quantum-sphere-loading-icon.svg" alt="NPM Total Downloads" /></a>
+    <a href="https://www.npmjs.com/package/quantum-sphere-loading-icon"><img src="https://img.shields.io/npm/types/quantum-sphere-loading-icon" alt="TypeScript types" /></a>
+    <a href="https://packagephobia.com/result?p=quantum-sphere-loading-icon"><img src="https://packagephobia.com/badge?p=quantum-sphere-loading-icon" alt="Install size" /></a>
+    <br />
+    <a href="https://github.com/OpenSourceAGI/GRAB-URL/stargazers"><img src="https://img.shields.io/github/stars/OpenSourceAGI/GRAB-URL" alt="GitHub Stars" /></a>
+    <a href="https://github.com/OpenSourceAGI/GRAB-URL/issues"><img src="https://img.shields.io/github/issues/OpenSourceAGI/GRAB-URL?logo=github" alt="GitHub Issues" /></a>
+    <a href="https://github.com/OpenSourceAGI/GRAB-URL/pulls"><img src="https://img.shields.io/github/issues-pr/OpenSourceAGI/GRAB-URL?logo=github&label=PRs" alt="Open Pull Requests" /></a>
+    <a href="https://github.com/OpenSourceAGI/GRAB-URL/pulls?q=is%3Apr+is%3Aclosed"><img src="https://img.shields.io/github/issues-pr-closed/OpenSourceAGI/GRAB-URL?logo=github&label=PRs%20merged&color=8957e5" alt="Merged Pull Requests" /></a>
+    <a href="https://github.com/OpenSourceAGI/GRAB-URL/discussions"><img src="https://img.shields.io/github/discussions/OpenSourceAGI/GRAB-URL" alt="GitHub Discussions" /></a>
+    <a href="https://github.com/OpenSourceAGI/GRAB-URL/commits/master/"><img src="https://img.shields.io/github/last-commit/OpenSourceAGI/GRAB-URL.svg" alt="GitHub last commit" /></a>
+    <br />
+    <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /> <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=white" alt="React" /> <img src="https://img.shields.io/badge/Svelte-FF3E00?logo=svelte&logoColor=white" alt="Svelte" />
 </p>
+<!-- template-git-repo:badges:end -->
 
 # Quantum Sphere Loading
 

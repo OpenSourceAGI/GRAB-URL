@@ -74,9 +74,10 @@ will be missing for consumers while working locally.
 
 - Do not recreate the root `docs/` folder; it was vestigial and PR #47 deleted
   it — see [documentation.md](documentation.md).
-- A red Vercel check here is a project misconfiguration, not your diff — the
-  project's Root Directory is `docs`, a folder that no longer exists, so every
-  deployment fails at the clone. Check before chasing it.
+- The Vercel build is driven by the **root** `vercel.json` (Root Directory is
+  the repository root). A red Vercel check was a project misconfiguration for a
+  long time — read [documentation.md](documentation.md) before assuming it is
+  your diff.
 - Do not edit `grab-help-docs/content/docs/claude-skill.mdx` by hand; edit the
   skill and regenerate.
 - Do not add an import to `grab-api/src/` that is not a Node builtin.

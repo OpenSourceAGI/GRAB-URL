@@ -33,17 +33,17 @@ behind it. `js-org/js.org`'s `cnames_active.js` maps
 `"grab": "cname.vercel-dns.com"`, so the hostname resolves into Vercel and
 nowhere else.
 
-The project's **Root Directory is still `docs`**. While the folder existed,
-turbo resolved no package from there (`docs/` matched neither `packages/*` nor
-`grab-help-docs` in the workspace globs), so it reported `No tasks were
-executed as part of this run`, never wrote a `.next`, and Vercel failed with:
+**First it pointed at `docs/`.** While that folder existed turbo resolved no
+package from it (`docs/` matched neither `packages/*` nor `grab-help-docs` in
+the workspace globs), so it reported `No tasks were executed as part of this
+run`, never wrote a `.next`, and Vercel failed with:
 
 ```
 The file "/vercel/path0/docs/.next/routes-manifest.json" couldn't be found.
 ```
 
-Now that the folder is deleted the build fails one step earlier, immediately
-after the clone:
+**Then #47 deleted the folder** and the build failed one step earlier, right
+after the clone — same cause, louder error:
 
 ```
 The specified Root Directory "docs" does not exist. Please update your Project Settings.
@@ -69,14 +69,30 @@ can fix it**, and deleting `docs/` did not fix it either. In Vercel → the
 
 `grab-help-docs/vercel.json` supplies the three build settings itself:
 
-| Setting | Value |
-| --- | --- |
-| `installCommand` | `npm install --prefix=..` |
-| `buildCommand` | `npx turbo run build --filter=grab-help-docs` |
-| `outputDirectory` | `.next` |
+`vercel.json` **at the repository root** — the file Vercel reads when the Root
+Directory is the repo root — now supplies the three settings that were missing:
 
-Until that setting changes, a red Vercel check on a PR here says nothing about
-that PR.
+| Setting | Value | Why |
+| --- | --- | --- |
+| `installCommand` | `npm ci` | Same reason as the Pages workflow: the lockfile pins a compatible `fumadocs-openapi` / `fumadocs-ui` pair and a floating resolve does not. |
+| `buildCommand` | `npx turbo run build --filter=grab-help-docs` | The root `build` script is `vite build`; only this reaches the Next.js app. |
+| `outputDirectory` | `grab-help-docs/.next` | Where that build actually writes, relative to the repo root. |
+| `build.env.VERCEL_PREVIEW_FEEDBACK_ENABLED` | `0` | Turns the preview toolbar's comments off. Next 16 uploads static files as immutable, which the comment injector cannot patch, so with it on every *preview* deployment dies after a successful build on `Cannot patch preview comments when immutable static file upload is enabled`. Production never patched them, so this changes nothing there. |
+
+So the deploy is config-in-the-repo now, and no dashboard visit is needed as
+long as **Root Directory stays empty (the repository root)**. Two settings
+still have to stay as they are, and both are dashboard-only:
+
+1. **Root Directory** — empty. Setting it back to a subdirectory makes Vercel
+   read that subdirectory's `vercel.json` instead of this one.
+2. **Install Command / Build Command / Output Directory overrides** — unset. A
+   dashboard override beats `vercel.json`; the old `npm install --prefix=..`
+   override in particular resolves above `/vercel/path0` from the repo root.
+
+`grab-help-docs/vercel.json` is kept as the equivalent config for the other
+arrangement — Root Directory `grab-help-docs`, paths relative to it. It is
+inert while the Root Directory is the repo root. Whichever directory Vercel is
+pointed at, one of the two files describes the build.
 
 The GitHub Pages deploy of the same docs is **green** and unaffected — it is the
 working copy of the site while Vercel is broken. It is not a drop-in

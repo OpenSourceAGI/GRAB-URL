@@ -333,10 +333,13 @@ it on Vercel with the defaults:
 | Setting | Value |
 |---------|-------|
 | Framework Preset | Next.js |
-| Root Directory | `docs` |
-| Build Command | `next build` (or `turbo run build --filter=grab-help-docs` from the repo root) |
-| Install Command | `npm install --prefix=..` (installs the whole workspace so `packages/*` resolve) |
-| Output Directory | *(leave empty — Next.js default)* |
+| Root Directory | *(leave empty — the repository root)* |
+| Install Command | `npm ci` (installs the whole workspace so `packages/*` resolve) |
+| Build Command | `npx turbo run build --filter=grab-help-docs` |
+| Output Directory | `grab-help-docs/.next` |
+
+The last three come from `vercel.json` at the repository root, so leave the
+dashboard overrides unset — a dashboard override beats the file.
 
 Optional environment variables:
 

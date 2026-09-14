@@ -32,7 +32,11 @@ It was a vestigial Jekyll stub from before GitHub Pages switched to deploying
 via Actions, and #47 deleted it. **Do not recreate it** — documentation belongs
 here, in `content/docs/`.
 
-It is still worth knowing about, because the Vercel project's Root Directory
-points at that now-missing folder and every deploy fails as a result. See
-[`../.claude/architecture/documentation.md`](../.claude/architecture/documentation.md);
-it is a dashboard setting, so no commit here can fix it.
+It is still worth knowing about, because the Vercel project pointed its Root
+Directory at that folder for a long time and every deploy failed as a result.
+The Root Directory is now the repository root, and the root `vercel.json`
+supplies the install, build and output settings that make the docs app build
+from there. See
+[`../.claude/architecture/documentation.md`](../.claude/architecture/documentation.md)
+before changing either file — `vercel.json` here is inert unless the Root
+Directory is pointed back at this folder.

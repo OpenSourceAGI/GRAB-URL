@@ -71,16 +71,22 @@ export function DependencyGraph({
   showExportedFunctions?: boolean;
   instructions?: React.ReactNode;
 }) {
+  // Both scans below run at build time only: every page that mounts this
+  // component is prerendered (see generateStaticParams), so the source tree is
+  // read on the build machine and never at request time. `turbopackIgnore`
+  // tells Turbopack not to treat these resolves as a filesystem dependency —
+  // without it, static analysis gives up on the dynamic path and traces the
+  // entire monorepo into the server output bundle.
   const dirs = paths;
   const ignorePatterns = new Set(ignore);
   if (ignoreFile) {
-    const filePath = path.isAbsolute(ignoreFile) ? ignoreFile : path.resolve(process.cwd(), ignoreFile);
+    const filePath = path.isAbsolute(ignoreFile) ? ignoreFile : path.resolve(/*turbopackIgnore: true*/ process.cwd(), ignoreFile);
     for (const p of parseIgnoreFile(filePath)) ignorePatterns.add(p);
   }
 
   const files: FileInfo[] = [];
   for (const d of dirs) {
-    const resolvedDir = path.isAbsolute(d) ? d : path.resolve(process.cwd(), d);
+    const resolvedDir = path.isAbsolute(d) ? d : path.resolve(/*turbopackIgnore: true*/ process.cwd(), d);
     console.log("[DependencyGraph] Scanning:", resolvedDir);
     const tree = generateFileTree(resolvedDir, descriptions, ignorePatterns, false);
     console.log("[DependencyGraph] Tree nodes:", tree.length);

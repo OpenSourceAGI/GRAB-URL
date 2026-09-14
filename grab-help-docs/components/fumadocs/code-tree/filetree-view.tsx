@@ -38,16 +38,22 @@ export function FileTreeView({
   /** Default collapse depth level */
   defaultCollapseDepth?: number;
 }) {
+  // Both scans below run at build time only: every page that mounts this
+  // component is prerendered (see generateStaticParams), so the source tree is
+  // read on the build machine and never at request time. `turbopackIgnore`
+  // tells Turbopack not to treat these resolves as a filesystem dependency —
+  // without it, static analysis gives up on the dynamic path and traces the
+  // entire monorepo into the server output bundle.
   const ignorePatterns = new Set(ignore);
   if (ignoreFile) {
-    const filePath = path.isAbsolute(ignoreFile) ? ignoreFile : path.resolve(process.cwd(), ignoreFile);
+    const filePath = path.isAbsolute(ignoreFile) ? ignoreFile : path.resolve(/*turbopackIgnore: true*/ process.cwd(), ignoreFile);
     for (const p of parseIgnoreFile(filePath)) {
       ignorePatterns.add(p);
     }
   }
 
   const tree = paths.flatMap((p) => {
-    const resolved = path.isAbsolute(p) ? p : path.resolve(process.cwd(), p);
+    const resolved = path.isAbsolute(p) ? p : path.resolve(/*turbopackIgnore: true*/ process.cwd(), p);
     return generateFileTree(resolved, descriptions, ignorePatterns, inferDescriptions);
   });
 

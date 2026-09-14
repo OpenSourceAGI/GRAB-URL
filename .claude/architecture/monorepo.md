@@ -17,7 +17,9 @@ using pnpm.
 
 **npm.** `packageManager` pins `npm@11.19.1`, the committed lockfile is
 `package-lock.json`, and CI runs `npm install` (tests) and `npm ci` (Pages).
-`.npmrc` sets `package-manager-strict=false`.
+There is no `.npmrc`: its one key, `package-manager-strict=false`, is a pnpm
+setting that npm 11 warns about on every install, so it now lives in
+`pnpm-workspace.yaml` as `packageManagerStrict: false`.
 
 A `pnpm-workspace.yaml` exists but there is **no pnpm lockfile**, so pnpm is
 tolerated rather than supported. Do not switch, and do not commit a second

@@ -1,3 +1,9 @@
 packages:
   - "packages/*"
   - "grab-help-docs"
+
+# `packageManager` in package.json pins npm, so pnpm refuses to run unless this
+# is relaxed. It used to live in `.npmrc`, but npm 11 does not know the key and
+# warned on every install ("Unknown project config ... will stop working in the
+# next major version of npm"). pnpm reads its own settings from here instead.
+packageManagerStrict: false
