@@ -52,7 +52,7 @@ audio from ~720 media sites.
     "name": "yt-dlp",                          // the binary's base name
     "args": ["--version"],                     // fixed argv for sidecar_output
     "downloadArgs": ["--newline", "…"],        // fixed argv for download_media, before the URL
-    "build": "node ../../scripts/install-yt-dlp.mjs --sidecar --out {out}",
+    "build": "node ../../packages/grab-url/scripts/install-yt-dlp.mjs --sidecar --out {out}",
     "buildCwd": "."                            // where to run that command, relative to the app dir
   }
 }

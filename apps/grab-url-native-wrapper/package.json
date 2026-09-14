@@ -32,7 +32,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "sidecar:refresh": "node ../../scripts/install-yt-dlp.mjs --sidecar --out-dir src-tauri/binaries --force"
+    "sidecar:refresh": "node ../../packages/grab-url/scripts/install-yt-dlp.mjs --sidecar --out-dir src-tauri/binaries --force"
   },
   "keywords": [
     "tauri",

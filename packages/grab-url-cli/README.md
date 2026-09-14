@@ -203,7 +203,7 @@ clean checkout builds without a manual step:
 ```json
 {
   "build": {
-    "beforeBuildCommand": "node ../scripts/install-yt-dlp.mjs --sidecar"
+    "beforeBuildCommand": "node ../grab-url/scripts/install-yt-dlp.mjs --sidecar"
   },
   "bundle": {
     "externalBin": ["binaries/yt-dlp"]

@@ -363,7 +363,7 @@ if (__isMain) {
     // different depths, so look for the script from both.
     const installer = [
       path.resolve(__dirname, "..", "scripts", "install-yt-dlp.mjs"),
-      path.resolve(__dirname, "..", "..", "..", "scripts", "install-yt-dlp.mjs"),
+      path.resolve(__dirname, "..", "..", "grab-url", "scripts", "install-yt-dlp.mjs"),
     ].find((candidate) => fs.existsSync(candidate));
 
     if (!installer) {

@@ -19,18 +19,18 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true, // Required for Vite
     "paths": {
-      "grab-url": ["./packages/grab-api/src/index.ts"],
-      "@grab-url/grab-api": ["./packages/grab-api/src/index.ts"],
-      "api2client": ["./packages/api2client/src/index.ts"],
-      "@grab-url/log": ["./packages/log-json/src/log-json.ts"],
-      "@grab-url/loading-animations": ["./packages/loading-animations/src/svg/index.ts"],
-      "@grab-url/grab-url-cli": ["./packages/grab-url-cli/src/index.ts"],
-      "@grab-url/archiver-web": ["./packages/archiver-web/src/index.ts"]
+      "grab-url": ["../../packages/grab-api/src/index.ts"],
+      "@grab-url/grab-api": ["../../packages/grab-api/src/index.ts"],
+      "api2client": ["../../packages/api2client/src/index.ts"],
+      "@grab-url/log": ["../../packages/log-json/src/log-json.ts"],
+      "@grab-url/loading-animations": ["../../packages/loading-animations/src/svg/index.ts"],
+      "@grab-url/grab-url-cli": ["../../packages/grab-url-cli/src/index.ts"],
+      "@grab-url/archiver-web": ["../../packages/archiver-web/src/index.ts"]
     }
   },
   "include": [
-    "./packages/**/*.ts",
-    "./packages/**/*.js"
+    "../../packages/**/*.ts",
+    "../../packages/**/*.js"
   ],
   "exclude": [
     "node_modules",

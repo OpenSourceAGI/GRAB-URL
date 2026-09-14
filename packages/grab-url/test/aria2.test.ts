@@ -25,7 +25,7 @@ import {
     supportsKind,
     redactCredentials,
     isAria2Noise,
-} from '../packages/grab-url-cli/src/transfer/aria2-transfer.js';
+} from '../../packages/grab-url-cli/src/transfer/aria2-transfer.js';
 
 import {
     BACKGROUND_CHILD_FLAG,
@@ -37,7 +37,7 @@ import {
     writeJobRecord,
     listJobs,
     isProcessAlive,
-} from '../packages/grab-url-cli/src/background.js';
+} from '../../packages/grab-url-cli/src/background.js';
 
 // ─── Target detection ─────────────────────────────────────────────────────────
 

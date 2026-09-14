@@ -1,9 +1,1 @@
-{
-  "$schema": "https://turbo.build/schema.json",
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
-    }
-  }
-}
+{"$schema": "https://turbo.build/schema.json", "tasks": {"build": {"dependsOn": ["^build"], "outputs": ["dist/**", ".next/**"]}, "test": {"dependsOn": ["^build"], "outputs": []}, "test:coverage": {"dependsOn": ["^build"], "outputs": []}, "test:ui": {"dependsOn": ["^build"], "outputs": []}}}

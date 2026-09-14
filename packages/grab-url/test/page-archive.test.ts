@@ -16,7 +16,7 @@ import {
     urlToFolderName,
     resolveFolderName,
     MAX_FOLDER_NAME,
-} from '../packages/grab-url-cli/src/page/folder-name.js';
+} from '../../packages/grab-url-cli/src/page/folder-name.js';
 
 import {
     escapeHTML,
@@ -25,7 +25,7 @@ import {
     buildCiteDocument,
     buildContentDocument,
     buildTranscriptDocument,
-} from '../packages/grab-url-cli/src/page/archive-html.js';
+} from '../../packages/grab-url-cli/src/page/archive-html.js';
 
 // ─── folder-name ──────────────────────────────────────────────────────────────
 
@@ -223,7 +223,7 @@ const extractorStub = {
     convertYoutubeToText: vi.fn(),
 };
 
-vi.mock('../packages/grab-url-cli/src/page/extract-webpage-loader.js', () => ({
+vi.mock('../../packages/grab-url-cli/src/page/extract-webpage-loader.js', () => ({
     loadExtractWebpage: () => Promise.resolve(extractorStub),
     resetExtractWebpageCache: () => {},
     EXTRACT_WEBPAGE_INSTALL_HINT: 'npm install extract-webpage',
@@ -236,8 +236,8 @@ const ytdlpStub = {
     ytDlpInstallHint: () => 'install yt-dlp',
 };
 
-vi.mock('../packages/grab-url-cli/src/transfer/ytdlp-transfer.js', async (importOriginal) => ({
-    ...(await importOriginal<typeof import('../packages/grab-url-cli/src/transfer/ytdlp-transfer.js')>()),
+vi.mock('../../packages/grab-url-cli/src/transfer/ytdlp-transfer.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../../packages/grab-url-cli/src/transfer/ytdlp-transfer.js')>()),
     findYtDlp: (...a: any[]) => ytdlpStub.findYtDlp(...a),
     probeYtDlp: (...a: any[]) => ytdlpStub.probeYtDlp(...a),
     runYtDlpDownload: (...a: any[]) => ytdlpStub.runYtDlpDownload(...a),
@@ -245,7 +245,7 @@ vi.mock('../packages/grab-url-cli/src/transfer/ytdlp-transfer.js', async (import
 }));
 
 const { archivePage, ARCHIVE_FILES } = await import(
-    '../packages/grab-url-cli/src/page/archive-page.js'
+    '../../packages/grab-url-cli/src/page/archive-page.js'
 );
 
 describe('archive-page — archivePage()', () => {

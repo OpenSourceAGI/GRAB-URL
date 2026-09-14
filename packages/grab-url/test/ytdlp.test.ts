@@ -14,7 +14,7 @@ import {
     matchMediaDomain,
     isMediaDomain,
     hostnameOf,
-} from '../packages/grab-url-cli/src/transfer/media-domains.js';
+} from '../../packages/grab-url-cli/src/transfer/media-domains.js';
 
 import {
     isYtDlpTarget,
@@ -26,7 +26,7 @@ import {
     describeYtDlpExit,
     resolveYtDlpSite,
     YTDLP_PROGRESS_TEMPLATE,
-} from '../packages/grab-url-cli/src/transfer/ytdlp-transfer.js';
+} from '../../packages/grab-url-cli/src/transfer/ytdlp-transfer.js';
 
 import {
     ytDlpExecutableName,
@@ -37,7 +37,7 @@ import {
     probeYtDlp,
     findYtDlp,
     ytDlpInstallHint,
-} from '../packages/grab-url-cli/src/transfer/ytdlp-binary.js';
+} from '../../packages/grab-url-cli/src/transfer/ytdlp-binary.js';
 
 import {
     parseArgs,
