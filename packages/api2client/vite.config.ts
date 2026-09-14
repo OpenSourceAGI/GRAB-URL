@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
-const external = ["grab-url", "@hey-api/openapi-ts"];
+const external = ["grab-url/slim", "@hey-api/openapi-ts"];
 
 export default defineConfig({
   plugins: [

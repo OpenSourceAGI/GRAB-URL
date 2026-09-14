@@ -41,7 +41,7 @@
     "rest"
   ],
   "dependencies": {
-    "grab-url": "^1.6.22"
+    "grab-url": "^2.0.0"
   },
   "peerDependencies": {
     "@hey-api/openapi-ts": ">=0.60.0"
