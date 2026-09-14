@@ -274,11 +274,14 @@ describe('grab features reaching generated SDKs', () => {
 // ─── Devtools ─────────────────────────────────────────────────────────────────
 
 describe('the Ctrl+Alt+I request inspector', () => {
-  /** A DOM just real enough for the inspector to bind its shortcut to. */
-  function stubBrowser() {
+  /**
+   * A DOM just real enough for the inspector to bind its shortcut to, served
+   * from `hostname` — which is what decides whether it binds at all.
+   */
+  function stubBrowser(hostname = 'localhost') {
     const listeners: string[] = [];
     const document = { addEventListener: (type: string) => void listeners.push(type) };
-    const window: Record<string, any> = { document };
+    const window: Record<string, any> = { document, location: { hostname } };
 
     // Assigned directly rather than with vi.stubGlobal, whose teardown would
     // also drop the fetch stub this file installs once for every suite.
@@ -321,6 +324,23 @@ describe('the Ctrl+Alt+I request inspector', () => {
 
     expect(listeners).not.toContain('keydown');
     expect(window.grab).toBeUndefined();
+  });
+
+  it('leaves a production origin alone', () => {
+    const { listeners, window } = stubBrowser('app.example.com');
+
+    createClient(createConfig({ baseUrl: BASE }));
+
+    expect(listeners).not.toContain('keydown');
+    expect(window.grab).toBeUndefined();
+  });
+
+  it('binds on a deployed build when a client asks for it', () => {
+    const { listeners } = stubBrowser('app.example.com');
+
+    createClient(createConfig({ baseUrl: BASE, devtools: true }));
+
+    expect(listeners).toContain('keydown');
   });
 });
 

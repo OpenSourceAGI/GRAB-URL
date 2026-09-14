@@ -139,23 +139,30 @@ Every option below is accepted client-wide in `createConfig()`/`setConfig()` and
 | `debug`, `logger`                      | Log requests and responses                          |
 | `unzip`, `parseDOM`, `unescapeHTML`    | Opt back into grab's ZIP/HTML post-processing       |
 | `grab`                                 | Use a custom grab instance, e.g. `grab.instance({})` |
-| `devtools`                             | default=true Attach the Ctrl+Alt+I request inspector |
+| `devtools`                             | default=on localhost Attach the Ctrl+Alt+I request inspector |
 
 ### Inspecting requests — Ctrl+Alt+I
 
-Creating a client attaches grab's request inspector: **Ctrl+Alt+I** opens a
-modal listing every request the SDK made, with its parsed response.
+In development, creating a client attaches grab's request inspector:
+**Ctrl+Alt+I** opens a modal listing every request the SDK made, with its
+parsed response.
 
 grab keeps that log on the global `window.grab` rather than on the instance the
 SDK holds, so the client publishes its grab there when nothing else has —
 without that the shortcut opens onto a log the SDK never wrote to. An app that
-imports grab itself keeps its own global, and its log, untouched.
+imports grab itself keeps its own global, and its log, untouched. It is bound
+once per page however many clients are created.
 
-It is installed once per page however many clients are created, does nothing
-outside a browser, and `devtools: false` turns it off:
+**It stays off in production.** A public origin is someone's production site,
+and every request the SDK made is not something to hand its visitors a
+keystroke away, so `devtools` left unset follows grab's own gate: on for a
+loopback host, off everywhere else. It also does nothing outside a browser.
+
+Both overrides are explicit:
 
 ```ts
-const client = createClient(createConfig({ baseUrl, devtools: false }));
+createClient(createConfig({ baseUrl, devtools: true }));   // deployed build
+createClient(createConfig({ baseUrl, devtools: false }));  // off, even locally
 ```
 
 

@@ -54,9 +54,10 @@
   ],
   "scripts": {
     "build": "vite build --config vite.config.ts",
-    "make": "npm run make:icons && npm run make:skill && npm run make:docs && npm run build",
+    "make": "npm run make:icons && npm run make:skill && npm run make:readme && npm run make:docs && npm run build",
     "make:docs": "npx turbo run build --filter=grab-help-docs",
     "make:skill": "node ./scripts/sync-skill-docs.mjs",
+    "make:readme": "node ./scripts/sync-root-readme.mjs",
     "make:icons": "npx export-svg-typescript@latest -i ../../packages/loading-animations/src/svg -o ../../packages/loading-animations/src/svg/index.ts",
     "postinstall": "node ./scripts/install-yt-dlp.mjs --postinstall",
     "ytdlp": "node ./scripts/install-yt-dlp.mjs --force",

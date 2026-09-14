@@ -7,7 +7,7 @@
  * of axios' or fetch's bare behavior.
  */
 
-import { grab as defaultGrab, setupDevTools } from "grab-url/slim";
+import { grab as defaultGrab, isLocalhost, setupDevTools } from "grab-url/slim";
 import type { GrabOptions } from "grab-url/slim";
 
 import { createSseClient } from "./core/sse";
@@ -110,9 +110,12 @@ const toRequestInit = (opts: Record<string, any>): RequestInit => ({
  * grab records its log on the *global* grab (`window.grab.log`) and the
  * inspector reads it from there, so an SDK whose only reference to grab is
  * this module's import has to publish one — otherwise the modal opens onto an
- * empty log and the SDK's requests never show up. grab installs the shortcut
- * itself on localhost; doing it here means a generated SDK is inspectable on a
- * staging or preview origin too.
+ * empty log and the SDK's requests never show up.
+ *
+ * Only on a loopback host, which is where grab installs its own shortcut: a
+ * public origin is someone's production site, and every request an SDK made is
+ * not something to hand its visitors a keystroke away. `devtools: true` turns
+ * it on anyway, for debugging a deployed build.
  *
  * @param grab - The grab this client sends with, published if none is global.
  */
@@ -146,7 +149,9 @@ const attachDevTools = (grab: any) => {
 export const createClient = (config: Config = {}): Client => {
   let _config = mergeConfigs(createConfig(), config);
 
-  if (_config.devtools !== false) attachDevTools(_config.grab ?? defaultGrab);
+  // Unset means "when developing"; `true` and `false` both override that.
+  if (_config.devtools ?? isLocalhost())
+    attachDevTools(_config.grab ?? defaultGrab);
 
   const getConfig = (): Config => ({ ..._config });
 
