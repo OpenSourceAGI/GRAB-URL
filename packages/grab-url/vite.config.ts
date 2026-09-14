@@ -43,7 +43,10 @@ const sharedAlias = {
   "@grab-url/log": resolve(__dirname, "../../packages/log-json/src/log-json.ts"),
   "@grab-url/grab-api": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
   // The heyapi client imports the published package name; inside the
-  // monorepo that resolves to the same source.
+  // monorepo that resolves to the same source. The slim subpath is listed
+  // first because a string alias matches as a prefix: "grab-url" alone would
+  // rewrite "grab-url/slim" to ".../index.ts/slim" and fail to resolve.
+  "grab-url/slim": resolve(__dirname, "../../packages/grab-api/src/index.slim.ts"),
   "grab-url": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
 };
 

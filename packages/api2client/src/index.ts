@@ -48,6 +48,7 @@ export type {
 export {
   buildUrl,
   createConfig,
+  defaultGrabOptions,
   createQuerySerializer,
   getParseAs,
   getUrl,
