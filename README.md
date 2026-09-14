@@ -1,7 +1,3 @@
-<p align="center">
-    <a href="https://grab.js.org"><img src="https://i.imgur.com/mbZKlD0.png" alt="grab.js.org" /></a>
-</p>
-
 <!-- template-git-repo:badges:start -->
 <p align="center">
     <a href="https://deepwiki.com/OpenSourceAGI/GRAB-URL"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" /></a>
@@ -28,15 +24,12 @@
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/commits/master/"><img src="https://img.shields.io/github/last-commit/OpenSourceAGI/GRAB-URL.svg" alt="GitHub last commit" /></a>
     <a href="https://discord.gg/SJdBqBz3tV"><img src="https://img.shields.io/discord/1110227955554209923.svg?label=Chat&logo=Discord&colorB=7289da&style=flat" alt="Join Discord" /></a>
     <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request"><img src="https://img.shields.io/badge/PRs--welcome-brightgreen" alt="PRs Welcome" /></a>
-    <a href="https://github.com/OpenSourceAGI/GRAB-URL/blob/master/LICENSE.md"><img src="https://img.shields.io/github/license/OpenSourceAGI/GRAB-URL" alt="License" /></a>
     <br />
-    <img src="https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=white" alt="Claude" /> <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /> <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=white" alt="React" /> <img src="https://img.shields.io/badge/Svelte-FF3E00?logo=svelte&logoColor=white" alt="Svelte" /> <img src="https://img.shields.io/badge/Tauri-24C8D8?logo=tauri&logoColor=white" alt="Tauri" /> <img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" alt="Vite" /> <img src="https://img.shields.io/badge/Turborepo-EF4444?logo=turborepo&logoColor=white" alt="Turborepo" /> <img src="https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white" alt="Vitest" />
+    <img src="https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=white" alt="Claude" /> <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /> <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=white" alt="React" />     <a href="https://grab.js.org"><img src="https://i.imgur.com/mbZKlD0.png" alt="grab.js.org" /></a>
+    <br />
+        <img src="https://i.imgur.com/xzFQmrD.jpeg" />
 </p>
 <!-- template-git-repo:badges:end -->
-
-<p align="center">
-    <img src="https://i.imgur.com/xzFQmrD.jpeg" />
-</p>
 
 ```bash
 npm i grab-url
