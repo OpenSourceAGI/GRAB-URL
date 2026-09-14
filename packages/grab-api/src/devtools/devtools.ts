@@ -43,12 +43,22 @@ function escapeHtml(str: string) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+/** Flag marking the inspector as already installed on this page. */
+const DEVTOOLS_FLAG = "__grabDevToolsAttached";
+
 /**
  * Sets up development tools for debugging API requests.
  * Adds a keyboard shortcut (Ctrl+Alt+I) to toggle a modal showing the request history from `grab.log`.
+ *
+ * Calling it more than once is a no-op: an API client that attaches the
+ * inspector for its own requests must not end up appending the log twice.
  */
 export function setupDevTools() {
   if (typeof document === "undefined") return;
+
+  const scope = globalThis as any;
+  if (scope[DEVTOOLS_FLAG]) return;
+  scope[DEVTOOLS_FLAG] = true;
 
   document.addEventListener("keydown", (e) => {
     // Check for global grab on window
@@ -89,3 +99,4 @@ export function setupDevTools() {
     }
   });
 }
+

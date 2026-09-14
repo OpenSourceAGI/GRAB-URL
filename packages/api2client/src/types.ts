@@ -100,6 +100,12 @@ export interface GrabConfig {
   /** default=false Unescape HTML entities in text responses */
   unescapeHTML?: boolean;
   /**
+   * default=true Attach grab's Ctrl+Alt+I request inspector, which lists this
+   * client's requests and responses in a modal. Set false to leave the
+   * keyboard shortcut and the global `window.grab` alone.
+   */
+  devtools?: boolean;
+  /**
    * Fetch implementation used only by `client.sse.*()`. Plain requests still
    * go through grab or `GrabConfig.grab` — SSE's long-lived connection
    * doesn't fit grab's request model, so it calls fetch directly.

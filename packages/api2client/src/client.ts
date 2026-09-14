@@ -7,7 +7,7 @@
  * of axios' or fetch's bare behavior.
  */
 
-import { grab as defaultGrab } from "grab-url/slim";
+import { grab as defaultGrab, setupDevTools } from "grab-url/slim";
 import type { GrabOptions } from "grab-url/slim";
 
 import { createSseClient } from "./core/sse";
@@ -86,6 +86,12 @@ const defined = <T extends Record<string, any>>(options: T): T => {
   return options;
 };
 
+/**
+ * Methods whose answer may be reused and whose failure may be replayed, and so
+ * the only ones a client-wide `cache` or `retryAttempts` reaches.
+ */
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
 /** RequestInit fields carried over from the config, minus grab's own options. */
 const toRequestInit = (opts: Record<string, any>): RequestInit => ({
   credentials: opts.credentials,
@@ -97,6 +103,33 @@ const toRequestInit = (opts: Record<string, any>): RequestInit => ({
   referrerPolicy: opts.referrerPolicy,
   signal: opts.signal,
 });
+
+/**
+ * Attaches grab's Ctrl+Alt+I request inspector to this client.
+ *
+ * grab records its log on the *global* grab (`window.grab.log`) and the
+ * inspector reads it from there, so an SDK whose only reference to grab is
+ * this module's import has to publish one — otherwise the modal opens onto an
+ * empty log and the SDK's requests never show up. grab installs the shortcut
+ * itself on localhost; doing it here means a generated SDK is inspectable on a
+ * staging or preview origin too.
+ *
+ * @param grab - The grab this client sends with, published if none is global.
+ */
+const attachDevTools = (grab: any) => {
+  if (typeof window === "undefined") return;
+
+  const scope = window as any;
+  // An app that imported grab itself already owns the global, and the log the
+  // inspector has been showing all along; only fill in a missing one.
+  if (!scope.grab?.log) scope.grab = grab?.log ? grab : defaultGrab;
+
+  // setupDevTools() guards itself against a second call, but an older grab
+  // does not; the flag keeps either from registering the listener twice.
+  if (scope.__grabDevToolsAttached) return;
+  scope.__grabDevToolsAttached = true;
+  setupDevTools();
+};
 
 /**
  * Creates a Hey API client that sends every request through grab.
@@ -112,6 +145,8 @@ const toRequestInit = (opts: Record<string, any>): RequestInit => ({
  */
 export const createClient = (config: Config = {}): Client => {
   let _config = mergeConfigs(createConfig(), config);
+
+  if (_config.devtools !== false) attachDevTools(_config.grab ?? defaultGrab);
 
   const getConfig = (): Config => ({ ..._config });
 
@@ -162,6 +197,15 @@ export const createClient = (config: Config = {}): Client => {
     const throwOnError = opts.throwOnError ?? false;
     const responseStyle: ResponseStyle = opts.responseStyle ?? "fields";
     const grab = opts.grab ?? defaultGrab;
+    // Serving a write from cache, or replaying one that failed, would change
+    // what the API was asked to do, so a client-wide `cache`/`retryAttempts`
+    // covers reads only. A caller who wants either on a write says so on that
+    // request, where the consequences are in front of them.
+    const safe = SAFE_METHODS.has(request.method);
+    const cache = safe ? opts.cache : (options.cache ?? false);
+    const retryAttempts = safe
+      ? opts.retryAttempts
+      : (options.retryAttempts ?? 0);
     const hasBody =
       (body !== undefined && body !== null && body !== "") || !!request.body;
 
@@ -183,7 +227,7 @@ export const createClient = (config: Config = {}): Client => {
       // matching its header, and so `null` means "no body" rather than "{}".
       body: hasBody ? await request.clone().arrayBuffer() : null,
       baseURL,
-      cache: opts.cache,
+      cache,
       timeout: opts.timeout,
       rateLimit: opts.rateLimit,
       unzip: opts.unzip ?? false,
@@ -204,7 +248,7 @@ export const createClient = (config: Config = {}): Client => {
             parseDOM: opts.parseDOM ?? false,
             unescapeHTML: opts.unescapeHTML ?? false,
             cacheForTime: opts.cacheForTime,
-            retryAttempts: opts.retryAttempts,
+            retryAttempts,
             onRawResponse: (raw: Response) => {
               response = raw;
               // grab throws on a failed status without touching the body, so

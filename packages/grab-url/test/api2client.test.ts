@@ -9,10 +9,15 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { grab } from '../grab-api/src/index.ts';
+// The slim entry, because that is the one api2client sends with: the two
+// entries are separate modules with separate `log`, `mock` and `supports`, so
+// asserting against the full grab here would be asserting against a different
+// object than the client ever touches.
+import { grab } from '../grab-api/src/index.slim.ts';
 import {
   createClient,
   createConfig,
+  defaultGrabOptions,
   rewireGeneratedClient,
 } from '../api2client/src/index.ts';
 
@@ -161,7 +166,9 @@ describe('error handling', () => {
   });
 
   it('reports a transport failure as an error', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network down'));
+    // Every attempt fails, not just the first: reads are retried by default,
+    // so a one-shot rejection would leave the retry with nothing queued.
+    mockFetch.mockRejectedValue(new Error('Network down'));
 
     const result = await client.get({ url: '/pets' });
 
@@ -214,12 +221,106 @@ describe('grab features reaching generated SDKs', () => {
     }
   });
 
+  it('applies the default grab options to a read', async () => {
+    mockJson({ id: '1' });
+
+    const bare = createClient(createConfig({ baseUrl: BASE }));
+    await bare.get({ url: '/pets/1' });
+
+    expect(bare.getConfig()).toMatchObject(defaultGrabOptions);
+  });
+
+  it('leaves a write uncached and unretried even when the client caches', async () => {
+    mockFetch.mockRejectedValue(new Error('Network down'));
+
+    const caching = createClient(
+      createConfig({ baseUrl: BASE, cache: true, debug: false, retryAttempts: 3 }),
+    );
+    await caching.post({ url: '/pets' });
+
+    // One attempt, and nothing stored to answer the next POST from.
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('still lets a single write ask for a retry', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network down'));
+    mockJson({ id: '1' });
+
+    const result = await client.post({ retryAttempts: 1, url: '/pets' });
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(result.data).toEqual({ id: '1' });
+  });
+
+  it('advertises onRawResponse, so the slim grab reports statuses', async () => {
+    expect(grab.supports?.onRawResponse).toBe(true);
+
+    mockJson({ message: 'Pet not found' }, 404);
+    const result = await client.get({ url: '/pets/404' });
+
+    expect(result.response?.status).toBe(404);
+    expect(result.error).toEqual({ message: 'Pet not found' });
+  });
+
   it('records every request in the shared grab log', async () => {
     mockJson({ id: '1' });
 
     await client.get({ url: '/pets/1' });
 
     expect(grab.log[0].path).toBe('/pets/1');
+  });
+});
+
+// ─── Devtools ─────────────────────────────────────────────────────────────────
+
+describe('the Ctrl+Alt+I request inspector', () => {
+  /** A DOM just real enough for the inspector to bind its shortcut to. */
+  function stubBrowser() {
+    const listeners: string[] = [];
+    const document = { addEventListener: (type: string) => void listeners.push(type) };
+    const window: Record<string, any> = { document };
+
+    // Assigned directly rather than with vi.stubGlobal, whose teardown would
+    // also drop the fetch stub this file installs once for every suite.
+    delete (globalThis as any).__grabDevToolsAttached;
+    (globalThis as any).window = window;
+    (globalThis as any).document = document;
+
+    return { listeners, window };
+  }
+
+  afterEach(() => {
+    delete (globalThis as any).window;
+    delete (globalThis as any).document;
+    delete (globalThis as any).__grabDevToolsAttached;
+  });
+
+  it('binds the shortcut and publishes the grab whose log it reads', () => {
+    const { listeners, window } = stubBrowser();
+
+    createClient(createConfig({ baseUrl: BASE }));
+
+    expect(listeners).toContain('keydown');
+    // Without this the inspector opens onto a log nothing was recorded in.
+    expect(window.grab).toBe(grab);
+  });
+
+  it('binds the shortcut once however many clients are created', () => {
+    const { listeners } = stubBrowser();
+
+    createClient(createConfig({ baseUrl: BASE }));
+    createClient(createConfig({ baseUrl: BASE }));
+
+    expect(listeners.filter((type) => type === 'keydown')).toHaveLength(1);
+  });
+
+  it('stays out of the way when a client opts out', () => {
+    const { listeners, window } = stubBrowser();
+
+    createClient(createConfig({ baseUrl: BASE, devtools: false }));
+
+    expect(listeners).not.toContain('keydown');
+    expect(window.grab).toBeUndefined();
   });
 });
 
