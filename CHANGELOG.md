@@ -2,6 +2,19 @@
 
 ***
 
+## 1.6.23 — `onRawResponse`, released
+
+`grab()` gained an **`onRawResponse` hook** — it hands the caller the raw
+`Response` before grab parses or throws on it — plus a **`grab.supports`**
+feature-flag object so integrations can detect the hook instead of guessing
+from a version number. Both landed with `api2client` (PR #14) but were never
+released, so every published `api2client` fell back to its no-`onRawResponse`
+path: an OpenAPI SDK on it lost the HTTP status and the parsed error body on
+any non-2xx response. This release is that fix — the code is unchanged, it
+simply ships.
+
+***
+
 ## September 2026 — Docs overhaul and runnable examples
 
 The current month has been a concentrated push on the documentation site. **README and docs-site badges** were brought to parity with debate-ai.com, with **npm downloads**, **bundle size** and **grab.js.org** badges added (PRs #15, #16, #17). An **OpenAPI SDKs overview page** and matching homepage section were published (PR #18), followed by a **Hey API setup guide**.
