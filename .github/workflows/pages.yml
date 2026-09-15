@@ -2,10 +2,10 @@
 #
 # Settings -> Pages -> Source is "GitHub Actions", so this workflow is what publishes
 # the site. The /docs folder Pages used to build from with Jekyll is gone -- nothing
-# reads it any more, and the docs app lives in grab-help-docs/.
+# reads it any more, and the docs app lives in apps/grab-help-docs/.
 #
 # The site is a full Next.js app, so it is exported statically here: see
-# grab-help-docs/scripts/build-static-pages.mjs for the server-only pieces that are pruned and
+# apps/grab-help-docs/scripts/build-static-pages.mjs for the server-only pieces that are pruned and
 # what each costs. https://grab.js.org builds from the same source without this flag
 # and keeps all of them.
 name: Deploy docs to Pages
@@ -14,7 +14,7 @@ on:
   push:
     branches: [master]
     paths:
-      - grab-help-docs/**
+      - apps/grab-help-docs/**
       - packages/**
       - package.json
       - package-lock.json
@@ -55,11 +55,11 @@ jobs:
       - name: Build static export
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-        run: node grab-help-docs/scripts/build-static-pages.mjs
+        run: node apps/grab-help-docs/scripts/build-static-pages.mjs
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: grab-help-docs/out
+          path: apps/grab-help-docs/out
 
   deploy:
     environment:
