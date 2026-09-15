@@ -294,9 +294,32 @@ const defaultQuerySerializer = createQuerySerializer({
 const defaultHeaders = { "Content-Type": "application/json" };
 
 /**
+ * grab options this client turns on by default, so a generated SDK gets
+ * grab's caching, retries and timeout without any configuration. Every one of
+ * them is overridable client-wide in `createConfig()`/`setConfig()` or per
+ * request. `cache` and `retryAttempts` apply to `GET`, `HEAD` and `OPTIONS`
+ * only — see {@link createClient}.
+ */
+export const defaultGrabOptions = {
+  /**
+   * Caching is configured but left off: an SDK that served a GET from a
+   * minute-old cache would hand back pre-write data after a POST to the same
+   * resource, which is not a default anyone can opt out of after the fact.
+   * Turn it on with `cache: true` — the window below is already set.
+   */
+  cache: false,
+  /** Seconds a cached response stays fresh, once `cache` is on. */
+  cacheForTime: 60,
+  /** Retries for a read that failed. */
+  retryAttempts: 2,
+  /** Seconds before a request is aborted. */
+  timeout: 30,
+} as const;
+
+/**
  * Builds the client's starting configuration, with the JSON body serializer,
- * the OpenAPI-compliant query serializer and Content-Type header applied
- * unless overridden.
+ * the OpenAPI-compliant query serializer, Content-Type header and
+ * {@link defaultGrabOptions} applied unless overridden.
  *
  * @param override - Options replacing the defaults.
  * @returns The resolved config to hand to {@link createClient}.
@@ -305,6 +328,7 @@ export const createConfig = <T extends ClientOptions = ClientOptions>(
   override: Config<Omit<ClientOptions, keyof T> & T> = {},
 ): Config<Omit<ClientOptions, keyof T> & T> => ({
   ...jsonBodySerializer,
+  ...defaultGrabOptions,
   headers: defaultHeaders,
   parseAs: "auto",
   querySerializer: defaultQuerySerializer,

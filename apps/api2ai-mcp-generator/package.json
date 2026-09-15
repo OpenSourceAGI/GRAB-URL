@@ -93,7 +93,6 @@
     "@scalar/api-reference-react": "^0.8.11",
     "@shikijs/rehype": "^3.20.0",
     "@shikijs/transformers": "^3.20.0",
-    "@silevis/reactgrid": "^4.1.17",
     "@t3-oss/env-nextjs": "0.13.10",
     "@tabler/icons-react": "^3.36.0",
     "@tanstack/react-router": "latest",

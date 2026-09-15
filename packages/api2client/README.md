@@ -104,6 +104,27 @@ import { createClient, createConfig } from "api2client";
 const client = createClient(createConfig({ baseUrl: "https://api.example.com" }));
 ```
 
+### Defaults
+
+`createConfig()` starts every client with these, so a generated SDK gets grab's
+behavior without being configured:
+
+```ts
+import { defaultGrabOptions } from "api2client";
+
+// { cache: false, cacheForTime: 60, retryAttempts: 2, timeout: 30 }
+```
+
+`cache` is configured but off: an SDK that served a GET from a minute-old cache
+would hand back pre-write data after a POST to the same resource, and that is
+not something a caller can opt out of after the fact. Turn it on with
+`cache: true` — the window is already set.
+
+`cache` and `retryAttempts` reach `GET`, `HEAD` and `OPTIONS` only. Setting
+either client-wide leaves writes alone, since serving a POST from cache or
+replaying a DELETE that failed changes what the API was asked to do; a single
+write can still ask for them per request.
+
 ### grab options
 
 Every option below is accepted client-wide in `createConfig()`/`setConfig()` and per request. See [grab options](https://grab.js.org/docs/grab-options) for the full reference.
@@ -118,13 +139,39 @@ Every option below is accepted client-wide in `createConfig()`/`setConfig()` and
 | `debug`, `logger`                      | Log requests and responses                          |
 | `unzip`, `parseDOM`, `unescapeHTML`    | Opt back into grab's ZIP/HTML post-processing       |
 | `grab`                                 | Use a custom grab instance, e.g. `grab.instance({})` |
+| `devtools`                             | default=on localhost Attach the Ctrl+Alt+I request inspector |
+
+### Inspecting requests — Ctrl+Alt+I
+
+In development, creating a client attaches grab's request inspector:
+**Ctrl+Alt+I** opens a modal listing every request the SDK made, with its
+parsed response.
+
+grab keeps that log on the global `window.grab` rather than on the instance the
+SDK holds, so the client publishes its grab there when nothing else has —
+without that the shortcut opens onto a log the SDK never wrote to. An app that
+imports grab itself keeps its own global, and its log, untouched. It is bound
+once per page however many clients are created.
+
+**It stays off in production.** A public origin is someone's production site,
+and every request the SDK made is not something to hand its visitors a
+keystroke away, so `devtools` left unset follows grab's own gate: on for a
+loopback host, off everywhere else. It also does nothing outside a browser.
+
+Both overrides are explicit:
+
+```ts
+createClient(createConfig({ baseUrl, devtools: true }));   // deployed build
+createClient(createConfig({ baseUrl, devtools: false }));  // off, even locally
+```
+
 
 ### Mock any endpoint
 
 `grab.mock` keys are request paths (with or without a leading slash), so an SDK endpoint can be stubbed without touching the network:
 
 ```ts
-import { grab } from "grab-url";
+import { grab } from "grab-url/slim";
 
 grab.mock["/pets/42"] = { response: { id: "42", name: "Rex" } };
 
@@ -178,7 +225,11 @@ Reconnects honor the server's `retry:` field and send `Last-Event-ID` from the l
 
 ## Requirements
 
-Needs `grab-url` ≥ 1.6.23 for the `onRawResponse` hook, which is what reports the response status, headers and parsed error payloads. The client detects support and never sends options an older grab would turn into query parameters, so it still runs on 1.6.22 — but there a failed request comes back as grab's error message (`"HTTP error: 404 Not Found"`) with **no `response` at all**, so `result.response.status` throws. Anything that branches on the status needs 1.6.23.
+Requests are sent with **`grab-url/slim`** — the same `grab()`, without the bundled `linkedom`/`archiver-web` HTML and archive extractors an OpenAPI response never needs. Anything reaching for `grab.mock` or `grab.log` alongside an SDK has to import the same entry; `grab-url` and `grab-url/slim` are separate modules with separate `mock` and `log`, and a stub registered on one is invisible to the other.
+
+Needs a `grab-url` whose **slim** entry advertises the `onRawResponse` hook — check `grab.supports?.onRawResponse` — which is what reports the response status, headers and parsed error payloads. The slim executor has called the hook since 1.6.23, but the slim entry did not set the flag until the release this client ships with, so an older slim grab silently fell back.
+
+The client detects support and never sends options an older grab would turn into query parameters, so it still runs on one that lacks the flag — but a failed request then comes back as grab's error message (`"HTTP error: 404 Not Found"`) with **no `response` at all**, so `result.response.status` throws, and `retryAttempts`/`cacheForTime` are not applied. Anything that branches on the status needs the flag.
 
 ## What's in this package
 
@@ -186,7 +237,7 @@ Needs `grab-url` ≥ 1.6.23 for the `onRawResponse` hook, which is what reports 
 | -------------------------------------------------------- | ---------------------------------------------------- |
 | [src/client.ts](src/client.ts)                           | `createClient()` — the Hey API interface over grab    |
 | [src/types.ts](src/types.ts)                             | The client contract generated SDKs type-check against |
-| [src/utils.ts](src/utils.ts)                             | Config merging, URL building, auth, interceptors      |
+| [src/utils.ts](src/utils.ts)                             | Config merging, URL building, auth, interceptors, `defaultGrabOptions` |
 | [src/core/](src/core)                                    | OpenAPI path/query/body serializers, SSE streaming     |
 | [src/generate.ts](src/generate.ts)                       | Codegen and rewiring of generated output              |
 | [src/cli.ts](src/cli.ts)                                 | The `api2client` command                             |

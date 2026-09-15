@@ -15,6 +15,14 @@ grab.log = [];
 grab.mock = {};
 grab.defaults = {};
 
+// Feature flags so integrations can detect what this version supports and
+// avoid passing options an older grab would treat as query parameters. The
+// slim executor calls onRawResponse just as the full one does, so an
+// integration built on grab-url/slim — api2client, and the OpenAPI SDKs it
+// generates — must see the same flag, or it quietly gives up response
+// statuses, parsed error bodies and retries.
+grab.supports = { onRawResponse: true };
+
 if (typeof window !== "undefined") {
   // @ts-ignore
   window.log = log;

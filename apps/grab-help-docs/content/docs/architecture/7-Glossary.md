@@ -1,4 +1,7 @@
-# Glossary
+---
+title: "Glossary"
+---
+
 Relevant source files
 - [.github/workflows/tests.yml](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/.github/workflows/tests.yml)
 - [codecov.yml](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/codecov.yml)
