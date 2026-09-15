@@ -1,7 +1,6 @@
-<!-- Copied from packages/grab-url/README.md by packages/grab-url/scripts/sync-root-readme.mjs — edit that file, not this one. -->
 
-<!-- template-git-repo:badges:start -->
-<p align="center">
+<p align="center"> 
+        <img src="https://i.imgur.com/HVLYLqR.png" /> <br />
     <a href="https://deepwiki.com/OpenSourceAGI/GRAB-URL"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" /></a>
     <a href="https://grab.js.org"><img src="https://img.shields.io/badge/Docs-blue?logo=ReadTheDocs&logoColor=white" alt="Documentation" /></a>
     <a href="https://stackblitz.com/github/OpenSourceAGI/GRAB-URL/tree/master/examples/basic-request"><img height="20px" src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" /></a>
@@ -26,8 +25,7 @@
     <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request"><img src="https://img.shields.io/badge/PRs--welcome-brightgreen" alt="PRs Welcome" /></a>
     <br />
     <img src="https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=white" alt="Claude" /> <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /> <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=white" alt="React" />     <a href="https://grab.js.org"><img src="https://i.imgur.com/mbZKlD0.png" alt="grab.js.org" /></a>
-    <br />
-        <img src="https://i.imgur.com/xzFQmrD.jpeg" />
+   
 </p>
 <!-- template-git-repo:badges:end -->
 
