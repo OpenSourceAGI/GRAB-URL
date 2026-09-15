@@ -33,11 +33,11 @@ export const config = {
   // rather than treat them as prebuilt dependencies.
   transpilePackages: ['loading-animations', 'quantum-sphere-loading-icon'],
   // distDir: './dist',
-  outputFileTracingRoot: resolve(import.meta.dirname, '..'),
+  outputFileTracingRoot: resolve(import.meta.dirname, '../..'),
   turbopack: {
     // Must match outputFileTracingRoot: both point at the monorepo root so
     // workspace packages are traced into the Vercel output bundle.
-    root: resolve(import.meta.dirname, '..'),
+    root: resolve(import.meta.dirname, '../..'),
   },
   // `rewrites` is a server feature; under static export the pre-rendered
   // /docs/llms.mdx/docs/* pages are still emitted and reachable directly.
