@@ -1,4 +1,7 @@
-# AI Agent Integration & OpenAPI Services
+---
+title: "AI Agent Integration & OpenAPI Services"
+---
+
 Relevant source files
 - [dist/grab-api.d.ts](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/dist/grab-api.d.ts)
 - [docs/content/docs/claude-skill.mdx](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/docs/content/docs/claude-skill.mdx?plain=1)

@@ -1,4 +1,7 @@
-# CLI Tool (grab-url-cli)
+---
+title: "CLI Tool (grab-url-cli)"
+---
+
 Relevant source files
 - [docs/content/docs/cli.mdx](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/docs/content/docs/cli.mdx?plain=1)
 - [docs/content/docs/configuration.mdx](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/docs/content/docs/configuration.mdx?plain=1)
