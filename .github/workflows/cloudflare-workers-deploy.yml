@@ -1,13 +1,11 @@
 name: Build and deploy web and .com apps to Cloudflare Workers
 
 on:
-  # Deploy automatically for every push/commit to any branch.
   push:
     paths:
       - 'apps/**'
       - '.github/workflows/cloudflare-workers-deploy.yml'
 
-  # Allows a manual deployment of one selected app.
   workflow_dispatch:
     inputs:
       app:
@@ -19,7 +17,6 @@ permissions:
   contents: read
 
 concurrency:
-  # Avoid two deployments from the same branch running at once.
   group: cloudflare-workers-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
@@ -51,15 +48,26 @@ jobs:
 
             apps=$(jq -cn --arg app "${REQUESTED_APP}" '[ $app ]')
           else
-            apps=$(
+            if [[ ! -d "apps" ]]; then
+              echo "::error::The repository does not contain an apps/ directory."
+              exit 1
+            fi
+
+            matches=$(
               find apps -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
-                | grep -Ei 'web|\.com' \
+                | grep -Ei 'web|\.com' || true
+            )
+
+            apps=$(
+              printf '%s\n' "${matches}" \
                 | jq -Rsc 'split("\n") | map(select(length > 0))'
             )
           fi
 
           if [[ "${apps}" == "[]" ]]; then
             echo "::error::No direct directories in apps/ contain 'web' or '.com'."
+            echo "Directories GitHub Actions found in apps/:"
+            find apps -mindepth 1 -maxdepth 1 -type d -printf ' - %f\n' || true
             exit 1
           fi
 
@@ -84,8 +92,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # Node 24 prevents intentionally selecting the deprecated Node 20 runtime.
-      # No npm cache here: it safely supports apps with or without package-lock.json.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -98,7 +104,6 @@ jobs:
           echo "Current directory: $(pwd)"
           ls -la
 
-      # npm ci needs a package-lock.json. npm install works both with and without one.
       - name: Install dependencies
         run: npm install
 
