@@ -1,5 +1,5 @@
 ---
-title: "Architecture"
+title: "Request-Lifecycle-&-Core-Engine-vtempest-GRAB-URL-DeepWiki"
 ---
 
 ## Content Index
