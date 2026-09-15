@@ -10,8 +10,6 @@
     <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/dm/grab-url.svg" alt="NPM Monthly Downloads" /></a>
     <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/v/grab-url.svg" alt="npm version" /></a>
     <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/dt/grab-url.svg" alt="NPM Total Downloads" /></a>
-    <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/types/grab-url" alt="TypeScript types" /></a>
-    <a href="https://packagephobia.com/result?p=grab-url"><img src="https://packagephobia.com/badge?p=grab-url" alt="Install size" /></a>
     <a href="https://codecov.io/gh/OpenSourceAGI/GRAB-URL"><img src="https://codecov.io/gh/OpenSourceAGI/GRAB-URL/graph/badge.svg" alt="Coverage" /></a>
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/actions/workflows/tests.yml"><img src="https://github.com/OpenSourceAGI/GRAB-URL/actions/workflows/tests.yml/badge.svg?branch=master" alt="CI status" /></a>
     <br />
