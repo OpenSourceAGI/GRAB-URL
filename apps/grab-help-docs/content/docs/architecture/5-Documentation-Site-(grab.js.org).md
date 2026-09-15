@@ -1,4 +1,7 @@
-# Documentation Site (grab.js.org)
+---
+title: "Documentation Site (grab.js.org)"
+---
+
 Relevant source files
 - [docs/.gitignore](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/docs/.gitignore)
 - [docs/app/(home)/page.tsx](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/docs/app/(home)/page.tsx)/page.tsx)

@@ -1,4 +1,7 @@
-# Core grab() API
+---
+title: "Core grab() API"
+---
+
 Relevant source files
 - [dist/grab-api.cjs.js](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/dist/grab-api.cjs.js)
 - [dist/grab-api.cjs.js.map](https://github.com/vtempest/GRAB-URL/blob/a61acaf0/dist/grab-api.cjs.js.map)
