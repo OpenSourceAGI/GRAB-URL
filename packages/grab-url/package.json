@@ -1,11 +1,12 @@
 {
   "name": "grab-url",
-  "description": "Generate Request to API from Browser",
+  "description": "Generate Request to API from Browser — The FBEST Request Manager: Functionally Brilliant, Elegantly Simple Tool. One function, zero dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries, rate-limiting, mock testing, pagination, and loading icons.",
   "type": "module",
   "version": "2.0.0",
   "packageManager": "npm@11.19.1",
-  "author": "vtempest",
-  "license": "rights.institute/prosper",
+  "author": "vtempest <vtempest@github.com>",
+  "license": "PROSPER-1.0.0",
+  "licenseUrl": "https://rights.institute/prosper",
   "main": "./dist/grab-api.cjs.js",
   "types": "./dist/grab-api.d.ts",
   "module": "./dist/grab-api.es.js",
@@ -50,7 +51,10 @@
     "dist",
     "src",
     "scripts/install-yt-dlp.mjs",
-    "src/loading-animations/cli/loading-animations-emojis.js"
+    "src/loading-animations/cli/loading-animations-emojis.js",
+    "LICENSE.md",
+    "CHANGELOG.md",
+    "README.md"
   ],
   "scripts": {
     "build": "vite build --config vite.config.ts",
@@ -63,7 +67,7 @@
     "ytdlp": "node ./scripts/install-yt-dlp.mjs --force",
     "ytdlp:sidecar": "node ./scripts/install-yt-dlp.mjs --sidecar",
     "prepublishOnly": "npm run build",
-    "ship": "bun x standard-version --release-as patch;rm CHANGELOG.md; npm publish",
+    "ship": "bun x standard-version --release-as patch; rm CHANGELOG.md; npm publish",
     "test:ui": "vitest --ui",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -127,6 +131,52 @@
     "post",
     "mock-api",
     "fetch",
-    "http"
-  ]
+    "http",
+    "http-client",
+    "rest-client",
+    "api-client",
+    "fetch-wrapper",
+    "request-deduplication",
+    "caching",
+    "retry",
+    "rate-limiting",
+    "mock-testing",
+    "pagination",
+    "infinite-scroll",
+    "loading-icons",
+    "quantum-sphere",
+    "cli",
+    "file-downloader",
+    "yt-dlp",
+    "web-archiving",
+    "openapi",
+    "hey-api",
+    "typescript",
+    "zero-dependencies"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSourceAGI/GRAB-URL.git",
+    "directory": "packages/grab-url"
+  },
+  "homepage": "https://grab.js.org",
+  "bugs": {
+    "url": "https://github.com/OpenSourceAGI/GRAB-URL/issues",
+    "email": "vtempest@github.com"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/vtempest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "sideEffects": false,
+  "unpkg": "dist/grab-api.es.js",
+  "jsdelivr": "dist/grab-api.es.js"
 }
