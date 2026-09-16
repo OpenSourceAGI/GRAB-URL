@@ -10,7 +10,7 @@ dist
 # frontendDist (see packages/native-app-wrapper/src-tauri/tauri.conf.json),
 # not build output.
 !packages/native-app-wrapper/dist/
-
+*lock.json
 # output
 out
 *.tgz

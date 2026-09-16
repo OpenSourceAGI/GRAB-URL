@@ -1,6 +1,5 @@
 {
-  "name": "@grab-url/grab-api",
-  "private": true,
+  "name": "grab-api.js"
   "type": "module",
   "main": "./src/index.ts",
   "exports": {

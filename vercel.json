@@ -3,7 +3,7 @@
   "framework": "nextjs",
   "installCommand": "npm ci",
   "buildCommand": "npx turbo run build --filter=grab-help-docs",
-  "outputDirectory": "grab-help-docs/.next",
+  "outputDirectory": "apps/grab-help-docs/.next",
   "build": {
     "env": {
       "VERCEL_PREVIEW_FEEDBACK_ENABLED": "0"
