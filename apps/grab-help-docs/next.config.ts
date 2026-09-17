@@ -28,10 +28,10 @@ type MDXNextConfig = NonNullable<Parameters<typeof withMDX>[0]>;
 
 export const config = {
   serverExternalPackages: ['typescript', 'fumadocs-typescript'],
-  // `loading-animations/svg/src` and `quantum-sphere-loading-icon/react` both
-  // resolve to TypeScript source in the workspace, so Next has to compile them
-  // rather than treat them as prebuilt dependencies.
-  transpilePackages: ['loading-animations', 'quantum-sphere-loading-icon'],
+  // `loading-animations/svg/src`, `quantum-sphere-loading-icon/react` and
+  // `archiver-web` all resolve to TypeScript source in the workspace, so Next
+  // has to compile them rather than treat them as prebuilt dependencies.
+  transpilePackages: ['archiver-web', 'loading-animations', 'quantum-sphere-loading-icon'],
   // distDir: './dist',
   outputFileTracingRoot: resolve(import.meta.dirname, '../..'),
   turbopack: {
