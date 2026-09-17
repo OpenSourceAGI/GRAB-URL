@@ -1,6 +1,6 @@
 /**
  * @file route.ts
- * @description API route for documentation search using Orama.
+ * @description API route serving the static documentation search index.
  */
 import { source } from '@/lib/fumadocs/source';
 import { createFromSource } from 'fumadocs-core/search/server';

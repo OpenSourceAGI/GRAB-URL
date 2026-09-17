@@ -2,19 +2,15 @@
  * @file api-page.tsx
  * @description API page component that generates dynamic documentation and code samples.
  */
-// import { openapi } from '@/lib/fumadocs/openapi';
-import { createAPIPage } from 'fumadocs-openapi/ui';
-import { createOpenAPI } from 'fumadocs-openapi/server';
-import { docsConfig } from '@/lib/fumadocs/customize-docs';
+'use client';
+import { createOpenAPIPage } from 'fumadocs-openapi/ui';
 
-export const openapi = createOpenAPI({
-    // the OpenAPI schema, you can also give it an external URL.
-    input: [docsConfig.apiDocsPath].filter(Boolean) as string[],
-});
-
-
-export const APIPage = createAPIPage(openapi, {
-    generateCodeSamples(endpoint) {
+// `createOpenAPIPage()` returns a client component and must be called from a
+// client module. The schema reaches it through the `payload`/`preloaded` props
+// that the page data supplies, so the server instance
+// (`@/lib/fumadocs/openapi`) is no longer passed in here.
+export const APIPage = createOpenAPIPage({
+    generateCodeSamples() {
         return [
             // {
             //     id: 'js',
