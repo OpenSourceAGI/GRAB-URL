@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { extract, compress } from '../archiver-web/src/index.ts';
+import { extract, compress } from '../../archiver-web/src/index.ts';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 

@@ -145,7 +145,13 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    include: ["test/**/*.test.ts"],
+    // The suite lives here but exercises every package's source, so the test
+    // project is rooted at the monorepo. Vitest only instruments files that
+    // sit inside the project root: rooted at this package, v8 reported nothing
+    // for `grab-api`, `log-json`, `api2client` or `archiver-web`, and the
+    // coverage globs below could not reach them either.
+    root: resolve(__dirname, "../.."),
+    include: ["packages/grab-url/test/**/*.test.ts"],
     resolve: {
       alias: {
         ...sharedAlias,
@@ -159,9 +165,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "lcov"],
-      reportsDirectory: "../../coverage",
+      reportsDirectory: "coverage",
       reportOnFailure: true,
-      include: ["../../packages/**/src/**"],
+      include: ["packages/**/src/**"],
       exclude: [
         "**/node_modules/**",
         "**/dist/**",

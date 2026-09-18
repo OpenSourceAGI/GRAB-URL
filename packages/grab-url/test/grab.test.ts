@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { grab, log } from '../grab-api/src/index.ts';
+import { grab, log } from '../../grab-api/src/index.ts';
 
 // ─── Mock fetch ───────────────────────────────────────────────────────────────
 

@@ -12,7 +12,7 @@ import {
     loadingRing,
     loadingInfinity,
     loadingGears,
-} from '../loading-animations/src/svg/index.ts';
+} from '../../loading-animations/src/svg/index.ts';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -71,7 +71,16 @@ There are no per-package test folders. A new test for
 `packages/whatever/src/thing.ts` goes in `test/thing.test.ts`.
 
 Coverage (v8) includes `packages/**/src/**` and excludes `dist`, `.d.ts`,
-Svelte sources, `svg/` and `demo/` directories.
+Svelte sources, `svg/` and `demo/` directories. The Vitest project is rooted at
+the **monorepo**, not at `packages/grab-url` — Vitest only instruments files
+inside the project root, so rooting it at the package reported nothing for
+`grab-api`, `log-json`, `api2client` or `archiver-web`. That is also why every
+test imports a sibling package as `../../<package>/src/...`: the paths are
+relative to the test file, and a `../` path only ever resolved by accident
+through Vite's fallback to the project root.
+
+The report is written to the repository-root `coverage/`, with paths relative
+to the repository so Codecov can map them.
 
 ```bash
 npm run test

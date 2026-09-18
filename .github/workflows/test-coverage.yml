@@ -11,96 +11,59 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  vitest:
-    name: ${{ matrix.flag }}
+  coverage:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
-      # One package's failure should not hide the coverage of the others.
+      # One workspace's failure should not hide the coverage of the other.
       fail-fast: false
       matrix:
         include:
-          - { flag: qwk-vscode-ext, dir: apps/qwk-vscode-ext }
-          - { flag: qwksearch-desktop, dir: apps/qwksearch-desktop }
-          - { flag: qwksearch-ext, dir: apps/qwksearch-ext }
-          - { flag: qwksearch-web, dir: apps/qwksearch-web }
-          - { flag: chat-agent-toolkit, dir: packages/chat-agent-toolkit }
-          - { flag: extract-webpage, dir: packages/extract-webpage }
-          - { flag: html-renderer-api, dir: packages/html-renderer-api }
-          - { flag: notebooklm-api-client, dir: packages/notebooklm-api-client }
-          - { flag: qwksearch-api-client, dir: packages/qwksearch-api-client }
-          - { flag: qwksearch-mcp-server, dir: packages/qwksearch-mcp-server }
-          - { flag: react-weather-forecast, dir: packages/react-weather-forecast }
-          - { flag: reason-editor, dir: packages/reason-editor }
-          - { flag: research-agent-ui, dir: packages/research-agent-ui }
-          - { flag: search-web-api, dir: packages/search-web-api }
-          - { flag: shadcn-app-dock, dir: packages/shadcn-app-dock }
-          - { flag: shadcn-settings, dir: packages/shadcn-settings }
-          - { flag: trending-news-api, dir: packages/trending-news-api }
-          - { flag: use-voice-control, dir: packages/use-voice-control }
-          - { flag: user-help-docs, dir: packages/user-help-docs }
-          - { flag: write-language, dir: packages/write-language }
-          - { flag: scripts, dir: .github/scripts }
+          # `packages/grab-url` owns the monorepo's whole suite: its Vitest
+          # project is rooted at the repository, so it covers every package's
+          # `src/` and writes its lcov to the repository-root `coverage/`.
+          # The report carries one flag per covered package; `flag_management`
+          # in codecov.yml slices it by path so each package gets its own
+          # number.
+          - name: packages
+            dir: packages/grab-url
+            script: test:coverage
+            lcov: coverage/lcov.info
+            flags: api2client,archiver-web,grab-api,grab-url-cli,loading-animations,log-json,quantum-sphere-loading-animation
+          # The Tauri wrapper keeps its own suite and its own coverage dir.
+          - name: native-app-wrapper
+            dir: apps/grab-url-native-wrapper
+            script: coverage
+            lcov: apps/grab-url-native-wrapper/coverage/lcov.info
+            flags: native-app-wrapper
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Node 22 ships npm 10, which cannot resolve this workspace tree at all:
+      # `npm install` dies with "Cannot read properties of null (reading
+      # 'edgesOut')". Corepack activates the npm pinned by `packageManager` in
+      # the root package.json, so CI installs with the same npm as developers.
+      - name: Activate the pinned npm
+        run: corepack enable npm
 
       - name: Install dependencies
-        run: bun install
-
-      # extract-pdf, extract-youtube, react-reason-editor and
-      # use-voice-control are consumed by other workspace packages through
-      # their built `dist` output. They used to get built implicitly by a
-      # `prepare` script that ran on every `bun install`, but that script
-      # name made `bun install --frozen-lockfile` unreliable in unrelated
-      # environments (see https://github.com/oven-sh/bun/issues/19088), so
-      # the build is now explicit here instead.
-      - name: Build workspace libraries consumed via dist
-        run: bunx turbo build --filter=extract-pdf --filter=extract-youtube --filter=react-reason-editor --filter=use-voice-control
+        run: npm install
 
       - name: Run tests with coverage
         working-directory: ${{ matrix.dir }}
-        run: bun run test:coverage
+        run: npm run ${{ matrix.script }}
 
       - name: Upload coverage to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
-          files: ${{ matrix.dir }}/coverage/lcov.info
-          flags: ${{ matrix.flag }}
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
-
-  # Packages that do not run on Vitest and so need their own invocation.
-  other-runners:
-    name: ${{ matrix.flag }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { flag: domain-rank, dir: packages/domain-rank, lcov: coverage/lcov.info }
-          - { flag: extract-pdf, dir: packages/extract-pdf, lcov: coverage/lcov.info }
-          - { flag: extract-youtube, dir: packages/extract-youtube, lcov: coverage/lcov.info }
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Run tests with coverage
-        working-directory: ${{ matrix.dir }}
-        run: bun run test:coverage
-
-      - name: Upload coverage to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
-        with:
-          files: ${{ matrix.dir }}/${{ matrix.lcov }}
-          flags: ${{ matrix.flag }}
+          files: ${{ matrix.lcov }}
+          flags: ${{ matrix.flags }}
+          slug: OpenSourceAGI/GRAB-URL
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
