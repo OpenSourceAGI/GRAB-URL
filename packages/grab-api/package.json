@@ -1,5 +1,6 @@
 {
   "name": "grab-api.js",
+  "private": true,
   "type": "module",
   "main": "./src/index.slim.ts",
   "exports": {
