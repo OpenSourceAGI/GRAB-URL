@@ -105,6 +105,14 @@ jobs:
       - name: Commit version bumps
         if: always()
         run: |
+          # The publish loop runs `npm install` inside each package. In a
+          # workspace that rewrites the ROOT lockfile down to just that
+          # package's tree, and committing the result left `npm ci` — which
+          # pages.yml and Vercel both use — unable to install. Throw that away
+          # and rebuild the lockfile from the bumped package.json files.
+          git checkout -- package-lock.json
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
           git add packages/*/package.json package-lock.json
           git diff --staged --quiet && echo "No version changes to commit" && exit 0
           git commit -m "chore: bump published package versions [skip ci]"
