@@ -13,6 +13,7 @@ import { showAlert } from "../devtools/devtools";
 import { getMergedOptions, handleFlowControl } from "./flow-control";
 import { handleRegrabEvents } from "./regrab-events";
 import {
+  emitResponse,
   initializeResponse,
   mapResultToResponse,
 } from "../response/response-handler";
@@ -94,7 +95,8 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
   const grabLog = target?.log || [];
 
   // Set loading state synchronously before any await
-  if (resFunction) response = resFunction({ ...response, isLoading: true });
+  if (resFunction)
+    response = emitResponse({ ...response, isLoading: true }, resFunction);
   else if (typeof response === "object") response.isLoading = true;
 
   try {
@@ -186,7 +188,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
 
     // Clear loading state
     if (resFunction)
-      response = resFunction({ ...response, isLoading: undefined });
+      response = emitResponse({ ...response, isLoading: undefined }, resFunction);
     else if (typeof response === "object") delete response.isLoading;
 
     if (typeof onResponse === "function") {
@@ -209,7 +211,7 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     response = mapResultToResponse(res, response, resFunction, paginateResult);
 
     if (grabLog[0]) grabLog[0].response = response;
-    if (resFunction) response = resFunction(response);
+    if (resFunction) response = emitResponse(response, resFunction);
 
     return response as any;
   } catch (error: any) {
@@ -234,8 +236,10 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     response.error = error.message;
     const resFn = typeof responseOption === "function" ? responseOption : null;
     if (resFn) {
-      response.data = resFn({ isLoading: undefined, error: error.message });
-      response = response.data;
+      response = emitResponse(
+        { isLoading: undefined, error: error.message },
+        resFn,
+      );
     } else {
       delete response.isLoading;
     }

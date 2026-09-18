@@ -4,6 +4,8 @@
  * Determines cache hits and updates current page numbers for infinite scroll.
  */
 
+import { emitResponse } from "../response/response-handler";
+
 /**
  * Manages cache hits and pagination state updates.
  */
@@ -34,7 +36,7 @@ export function manageCacheAndPagination(
             for (let key of Object.keys(priorRequest.response)) {
                 response[key] = priorRequest.response[key];
             }
-            if (resFunction) response = resFunction(response);
+            if (resFunction) response = emitResponse(response, resFunction);
         }
     } else {
         // Pagination logic
