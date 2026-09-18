@@ -1,0 +1,19 @@
+{
+  "name": "grab-url-example-reactive-solid",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "grab-url": "^3.0.0",
+    "solid-js": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "vite": "latest",
+    "vite-plugin-solid": "latest"
+  }
+}

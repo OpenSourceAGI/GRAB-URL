@@ -735,23 +735,25 @@ Use `onStream` to receive each `{ path, content, size }` entry as it is extracte
 waiting for the whole download.
 
 The same extractor is usable directly when the job is archives rather than requests — it runs in
-Node, the browser, Cloudflare Workers and the CLI, and creates archives as well as reading them
-(ZIP, 7z, TAR, TAR.GZ, TAR.BZ2):
+Node, the browser, Cloudflare Workers and the CLI, and creates ZIPs as well as reading them:
 
 ```ts
-import { extractFolder, createArchive, ArchiveCompression } from "archiver-web";
+import { compress, extract, extractStream } from "archiver-web";
 
-const files = await extractFolder({
-  archiveUrl: "https://github.com/user/repo/archive/main.zip",
+// extract takes the archive's bytes, not a URL — grab or fetch them first.
+const bytes = await grab("https://github.com/user/repo/archive/main.zip", { unzip: false });
+const files = await extract({
+  archiveBuffer: await bytes.arrayBuffer(),
   folderPath: "src/",
 }); // [{ path, size, content, mime }]
 
-const archive = await createArchive({
+const archive = await compress({
   files: [{ path: "hello.txt", content: "World!" }],
-  outputName: "out.tar.gz",
-  compression: ArchiveCompression.GZIP,
-});
+  outputName: "out.zip",
+}); // { blob, mime, downloadName }
 ```
+
+`extractStream({ stream, onFile })` is the incremental form, and what `unzip` uses internally.
 
 ### DOM parsing
 

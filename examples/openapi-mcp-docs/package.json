@@ -1,0 +1,27 @@
+{
+  "name": "grab-url-example-openapi-mcp-docs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "codegen": "npm run codegen:client && npm run codegen:mcp",
+    "codegen:client": "api2client ./openapi.json ./src/client",
+    "codegen:mcp": "api2ai ./openapi.json ./mcp-server --name placeholder-api --port 3030",
+    "mcp:start": "ALLOW_RESTRICTED_TOOLS=true REQUIRE_APPROVALS=false npm --prefix ./mcp-server start",
+    "mcp:agent": "node --experimental-strip-types ./src/mcp-agent.ts"
+  },
+  "dependencies": {
+    "api2client": "^2.0.0",
+    "grab-url": "^3.0.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.60.0",
+    "@scalar/api-reference": "^1.25.0",
+    "api2ai": "file:../../apps/api2ai-mcp-generator",
+    "mcp-use": "^1.11.2",
+    "typescript": "latest",
+    "vite": "latest"
+  }
+}

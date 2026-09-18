@@ -3,12 +3,13 @@
 
   // Demo API returns a fixed list regardless of query; this shows the
   // reactive loading/error pattern, not a real search backend.
+  // grab puts the parsed body on `data`, so that is what the list reads.
   let searchResults = $state<{
-    results: Array<{ id: number; title: string; price: number }>;
+    data: Array<{ id: number; title: string; price: number }>;
     isLoading: boolean;
     error: string | null;
   }>({
-    results: [],
+    data: [],
     isLoading: false,
     error: null,
   });
@@ -33,9 +34,9 @@
     <div class="loading">Searching...</div>
   {:else if searchResults.error}
     <div class="error">{searchResults.error}</div>
-  {:else if searchResults.results}
+  {:else if searchResults.data}
     <div class="results">
-      {#each searchResults.results as product}
+      {#each searchResults.data as product}
         <div class="product-card">
           <h3>{product.title}</h3>
           <p>${product.price}</p>

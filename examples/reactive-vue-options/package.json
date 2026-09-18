@@ -1,0 +1,20 @@
+{
+  "name": "grab-url-example-reactive-vue-options",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "grab-url": "^3.0.0",
+    "vue": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vue-tsc": "latest"
+  }
+}

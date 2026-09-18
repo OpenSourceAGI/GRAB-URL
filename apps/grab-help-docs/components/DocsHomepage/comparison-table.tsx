@@ -4,10 +4,16 @@
  */
 import { Check, X, AlertCircle } from "lucide-react"
 
-const libraries = ["GRAB", "Axios", "TanStack", "SWR", "Alova", "Ky"]
+const libraries = [
+  { name: "GRAB", href: "https://github.com/OpenSourceAGI/GRAB-URL" },
+  { name: "Axios", href: "https://github.com/axios/axios" },
+  { name: "TanStack", href: "https://github.com/TanStack/query" },
+  { name: "SWR", href: "https://github.com/vercel/swr" },
+  { name: "Alova", href: "https://github.com/alovajs/alova" },
+  { name: "Ky", href: "https://github.com/sindresorhus/ky" },
+]
 
 const features = [
-  { name: "Size", values: ["4KB", "13KB", "39KB", "4.2KB", "4KB", "4KB"] },
   { name: "Zero Dependencies", values: [true, false, false, false, true, true] },
   { name: "isLoading State", values: [true, false, true, true, true, false] },
   { name: "Auto JSON", values: [true, true, false, false, true, true] },
@@ -54,12 +60,19 @@ export function ComparisonTable() {
                 <th className="text-left py-4 px-4 font-semibold text-foreground">Feature</th>
                 {libraries.map((lib, index) => (
                   <th
-                    key={lib}
+                    key={lib.name}
                     className={`text-center py-4 px-4 font-semibold ${
                       index === 0 ? "text-primary" : "text-foreground"
                     }`}
                   >
-                    {lib}
+                    <a
+                      href={lib.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline underline-offset-4"
+                    >
+                      {lib.name}
+                    </a>
                   </th>
                 ))}
               </tr>

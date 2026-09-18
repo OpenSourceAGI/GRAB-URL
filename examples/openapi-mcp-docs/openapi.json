@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Placeholder API",
+    "version": "1.0.0",
+    "description": "A small slice of jsonplaceholder.typicode.com — enough spec to generate a typed SDK, an MCP server and an API reference from one file."
+  },
+  "servers": [{ "url": "https://jsonplaceholder.typicode.com" }],
+  "tags": [
+    { "name": "users", "description": "People" },
+    { "name": "posts", "description": "Things people wrote" }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "tags": ["users"],
+        "summary": "List every user",
+        "responses": {
+          "200": {
+            "description": "All users",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/User" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "getUser",
+        "tags": ["users"],
+        "summary": "Fetch one user by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The user's id",
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+          },
+          "404": {
+            "description": "No such user",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "operationId": "listPosts",
+        "tags": ["posts"],
+        "summary": "List posts, optionally filtered by author",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "description": "Only posts written by this user",
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching posts",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Post" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "description": "One person in the directory",
+        "properties": {
+          "id": { "type": "integer", "description": "Unique id" },
+          "name": { "type": "string", "description": "Full name" },
+          "username": { "type": "string", "description": "Login handle" },
+          "email": { "type": "string", "format": "email", "description": "Contact address" },
+          "website": { "type": "string", "description": "Personal site" }
+        },
+        "required": ["id", "name", "email"]
+      },
+      "Post": {
+        "type": "object",
+        "description": "Something a user wrote",
+        "properties": {
+          "id": { "type": "integer", "description": "Unique id" },
+          "userId": { "type": "integer", "description": "Who wrote it" },
+          "title": { "type": "string", "description": "Headline" },
+          "body": { "type": "string", "description": "Full text" }
+        },
+        "required": ["id", "userId", "title"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": { "message": { "type": "string", "description": "What went wrong" } }
+      }
+    }
+  }
+}

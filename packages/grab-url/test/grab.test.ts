@@ -132,6 +132,50 @@ describe('grab() — Response object', () => {
     expect(state.error).toBe('Timeout');
     expect(state.isLoading).toBeUndefined();
   });
+
+  // A React/Preact/Solid setter returns undefined. The request has to keep
+  // building on the object it handed over, not on that return value.
+  it('delivers data to a setter function that returns nothing', async () => {
+    mockOk({ name: 'Leanne', email: 'leanne@example.com' });
+    // Snapshot each call — grab mutates the object it hands over as the
+    // request progresses, so keeping the references would compare one object.
+    const seen: any[] = [];
+    const setState = (next: any) => { seen.push({ ...next }); };
+
+    const promise = grab('user', { response: setState });
+    expect(seen[0].isLoading).toBe(true);
+    const result = await promise;
+
+    const last = seen.at(-1);
+    expect(last.name).toBe('Leanne');
+    expect(last.email).toBe('leanne@example.com');
+    expect(last.isLoading).toBeUndefined();
+    expect(last.error).toBeUndefined();
+    expect(result.name).toBe('Leanne');
+  });
+
+  it('reports a failed request to a setter function that returns nothing', async () => {
+    mockErr('Timeout');
+    const seen: any[] = [];
+    const setState = (next: any) => { seen.push({ ...next }); };
+
+    const result = await grab('bad', { response: setState });
+
+    expect(seen.at(-1).error).toBe('Timeout');
+    expect(seen.at(-1).isLoading).toBeUndefined();
+    expect(result.error).toBe('Timeout');
+  });
+
+  it('still honors a setter function that returns its own state', async () => {
+    mockOk({ name: 'Ervin' });
+    const seen: any[] = [];
+    const setState = (next: any) => { seen.push({ ...next }); return next; };
+
+    const result = await grab('user', { response: setState });
+
+    expect(seen.at(-1).name).toBe('Ervin');
+    expect(result.name).toBe('Ervin');
+  });
 });
 
 // ─── Mock server ─────────────────────────────────────────────────────────────
