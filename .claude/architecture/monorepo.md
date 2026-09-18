@@ -17,6 +17,14 @@ using pnpm.
 
 **npm.** `packageManager` pins `npm@11.19.1`, the committed lockfile is
 `package-lock.json`, and CI runs `npm install` (tests) and `npm ci` (Pages).
+`.gitignore` ignores `*lock.json` and then re-includes `package-lock.json` — do
+not drop that negation. Without it the file is untracked, `npm ci` has nothing
+to install from, and `actions/setup-node`'s `cache: npm` fails the Pages job
+before it starts with *"Dependencies lock file is not found"*.
+
+Both workflows that install run `corepack enable npm` first: Node 22's bundled
+npm 10 cannot resolve this workspace tree at all (`Cannot read properties of
+null (reading 'edgesOut')`).
 There is no `.npmrc`: its one key, `package-manager-strict=false`, is a pnpm
 setting that npm 11 warns about on every install, so it now lives in
 `pnpm-workspace.yaml` as `packageManagerStrict: false`.

@@ -137,7 +137,9 @@ the next `npm run make`.
 
 The Pages workflow uses `npm ci`, not a floating install: `package-lock.json`
 pins a compatible `fumadocs-openapi` / `fumadocs-ui` pair and a fresh resolve
-picks versions that break the build.
+picks versions that break the build. That only works because `.gitignore`
+re-includes `package-lock.json` after ignoring `*lock.json` — see
+[monorepo.md](monorepo.md#package-manager).
 
 ## Package READMEs and the root README
 
