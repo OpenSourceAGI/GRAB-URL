@@ -8,5 +8,9 @@
   },
   "scripts": {
     "build": "vite build --config ../../packages/grab-url/vite.config.ts"
+  },
+  "devDependencies": {
+    "archiver-web": "*",
+    "linkedom": "^0.18.12"
   }
 }
