@@ -1,11 +1,20 @@
 # The Build
 
-Everything published comes from **one** Vite build at the repo root. There is no
-per-package build step, and `packages/*/package.json` files are mostly metadata —
-editing one does not change what ships.
+Three Vite builds, one per published thing, and the split is the point: what
+`import ... from "grab-url"` costs a consumer must not depend on a CLI or a pair
+of archive bins that no browser will ever run.
+
+| Config | Builds | Published as |
+| --- | --- | --- |
+| `packages/grab-url/vite.config.ts` | the library entries | `grab-url` |
+| `packages/grab-url-cli/vite.config.ts` | the transfer CLI | `grab-url-cli` |
+| `packages/archiver-web/vite.config.ts` | the extractor + its two bins | `archiver-web` |
+
+`api2client` has had its own config all along. The library config also carries
+the **Vitest** setup for the whole repo.
 
 ```bash
-npm run build      # vite build --config vite.config.ts → dist/
+npm run build      # turbo run build → each package's own dist/
 npm run make       # icons → skill docs → docs site → build
 ```
 
@@ -16,7 +25,8 @@ npm run make       # icons → skill docs → docs site → build
 2. `make:skill` — regenerates `grab-help-docs/content/docs/claude-skill.mdx` from
    `skills/use-grab-request/SKILL.md`.
 3. `make:docs` — `turbo run build --filter=grab-help-docs`.
-4. `build` — the library bundle.
+4. `build` — the library bundle (the CLI and archiver-web build from their
+   own configs; `npm run build` at the root runs all of them through turbo).
 
 ## `dist/` is not in git
 
@@ -30,54 +40,98 @@ Publishing is unaffected. `package.json` names `dist` in `files`, and **a
 `files` entry cannot be excluded by `.gitignore` or `.npmignore`**, so `npm
 pack` includes it; `prepublishOnly` runs `npm run build` first, so the tarball
 carries a bundle built from the commit being published. The same holds for the
-`packages/*` that publish on their own (`api2client`, `loading-animations`,
-`quantum-sphere-loading-icon`): each names `dist` in `files` and builds in
-`prepublishOnly`. Verify with `npm pack --dry-run`.
+`packages/*` that publish on their own (`grab-url-cli`, `archiver-web`,
+`api2client`, `loading-animations`, `quantum-sphere-loading-icon`): each names
+`dist` in `files` and builds in `prepublishOnly`. Verify with `npm pack --dry-run`.
 
 The exception is **`packages/native-app-wrapper/dist/index.html`**, which stays
 tracked. It is not build output — it is the hand-written UI Tauri serves as
 `frontendDist` (see `src-tauri/tauri.conf.json`), so `.gitignore` re-includes
 that one directory.
 
-Note that CI (`tests.yml`) runs only `npm run test:coverage`, never
-`npm run build`, so a build break reaches `master` unnoticed. Run the build
-yourself before opening a PR.
+CI (`tests.yml`) builds the four published packages before running the suite,
+because `test/packaging.test.ts` reads the built bundles to check that the
+default import is still slim. A build break now fails the gate.
 
 ## Entries
 
+### The library — `packages/grab-url/vite.config.ts`
+
 Each key becomes `dist/<name>.{es,cjs}.js` plus a `.d.ts`, and is wired into
-`package.json`'s `exports`:
+`packages/grab-url/package.json`'s `exports`:
 
 | Entry | From | Exposed as |
 | --- | --- | --- |
-| `grab-api` | `packages/grab-api/src/index.ts` | `grab-url` |
-| `grab-api-slim` | `…/index.slim.ts` | `grab-url/slim` |
+| `grab-api-slim` | `packages/grab-api/src/index.slim.ts` | **`grab-url`** (the default import) and `grab-url/slim` |
+| `grab-api` | `packages/grab-api/src/index.ts` | `grab-url/full` |
 | `animations` | `packages/loading-animations/src/svg/index.ts` | `grab-url/animations` |
 | `quantum-sphere` | `packages/quantum-sphere-loading-animation/src/icons.ts` | `grab-url/icons/quantum-sphere` |
 | `log` | `packages/log-json/src/log-json.ts` | `grab-url/log` |
-| `grab-url-cli` | `packages/grab-url-cli/src/index.ts` | `grab-url/cli`, and the `grab-url`/`grab`/`g` bins |
-| `archiver-web`, `bin-extract`, `bin-compress` | `packages/archiver-web/src/` | `archiver-web` and its bins |
 
 **Adding an entry means editing three places**: `build.lib.entry` in
-`vite.config.ts`, `exports` in `package.json`, and `files` if it needs new source
-shipped.
+`packages/grab-url/vite.config.ts`, `exports` in `packages/grab-url/package.json`,
+and `files` if it needs new source shipped. It also means every consumer's
+install grows — check that the entry belongs in a library before adding it.
+
+### Slim is the default, and that is load-bearing
+
+`.` and `./slim` point at the **same** two files. That is deliberate twice over:
+
+- A consumer who writes `import grab from "grab-url"` gets ~16 kB (~7 kB
+  gzipped) and no DOM parser.
+- Because the files are identical, `grab-url` and `grab-url/slim` are one module
+  instance. A stub registered on `grab.mock` through either is visible to the
+  other — which was not true in 2.x, and bit `api2client`.
+
+`grab-url/full` reaches `content-processors.ts`, and through its lazy
+`import()`s, linkedom (~174 kB) and archiver-web. Those stay behind dynamic
+imports, so even `/full` pays for them only when a response actually needs
+unzipping or DOM parsing.
+
+What keeps slim slim is **the module graph, not an externals rule**: the slim
+entry imports `request-executor-slim.ts`, which never touches
+`content-processors.ts`. (2.x carried an
+`external: id => …importer?.includes("index.slim")` branch that claimed to do
+this. It never fired — the importer of `archiver-web` is
+`content-processors.ts`, never `index.slim.ts`. It is gone.)
+`test/packaging.test.ts` walks the built graph and fails if anything heavy
+becomes reachable from the default entry.
+
+### The CLI — `packages/grab-url-cli/vite.config.ts`
+
+Builds the one `grab-url-cli` entry, with the `grab-url` / `grab` / `g` bins and
+the yt-dlp `postinstall`. It resolves `@grab-url/grab-api` to the **full**
+source: a CLI that archives pages wants the DOM parser.
+
+Before 3.0 this rode inside the `grab-url` package, which meant every consumer
+of a 5 kB HTTP client also installed chalk, cli-table3, cli-progress and a
+yt-dlp download. Do not move it back.
+
+### The archive bins — `packages/archiver-web/vite.config.ts`
+
+`archiver-web`, `bin-extract`, `bin-compress`. `grab-url/full` still reaches
+this code, but through a bundled lazy chunk of its own, not from this build.
 
 ## Externals — each one is load-bearing
 
-`rollupOptions.external` is a function, not a list, and every branch is there for
-a reason:
+`rollupOptions.external` is a function in each config, and every branch is there
+for a reason:
 
-- **Node builtins** (`node:*` and the `nodeBuiltins` list) — the CLI is a Node
-  program; bundling these breaks it.
-- **`extract-webpage`** — the optional peer behind `--page`, loaded by runtime
-  `import()`. Bundling it pulls jsdom/linkedom into the CLI.
-- **`react`, `react-dom`, the JSX runtimes** — a second React copy makes every
-  hook in `QuantumOrbital` throw *Invalid hook call*. Only the sphere imports
-  React, so this is a no-op for the other entries.
-- **`jszip`** — always external.
-- **`archiver-web` and `linkedom`, but only when the importer is `index.slim`** —
-  this is what makes the slim build slim. The `importer?.includes("index.slim")`
-  check is the whole mechanism.
+- **Node builtins** (`node:*` and the `nodeBuiltins` list) — the CLI and the
+  archive bins are Node programs; bundling these breaks them. The library config
+  has no such list: nothing on the library path may use a Node builtin.
+- **`extract-webpage`** (CLI) — the optional peer behind `--page`, loaded by a
+  runtime `import()`. Bundling it pulls jsdom/linkedom into the CLI.
+- **`react`, `react-dom`, the JSX runtimes** (library) — a second React copy
+  makes every hook in `QuantumOrbital` throw *Invalid hook call*. Only the
+  sphere imports React, so this is a no-op for the other entries.
+- **`jszip`** — never bundled anywhere. `archiver-web` resolves it at runtime
+  from a global, a local install, or the CDN, which is why neither `grab-url`
+  nor `archiver-web` declares it as a dependency.
+
+`grab-url` ships with **no runtime dependencies at all**. `linkedom` is a
+devDependency: it is bundled into the full build's lazy chunk at build time, not
+resolved from a consumer's `node_modules`.
 
 ## Two traps that have already cost a release
 
@@ -89,9 +143,10 @@ dead code in an ES module. The `useClientDirective` plugin writes it in
 Without it, a React Server Component importing the sphere fails on the first
 hook. Do not "simplify" that plugin into a banner.
 
-**Shebangs.** `rollupOptions.output.banner` adds `#!/usr/bin/env node` to
-`grab-url-cli` and the `bin-*` chunks by name. A renamed entry silently loses its
-shebang and the bin stops being executable.
+**Shebangs.** `rollupOptions.output.banner` adds `#!/usr/bin/env node` to the
+`grab-url-cli` chunk and to the `bin-*` chunks, **by name**, in their own
+configs. A renamed entry silently loses its shebang and the bin stops being
+executable.
 
 ## Aliases
 
@@ -100,6 +155,12 @@ name `grab-url`** to the in-repo source, so the generated Hey API client — whi
 imports `grab-url` by package name — resolves to the same source inside the
 monorepo as it does for a consumer.
 
+The subpaths are listed **before** the bare name, because a string alias matches
+as a prefix: with `grab-url` first, `grab-url/full` would be rewritten to
+`…/index.slim.ts/full` and fail to resolve. And bare `grab-url` maps to
+`index.slim.ts`, mirroring the published `exports` map — an in-repo import must
+cost what a consumer's does.
+
 ## Tests
 
 Vitest is configured inside `vite.config.ts` (`test.coverage`), with tests in
@@ -107,6 +168,13 @@ Vitest is configured inside `vite.config.ts` (`test.coverage`), with tests in
 
 ```bash
 npm test                 # watch
-npm run test:coverage    # what CI runs
-npm run test:cli         # a real end-to-end download
+npm run test:coverage    # what CI runs (after the build step)
 ```
+
+`test/packaging.test.ts` guards the published shape: the exports map, the
+absence of a bin, and — once `dist/` exists — what each built entry can actually
+reach. The bundle half skips when nothing has been built, so run
+`npm run build` before trusting a green local run.
+
+The CLI's live smoke test moved with it:
+`cd packages/grab-url-cli && npm run test:cli`.

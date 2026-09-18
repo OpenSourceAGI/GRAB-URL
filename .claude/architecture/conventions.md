@@ -78,9 +78,11 @@ will be missing for consumers while working locally.
 ## Security
 
 - Never commit secrets, credentials or API keys.
-- `postinstall` downloads a yt-dlp binary (`scripts/install-yt-dlp.mjs`). Treat
-  changes to it as security-relevant: it fetches and executes a third-party
-  binary on every consumer's machine.
+- `grab-url-cli`'s `postinstall` downloads a yt-dlp binary
+  (`packages/grab-url-cli/scripts/install-yt-dlp.mjs`). Treat changes to it as
+  security-relevant: it fetches and executes a third-party binary on every
+  consumer's machine. The `grab-url` library itself runs no install script —
+  keep it that way.
 - The license is PROSPER; contributions are under it.
 
 ## Agent-specific rules

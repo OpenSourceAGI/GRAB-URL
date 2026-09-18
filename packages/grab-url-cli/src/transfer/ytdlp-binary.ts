@@ -167,7 +167,7 @@ export function findYtDlp(): YtDlpBinary | null {
 /** Platform-appropriate install hint shown when yt-dlp is missing. */
 export function ytDlpInstallHint(): string {
     return [
-        'npx grab-url --install-ytdlp',
+        'npx grab-url-cli --install-ytdlp',
         process.platform === 'darwin'
             ? '   (or: brew install yt-dlp)'
             : process.platform === 'win32'

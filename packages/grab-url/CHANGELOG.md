@@ -2,6 +2,47 @@
 
 ***
 
+## 3.0.0 — slim by default, CLI split out
+
+**Breaking.** Two changes to what the package is.
+
+**`import grab from "grab-url"` is now the slim build** — about 16 kB raw,
+5 kB gzipped, with no DOM parser and no archive extractor reachable from it.
+Previously the bare import was the full build, so every consumer paid for
+linkedom and archiver-web whether or not they used `unzip` or `parseDOM`.
+
+Those two features moved one subpath over:
+
+```ts
+import grab from "grab-url";        // default — slim
+import grab from "grab-url/full";   // + `unzip` and `parseDOM`
+```
+
+`grab-url/slim` still resolves, now as an alias of the default. Because both
+specifiers name the identical files they are **one module instance** — a stub
+registered on `grab.mock` through either is visible to the other, which was not
+true in 2.x and quietly bit anyone mixing an `api2client` SDK with direct
+`grab` calls. `main`, `module`, `types`, `unpkg` and `jsdelivr` all point at the
+slim build too, so a CDN `<script>` gets it as well.
+
+*Migration:* if you pass `unzip` or `parseDOM`, change the import to
+`grab-url/full`. Everything else is unchanged — same `grab()`, same options,
+same globals.
+
+**The CLI is its own package, [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli).**
+`grab-url` no longer declares a `bin`, and installing it no longer pulls in
+chalk, cli-table3 and cli-progress or runs a `postinstall` that downloads a
+yt-dlp binary. The library now has **zero runtime dependencies and no install
+scripts**.
+
+*Migration:* `npm i -g grab-url-cli` (the `grab-url`, `grab` and `g` commands
+are unchanged), or `npx grab-url-cli <url>` instead of `npx grab-url <url>`.
+
+`archiver-web`'s `extract` / `compress` bins likewise build from that package
+rather than riding inside `grab-url`.
+
+***
+
 ## 1.6.23 — `onRawResponse`, released
 
 `grab()` gained an **`onRawResponse` hook** — it hands the caller the raw

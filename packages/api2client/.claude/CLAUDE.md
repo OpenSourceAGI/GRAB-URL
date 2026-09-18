@@ -1,20 +1,32 @@
 # CLAUDE.md — `api2client`
 
-**Published on its own** — and also reachable through the `grab-url` build.
+**Published on its own**, from its own `vite.config.ts`.
 
 A [Hey API](https://heyapi.dev) client that sends generated OpenAPI SDK requests
 through **`grab-url`** instead of fetch or axios, so every generated operation
 inherits caching, retries, rate limiting and request dedupe.
 
-## The alias that makes this work
+## grab is external, and it is the slim grab
 
-`vite.config.ts` aliases the bare specifier `"grab-url"` to
-`packages/grab-api/src/index.ts`, because the generated Hey API client imports
-the **published package name**. Inside the monorepo that has to resolve to the
-same source — otherwise a build ends up with two copies of the client and the
-cache/dedupe layers stop being shared.
+`grab-url`, `grab-url/slim` and `grab-url/full` are all in this config's
+`external` list, so none of them is ever bundled here. Two reasons, both
+load-bearing:
 
-If you change how this package imports `grab-url`, check that alias.
+- **One module instance.** The generated Hey API client imports the *published
+  package name*, and so does the app around it. Bundling a copy in would give
+  the SDK its own `grab.mock`, `grab.log` and cache — stubs registered by the
+  app would be invisible to it.
+- **Size.** An OpenAPI response never needs the unzipper or the DOM parser.
+  `src/` imports `grab-url/slim` explicitly; since grab-url 3.0 that is the same
+  file the bare import resolves to, so it is an alias, not a second copy. Never
+  reach for `grab-url/full` here.
+
+`packages/grab-url/vite.config.ts` aliases the bare specifier and both subpaths
+to the in-repo source so an in-monorepo build resolves exactly as a consumer's
+does. If you change how this package imports grab, check that alias.
+
+`test/packaging.test.ts` asserts the externals list and that
+`dist/index.es.js` stays under 100 kB (it is ~20 kB).
 
 ## Rules
 

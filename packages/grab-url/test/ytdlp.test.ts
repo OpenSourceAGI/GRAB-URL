@@ -4,7 +4,7 @@
  *   - transfer/media-domains.ts   (domain matching)
  *   - transfer/ytdlp-transfer.ts  (target detection, arg building, readout parsing)
  *   - transfer/ytdlp-binary.ts    (naming, search paths, discovery)
- *   - scripts/install-yt-dlp.mjs  (argument parsing, platform → asset mapping)
+ *   - grab-url-cli/scripts/install-yt-dlp.mjs  (argument parsing, platform → asset mapping)
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
@@ -46,7 +46,7 @@ import {
     tripleFromSidecarPath,
     targetTriple,
     executableName,
-} from '../scripts/install-yt-dlp.mjs';
+} from '../../grab-url-cli/scripts/install-yt-dlp.mjs';
 
 // ─── Domain matching ──────────────────────────────────────────────────────────
 

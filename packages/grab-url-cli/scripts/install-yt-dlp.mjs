@@ -296,7 +296,7 @@ if (isMain) {
         if (options.postinstall) {
             // Never break `npm install` over an optional companion binary.
             console.warn(`${message}\n  Media-site URLs will need yt-dlp installed separately:`);
-            console.warn('  npx grab-url --install-ytdlp   (or: brew / winget / pipx install yt-dlp)');
+            console.warn('  npx grab-url-cli --install-ytdlp   (or: brew / winget / pipx install yt-dlp)');
             process.exit(0);
         }
         console.error(message);

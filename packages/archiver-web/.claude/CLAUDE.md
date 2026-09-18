@@ -1,7 +1,9 @@
 # CLAUDE.md — `archiver-web`
 
-**Published on its own**, and built into three `grab-url` entries:
-`archiver-web`, `bin-extract`, `bin-compress`.
+**Published on its own**, built by this package's own `vite.config.ts` into
+three entries: `archiver-web`, `bin-extract`, `bin-compress`. Since 3.0 they no
+longer ride inside the `grab-url` package — a library consumer should not be
+installing two executables.
 
 A universal archive extractor and creator on **JSZip** — frontend-capable, so it
 runs in a browser as well as in Node.
@@ -20,11 +22,17 @@ runs in a browser as well as in Node.
 
 ## Build notes
 
-- `jszip` is **externalized** — the caller provides it.
-- `archiver-web` is externalized from the **slim** `grab-url` entry, so the slim
-  build doesn't carry it. Keep the import surface externalizable.
-- The `bin-*` chunks get the `#!/usr/bin/env node` banner from the root build,
-  not from source.
+- `jszip` is **externalized** — resolved at runtime from a global, a local
+  install, or the CDN, never bundled and never a declared dependency.
+- The **slim** `grab-url` entry never reaches this code at all: it uses
+  `request-executor-slim.ts`, which does not import `content-processors.ts`.
+  Only `grab-url/full` does, through a lazy `import("archiver-web")` that vite
+  bundles into a chunk of the full build. Keep that import dynamic.
+- The `bin-*` chunks get the `#!/usr/bin/env node` banner from this package's
+  build, not from source.
+- The bins are Node programs, so this config externalizes Node builtins;
+  without that, vite swaps `util` for its browser stub and the build fails on
+  `parseArgs`.
 
 ## Layout
 

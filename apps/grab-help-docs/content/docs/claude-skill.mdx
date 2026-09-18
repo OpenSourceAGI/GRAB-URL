@@ -45,8 +45,8 @@ from [`grab-url`](https://grab.js.org):
 | The app calls a **backend it owns**, or any API with an **OpenAPI/Swagger spec**     | A **generated typed client** — [`api2client`](#full-stack-apps-generate-the-api-client-never-hand-write-calls) |
 | A one-off call, a third-party API with no spec, a scrape, a download, a quick script | `grab()` directly                                                     |
 | An AI agent needs to call the API as a tool                                          | `npx api2ai <spec> ./mcp-server` — an MCP server over the same spec  |
-| A file to download, or an SFTP / torrent / magnet transfer, from a terminal          | `npx grab-url <url>` — the [CLI](#cli)                                |
-| A web page to keep — its article, citation, transcript and video — from a terminal   | `npx grab-url <url> --page` — [page archives](#page-archives)          |
+| A file to download, or an SFTP / torrent / magnet transfer, from a terminal          | `npx grab-url-cli <url>` — the [CLI](#cli)                            |
+| A web page to keep — its article, citation, transcript and video — from a terminal   | `npx grab-url-cli <url> --page` — [page archives](#page-archives)      |
 
 The first two send their requests through the same `grab` transport, so caching, retries,
 rate limiting, deduplication, mocks and the request log apply either way.
@@ -97,7 +97,9 @@ const { data, error, response } = await getPetById({
 });
 ```
 
-Requires Node 18+ and `grab-url` ≥ 1.6.22 (≥ 1.6.23 to see real `response.status` on failures).
+Requires Node 18+ and `grab-url` ≥ 3.0.0 (`api2client` ≥ 2 depends on it). The generated SDK
+imports `grab-url`, which since 3.0 is the ~5 kB slim build — an OpenAPI response never needs
+the DOM parser or the unzipper, so the whole generated transport layer stays under 100 kB.
 
 ## 1. Make sure the backend emits a spec
 
@@ -471,8 +473,16 @@ await grab("users", { post: true, name: "Jane", email: "jane@example.com" });
 Let `grab` handle JSON parsing, the `isLoading` status on the `response` object, and defaults
 via `grab.defaults` or `grab("", { setDefaults: true })`.
 
-There is also a dependency-free slim build for size-sensitive bundles, which drops ZIP and DOM
-post-processing: `import grab from "grab-url/slim"`.
+`import grab from "grab-url"` is the slim build — ~5 kB gzipped, no ZIP or DOM
+post-processing, which is what almost every app wants. When a response needs auto-unzipping
+(`unzip`) or HTML parsed into a DOM (`parseDOM`), import `grab-url/full` instead; it adds
+linkedom and the archive extractor, both behind lazy imports that only load when a response
+actually triggers them.
+
+```ts
+import grab from "grab-url";        // default — slim
+import grab from "grab-url/full";   // only if you use `unzip` or `parseDOM`
+```
 
 ## When to avoid `fetch`
 
@@ -878,12 +888,16 @@ Use these for the `isLoading` branch instead of hand-rolled CSS.
 
 ## CLI
 
-`grab-url` is also a command-line request runner and transfer tool — useful for exercising an
+`grab-url-cli` is a command-line request runner and transfer tool — useful for exercising an
 API without writing a script, and for downloads that HTTP alone cannot do: **SFTP**,
 **BitTorrent** and **magnet** links, all with the same resumable, colored multi-progress UI.
 
+It is a **separate package** from the `grab-url` library: installing the library gives you a
+~5 kB import and no install scripts, while the CLI brings its terminal dependencies and a
+yt-dlp download with it.
+
 ```bash
-npm i -g grab-url          # then `grab`, `g`, or `grab-url`; or just `npx grab-url`
+npm i -g grab-url-cli      # then `grab`, `g`, or `grab-url`; or just `npx grab-url-cli`
 ```
 
 Mode is auto-detected from the arguments: **API mode** for a single non-file URL (the response
@@ -893,27 +907,27 @@ or any of them looks like a file, and **aria2 mode** for SFTP, torrent and magne
 
 ```bash
 # API mode — fetch JSON and save it to output.json
-npx grab-url https://api.example.com/data
-npx grab-url https://api.example.com/search -p '{"q":"hello","limit":10}'
-npx grab-url https://api.example.com/data --no-save     # print to stdout, write nothing
+npx grab-url-cli https://api.example.com/data
+npx grab-url-cli https://api.example.com/search -p '{"q":"hello","limit":10}'
+npx grab-url-cli https://api.example.com/data --no-save     # print to stdout, write nothing
 
 # Download mode — one file, several concurrently, or renamed
-npx grab-url https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
-npx grab-url https://example.com/file1.zip https://example.com/file2.zip
-npx grab-url https://example.com/file.iso -o ubuntu.iso
+npx grab-url-cli https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
+npx grab-url-cli https://example.com/file1.zip https://example.com/file2.zip
+npx grab-url-cli https://example.com/file.iso -o ubuntu.iso
 
 # aria2 mode — SFTP, torrents, magnets
-npx grab-url sftp://user@host/srv/backup.tar.gz --password hunter2
-npx grab-url ./ubuntu.torrent -d ./downloads
-npx grab-url "magnet:?xt=urn:btih:HASH" -d ./downloads --seed
+npx grab-url-cli sftp://user@host/srv/backup.tar.gz --password hunter2
+npx grab-url-cli ./ubuntu.torrent -d ./downloads
+npx grab-url-cli "magnet:?xt=urn:btih:HASH" -d ./downloads --seed
 
 # Page-archive mode — one folder per URL, named after the page title
-npx grab-url https://example.com/article --page
-npx grab-url https://youtu.be/dQw4w9WgXcQ --page -d ./archive --lang es,en
+npx grab-url-cli https://example.com/article --page
+npx grab-url-cli https://youtu.be/dQw4w9WgXcQ --page -d ./archive --lang es,en
 
 # Background transfers
-npx grab-url https://example.com/big.iso --background    # detach at once
-npx grab-url --jobs                                      # list what is still running
+npx grab-url-cli https://example.com/big.iso --background    # detach at once
+npx grab-url-cli --jobs                                      # list what is still running
 ```
 
 ### Options
@@ -955,11 +969,11 @@ Rockets A Primer/
 ```
 
 ```bash
-npx grab-url https://example.com/article --page              # ./<Page Title>/
-npx grab-url https://youtu.be/dQw4w9WgXcQ --page -d ./archive
-npx grab-url https://example.com/article --page --no-video   # text only
-npx grab-url https://example.com/talk --page --video-format bestaudio
-npx grab-url https://youtu.be/x --page --lang es,en          # transcript language order
+npx grab-url-cli https://example.com/article --page              # ./<Page Title>/
+npx grab-url-cli https://youtu.be/dQw4w9WgXcQ --page -d ./archive
+npx grab-url-cli https://example.com/article --page --no-video   # text only
+npx grab-url-cli https://example.com/talk --page --video-format bestaudio
+npx grab-url-cli https://youtu.be/x --page --lang es,en          # transcript language order
 ```
 
 Content, citation and transcript come from
@@ -1071,18 +1085,19 @@ One npm package with several entry points, plus the siblings the codegen and arc
 
 | Import / command                  | What it is                                                            |
 | --------------------------------- | --------------------------------------------------------------------- |
-| `grab-url`                        | `grab()`, `log()`, the globals, DevTools, cache, mocks                |
-| `grab-url/slim`                   | Dependency-free build without ZIP and DOM post-processing            |
+| `grab-url`                        | **The default** — `grab()`, `log()`, the globals, DevTools, cache, mocks, ~5 kB gzipped |
+| `grab-url/full`                   | The same plus ZIP extraction and DOM parsing (`unzip`, `parseDOM`)   |
+| `grab-url/slim`                   | Alias of `grab-url`, kept for 2.x code — the identical module        |
 | `grab-url/log`                    | The colorized `log()` on its own                                      |
 | `grab-url/animations`             | SVG spinner functions + terminal spinner frames                       |
 | `grab-url/icons/quantum-sphere`   | The React/Svelte quantum orbital loader                               |
-| `grab-url/cli` · `grab-url` bin   | The transfer CLI and its primitives (`grab`, `g` are aliases)         |
+| `grab-url-cli` · `grab-url` bin   | The transfer CLI and its primitives (`grab`, `g` are aliases), its own package |
 | `archiver-web`                    | The archive extractor/creator behind `unzip`                          |
 | `api2client`                      | OpenAPI → typed SDK that sends through grab                           |
 | `api2ai`                          | OpenAPI → MCP server for agents                                       |
 
 URLs on ~720 known media sites are detected by domain and downloaded with `yt-dlp`, which
-`npm install` fetches automatically (`--no-ytdlp` opts out per-command, `--ytdlp` forces any URL
+installing `grab-url-cli` fetches automatically (`--no-ytdlp` opts out per-command, `--ytdlp` forces any URL
 through it). Use `-f` for a format selector, `-a` for audio-only, `--playlist` for a whole
 playlist, and `--cookies-from-browser` for gated media.
 

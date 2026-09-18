@@ -6,25 +6,28 @@ icon: Terminal
 
 ### Command Line Usage Examples
 
+The CLI ships as its own package, **`grab-url-cli`** — separate from the `grab-url`
+library so importing `grab()` in an app stays a ~5 kB dependency with no install scripts.
+
 ```bash
 ## install for CLI testing of your APIs
-npm i -g grab-url
+npm i -g grab-url-cli
 
-# use "grab" (or "g") if installed, or "npx grab-url" if not
+# use "grab" (or "g") if installed, or "npx grab-url-cli" if not
 g https://api.example.com/data
 
 # Basic request — parses JSON and writes output.json
-npx grab-url https://api.example.com/data
+npx grab-url-cli https://api.example.com/data
 
 # Request with query params as JSON
-npx grab-url https://api.example.com/search -p '{"q":"hello","limit":10}'
+npx grab-url-cli https://api.example.com/search -p '{"q":"hello","limit":10}'
 
 # Print the response instead of saving it
-npx grab-url https://api.example.com/data --no-save
+npx grab-url-cli https://api.example.com/data --no-save
 
 # Download a file, or several concurrently
-npx grab-url https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
-npx grab-url https://example.com/a.zip https://example.com/b.zip -d ./downloads
+npx grab-url-cli https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
+npx grab-url-cli https://example.com/a.zip https://example.com/b.zip -d ./downloads
 ```
 
 ### SFTP, torrents and magnet links
@@ -36,19 +39,19 @@ takes that route; everything else keeps the built-in downloader, and one command
 
 ```bash
 # Pull a file over SFTP (credentials inline, or as flags to keep them out of shell history)
-npx grab-url sftp://user@host/srv/backup.tar.gz --password hunter2
-npx grab-url sftp://host:2222/srv/db.tar.zst --user alice --password hunter2 -o backup.tar.zst
+npx grab-url-cli sftp://user@host/srv/backup.tar.gz --password hunter2
+npx grab-url-cli sftp://host:2222/srv/db.tar.zst --user alice --password hunter2 -o backup.tar.zst
 
 # Pin the host key — the transfer aborts if the server presents a different one
-npx grab-url sftp://host/srv/db.tar.zst --user alice --password hunter2 \
+npx grab-url-cli sftp://host/srv/db.tar.zst --user alice --password hunter2 \
   --ssh-host-key sha-1=b030503bb45f9f0e0a1e9c4a1e0b8f4c3d2e1f00
 
 # Torrent file or magnet link, with optional seeding after it completes
-npx grab-url ./ubuntu.torrent -d ./downloads
-npx grab-url "magnet:?xt=urn:btih:HASH" -d ./downloads --seed
+npx grab-url-cli ./ubuntu.torrent -d ./downloads
+npx grab-url-cli "magnet:?xt=urn:btih:HASH" -d ./downloads --seed
 
 # Throttle, or pass any other aria2c flag straight through
-npx grab-url ./ubuntu.torrent --aria2-args "--max-overall-download-limit=2M --enable-dht=false"
+npx grab-url-cli ./ubuntu.torrent --aria2-args "--max-overall-download-limit=2M --enable-dht=false"
 ```
 
 `aria2c` must be installed for these three kinds — the CLI prints the install command for your
@@ -60,10 +63,10 @@ aria2c's `.aria2` control file.
 
 ```bash
 # Detach at once — prints the PID and log path, then returns
-npx grab-url https://example.com/big.iso --background
+npx grab-url-cli https://example.com/big.iso --background
 
 # List background transfers still running (dead jobs are pruned automatically)
-npx grab-url --jobs
+npx grab-url-cli --jobs
 ```
 
 Press **Ctrl+C** during any transfer and the CLI offers the same handoff

@@ -1,9 +1,10 @@
 {
   "name": "grab-api.js",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./src/index.slim.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": "./src/index.slim.ts",
+    "./full": "./src/index.ts",
     "./slim": "./src/index.slim.ts"
   },
   "scripts": {

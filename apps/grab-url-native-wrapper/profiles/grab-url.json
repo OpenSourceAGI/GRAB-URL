@@ -33,7 +33,7 @@
       "--output",
       "%(title)s [%(id)s].%(ext)s"
     ],
-    "build": "node ../../packages/grab-url/scripts/install-yt-dlp.mjs --sidecar --out {out}",
+    "build": "node ../../packages/grab-url-cli/scripts/install-yt-dlp.mjs --sidecar --out {out}",
     "buildCwd": "."
   }
 }

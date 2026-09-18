@@ -153,7 +153,7 @@ const categories = await grab('categories', {
   cache: true // Instant from memory on repeat
 });`,
   cli: `# Install globally for CLI testing
-npm i -g grab-url
+npm i -g grab-url-cli
 
 # Basic request
 grab https://api.example.com/users

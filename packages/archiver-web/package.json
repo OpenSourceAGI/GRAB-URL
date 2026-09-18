@@ -5,8 +5,8 @@
   "type": "module",
   "main": "./src/index.ts",
   "bin": {
-    "extract": "./dist/bin-extract.js",
-    "compress": "./dist/bin-compress.js"
+    "extract": "./dist/bin-extract.es.js",
+    "compress": "./dist/bin-compress.es.js"
   },
   "types": "./src/index.ts",
   "exports": {
@@ -14,8 +14,9 @@
   },
   "scripts": {
     "ship": "bun x standard-version --release-as patch;rm CHANGELOG.md; npm publish",
-    "build": "vite build --config ../../packages/grab-url/vite.config.ts",
-    "test": "tsx test.ts"
+    "build": "vite build --config vite.config.ts",
+    "test": "tsx test.ts",
+    "prepublishOnly": "npm run build"
   },
   "optionalDependencies": {
     "fflate": "^0.8.2",
@@ -36,5 +37,10 @@
   "bugs": {
     "url": "https://github.com/OpenSourceAGI/GRAB-URL/issues"
   },
-  "homepage": "https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/archiver-web#readme"
+  "homepage": "https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/archiver-web#readme",
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ]
 }

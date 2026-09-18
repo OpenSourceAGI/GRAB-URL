@@ -86,18 +86,20 @@ to the repository so Codecov can map them.
 npm run test
 npm run test:coverage    # what CI runs
 npm run test:ui
-npm run test:cli         # a real download against a live Ubuntu ISO URL
 ```
 
-`test:cli` hits the network and downloads a large file. It is a smoke test, not
-part of the suite — don't wire it into CI.
+`packages/grab-url-cli`'s `npm run test:cli` hits the network and downloads a
+large file. It is a smoke test, not part of the suite — don't wire it into CI.
 
-## `postinstall` downloads yt-dlp
+## `postinstall` downloads yt-dlp — in `grab-url-cli`, not the library
 
-`scripts/install-yt-dlp.mjs --postinstall` runs on every install. If an install
-appears to hang or fails behind a proxy, that is where to look:
+`packages/grab-url-cli/scripts/install-yt-dlp.mjs --postinstall` runs when
+`grab-url-cli` is installed. Installing the `grab-url` library downloads
+nothing. If a CLI install appears to hang or fails behind a proxy, that is where
+to look:
 
 ```bash
+cd packages/grab-url-cli
 npm run ytdlp            # force a re-download
 npm run ytdlp:sidecar    # fetch the sidecar binary for a packaged app
 ```
