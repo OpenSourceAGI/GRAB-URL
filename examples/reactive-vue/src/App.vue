@@ -5,7 +5,7 @@
     <div v-if="userResults.isLoading" class="loading">Loading users...</div>
     <div v-else-if="userResults.error" class="error">{{ userResults.error }}</div>
     <div v-else class="user-list">
-      <div v-for="user in userResults.users" :key="user.id" class="user-card">
+      <div v-for="user in userResults.data" :key="user.id" class="user-card">
         {{ user.name }} — {{ user.email }}
       </div>
     </div>
@@ -19,12 +19,13 @@ import grab from "grab-url";
 // Demo API doesn't implement server-side filtering; this shows the reactive
 // loading/error pattern, not a real search backend.
 const searchTerm = ref("");
+// grab puts the parsed body on `data`, so that is what the list reads.
 const userResults = reactive<{
-  users: Array<{ id: number; name: string; email: string }>;
+  data: Array<{ id: number; name: string; email: string }>;
   isLoading: boolean;
   error: string | null;
 }>({
-  users: [],
+  data: [],
   isLoading: false,
   error: null,
 });
