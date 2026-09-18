@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [master] # adjust branch as needed
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -13,22 +13,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js # change if you use Python, Go, etc.
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      # Node 22 ships npm 10, which cannot resolve this workspace tree at all:
+      # `npm install` dies with "Cannot read properties of null (reading
+      # 'edgesOut')". Corepack activates the npm pinned by `packageManager`.
+      - name: Activate the pinned npm
+        run: corepack enable npm
+
       - name: Install dependencies
         run: npm install
 
+      # Codecov uploads are owned by the Coverage workflow, which flags each
+      # workspace separately. This job is the pass/fail gate.
       - name: Run tests with coverage
         run: npm run test:coverage
-
-      - name: Upload coverage reports to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: OpenSourceAGI/grab-url
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false

@@ -13,13 +13,13 @@ import { join } from 'node:path';
 // entries are separate modules with separate `log`, `mock` and `supports`, so
 // asserting against the full grab here would be asserting against a different
 // object than the client ever touches.
-import { grab } from '../grab-api/src/index.slim.ts';
+import { grab } from '../../grab-api/src/index.slim.ts';
 import {
   createClient,
   createConfig,
   defaultGrabOptions,
   rewireGeneratedClient,
-} from '../api2client/src/index.ts';
+} from '../../api2client/src/index.ts';
 
 // ─── Mock fetch ───────────────────────────────────────────────────────────────
 

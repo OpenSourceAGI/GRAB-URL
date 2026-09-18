@@ -17,7 +17,7 @@ import {
     formatBytesCompact, formatBytesPlain,
     formatETA, formatTotalDisplay, formatSpeed, formatSpeedDisplay,
     truncateFilename, formatProgress,
-} from '../grab-url-cli/src/display/progress-format.ts';
+} from '../../grab-url-cli/src/display/progress-format.ts';
 
 describe('download-format — formatBytesCompact()', () => {
     it('formats 0 as "0B"', () => expect(formatBytesCompact(0)).toBe('0B'));
@@ -87,7 +87,7 @@ import {
     loadDownloadState, saveDownloadState, cleanupStateFile,
     getPartialFileSize, resolveResumeDecision,
     type DownloadState, type ServerInfo,
-} from '../grab-url-cli/src/transfer/resume-state.ts';
+} from '../../grab-url-cli/src/transfer/resume-state.ts';
 
 describe('download-state — directory helpers', () => {
     it('getStateDirectory() respects GRAB_DOWNLOAD_STATE_DIR env var', () => {
@@ -226,7 +226,7 @@ import {
     spinnerTypes, getSpinnerFrames, getRandomSpinner,
     getSpinnerWidth, calculateBarSize, getRandomBarColor, getRandomBarGlueColor,
     barColors, barGlueColors,
-} from '../grab-url-cli/src/display/spinner-config.ts';
+} from '../../grab-url-cli/src/display/spinner-config.ts';
 
 describe('download-spinners — spinner data', () => {
     it('loads a non-empty list of spinner types', () => {
@@ -279,7 +279,7 @@ describe('download-spinners — color pickers', () => {
 
 // ─── MultiColorFileDownloaderCLI (integration smoke) ───────────────────────────────────
 
-import { MultiColorFileDownloaderCLI } from '../grab-url-cli/src/file-downloader.ts';
+import { MultiColorFileDownloaderCLI } from '../../grab-url-cli/src/file-downloader.ts';
 
 describe('MultiColorFileDownloaderCLI — instance', () => {
     it('constructs without error', () => {
