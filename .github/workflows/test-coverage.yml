@@ -54,6 +54,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # test/packaging.test.ts reads the built bundles, and it forces those
+      # checks on whenever CI is set rather than skipping them — so without a
+      # build the suite dies on ENOENT for packages/*/dist. tests.yml builds for
+      # the same reason; this job was the one place the step was missing.
+      - name: Build the published packages
+        if: matrix.name == 'packages'
+        run: npx turbo run build --filter=grab-url --filter=grab-url-cli --filter=archiver-web --filter=api2client
+
       - name: Run tests with coverage
         working-directory: ${{ matrix.dir }}
         run: npm run ${{ matrix.script }}
