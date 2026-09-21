@@ -10,34 +10,81 @@
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/discussions"><img src="https://img.shields.io/github/discussions/OpenSourceAGI/GRAB-URL" alt="GitHub Discussions" /></a>
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/commits/master/"><img src="https://img.shields.io/github/last-commit/OpenSourceAGI/GRAB-URL.svg" alt="GitHub last commit" /></a>
     <br />
+    <a href="https://www.npmjs.com/package/grab-api.js"><img src="https://img.shields.io/npm/v/grab-api.js.svg" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/grab-api.js"><img src="https://img.shields.io/npm/dm/grab-api.js.svg" alt="NPM Monthly Downloads" /></a>
+    <a href="https://bundlephobia.com/package/grab-api.js"><img src="https://img.shields.io/bundlephobia/minzip/grab-api.js" alt="Bundle size" /></a>
     <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" />
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
 </p>
 <!-- template-git-repo:badges:end -->
 
-# @grab-url/grab-api
+# grab-api.js
 
-Core implementation of `grab()` — the single-function request manager that ships in [`grab-url`](https://grab.js.org). One function, no runtime dependencies, minimalist syntax. This is the workspace package; most users should consume the published `grab-url` package instead.
+**Generate Request to API from Browser** — the core `grab()` request manager. One function,
+no runtime dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries,
+rate-limiting, mock testing, pagination and a DevTools overlay.
 
 ```bash
-npm i grab-url
+npm i grab-api.js
 ```
 
 ```ts
-import grab, { log } from "grab-url";
+import grab, { log } from "grab-api.js";
 
 const res = await grab("search", { query: "search words", post: true });
 log(res);
+```
+
+## grab-api.js or grab-url?
+
+Same code, same API, same version line — they differ only in what rides along:
+
+| | [`grab-api.js`](https://www.npmjs.com/package/grab-api.js) | [`grab-url`](https://www.npmjs.com/package/grab-url) |
+| --- | --- | --- |
+| `grab()`, `log()`, DevTools | ✅ | ✅ |
+| Loading animations, quantum sphere | — | ✅ |
+| Subpaths | `.` · `/full` · `/slim` | `.` · `/full` · `/slim` · `/animations` · `/icons/quantum-sphere` · `/log` |
+
+Pick `grab-api.js` when you want the request layer and nothing else. Switching is one line:
+
+```ts
+import grab from "grab-url";     // library + icons
+import grab from "grab-api.js";  // request manager only
+```
+
+## Slim by default
+
+`import grab from "grab-api.js"` gives you the **slim** build: ~5 kB gzipped, zero
+dependencies, nothing lazily reachable that you did not ask for. That is every feature
+below except the two that need a heavy library — ZIP extraction and HTML/DOM parsing.
+
+```ts
+import grab from "grab-api.js";        // default — ~5 kB gzipped
+import grab from "grab-api.js/full";   // + `unzip` and `parseDOM`
+```
+
+`grab-api.js/full` adds linkedom (~174 kB) and the archive extractor, both behind lazy
+imports, so they download only when a response actually needs one of them.
+`grab-api.js/slim` still resolves, as an alias of the default — it is the identical
+module, so a stub on `grab.mock` registered through either specifier is visible to the
+other.
+
+Both ESM and CommonJS work:
+
+```js
+const grab = require("grab-api.js");         // CJS
+import grab from "grab-api.js";              // ESM
 ```
 
 ## What's in this package
 
 | Folder         | Purpose                                                                                  |
 | -------------- | ---------------------------------------------------------------------------------------- |
-| [common/](common/)     | Shared `GrabOptions` / `GrabFunction` / `GrabLogEntry` types and small utilities         |
-| [core/](core/)         | The main `grab()` implementation, request executor, flow control, cache, regrab events   |
-| [response/](response/) | Response parsing, JSON conversion, and infinite-scroll pagination handling               |
-| [devtools/](devtools/) | `Ctrl+Alt+I` in-browser overlay showing requests, responses, timing, and JSON structure  |
-| [index.ts](index.ts)   | Public entry point — wires up globals (`window.grab`, `window.log`) and exports the API  |
+| [common/](https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/grab-api/src/common)     | Shared `GrabOptions` / `GrabFunction` / `GrabLogEntry` types and small utilities         |
+| [core/](https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/grab-api/src/core)         | The main `grab()` implementation, request executor, flow control, cache, regrab events   |
+| [response/](https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/grab-api/src/response) | Response parsing, JSON conversion, and infinite-scroll pagination handling               |
+| [devtools/](https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/grab-api/src/devtools) | `Ctrl+Alt+I` in-browser overlay showing requests, responses, timing, and JSON structure  |
+| [index.ts](https://github.com/OpenSourceAGI/GRAB-URL/blob/master/packages/grab-api/src/index.ts)   | Public entry point — wires up globals (`window.grab`, `window.log`) and exports the API  |
 
 ## Features (full list)
 
@@ -64,7 +111,7 @@ log(res);
 ## Usage
 
 ```ts
-import grab from "grab-url";
+import grab from "grab-api.js";
 
 let res = $state({}) as {
   results: Array<{ title: string }>;
@@ -115,8 +162,12 @@ In Node.js / Bun the same names are attached to `globalThis`.
 ## Build
 
 ```bash
-bun run build   # vite build, uses repo's vite.config.ts
+npm run build   # vite build, uses this package's vite.config.ts
 ```
+
+## License
+
+PROSPER-1.0.0 — see [LICENSE.md](LICENSE.md) and <https://rights.institute/prosper>.
 
 ## Links
 

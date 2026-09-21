@@ -7,39 +7,39 @@
   "author": "vtempest <vtempest@github.com>",
   "license": "PROSPER-1.0.0",
   "licenseUrl": "https://rights.institute/prosper",
-  "main": "./dist/grab-api-slim.cjs.js",
+  "main": "./dist/grab-api-slim.cjs",
   "types": "./dist/grab-api-slim.d.ts",
   "module": "./dist/grab-api-slim.es.js",
   "exports": {
     ".": {
       "types": "./dist/grab-api-slim.d.ts",
       "import": "./dist/grab-api-slim.es.js",
-      "require": "./dist/grab-api-slim.cjs.js"
+      "require": "./dist/grab-api-slim.cjs"
     },
     "./full": {
       "types": "./dist/grab-api.d.ts",
       "import": "./dist/grab-api.es.js",
-      "require": "./dist/grab-api.cjs.js"
+      "require": "./dist/grab-api.cjs"
     },
     "./slim": {
       "types": "./dist/grab-api-slim.d.ts",
       "import": "./dist/grab-api-slim.es.js",
-      "require": "./dist/grab-api-slim.cjs.js"
+      "require": "./dist/grab-api-slim.cjs"
     },
     "./animations": {
       "types": "./dist/animations.d.ts",
       "import": "./dist/animations.es.js",
-      "require": "./dist/animations.cjs.js"
+      "require": "./dist/animations.cjs"
     },
     "./icons/quantum-sphere": {
       "types": "./dist/quantum-sphere.d.ts",
       "import": "./dist/quantum-sphere.es.js",
-      "require": "./dist/quantum-sphere.cjs.js"
+      "require": "./dist/quantum-sphere.cjs"
     },
     "./log": {
       "types": "./dist/log.d.ts",
       "import": "./dist/log.es.js",
-      "require": "./dist/log.cjs.js"
+      "require": "./dist/log.cjs"
     },
     "./package.json": "./package.json"
   },

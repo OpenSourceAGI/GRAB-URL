@@ -60,12 +60,12 @@ const describeBuilt = built ? describe : process.env.CI ? describe : describe.sk
 describe('grab-url exports map', () => {
   it('resolves the bare import to the slim build', () => {
     expect(grabUrlPkg.exports['.'].import).toBe('./dist/grab-api-slim.es.js');
-    expect(grabUrlPkg.exports['.'].require).toBe('./dist/grab-api-slim.cjs.js');
+    expect(grabUrlPkg.exports['.'].require).toBe('./dist/grab-api-slim.cjs');
     expect(grabUrlPkg.exports['.'].types).toBe('./dist/grab-api-slim.d.ts');
   });
 
   it('points main, module, types and the CDN fields at the same slim build', () => {
-    expect(grabUrlPkg.main).toBe('./dist/grab-api-slim.cjs.js');
+    expect(grabUrlPkg.main).toBe('./dist/grab-api-slim.cjs');
     expect(grabUrlPkg.module).toBe('./dist/grab-api-slim.es.js');
     expect(grabUrlPkg.types).toBe('./dist/grab-api-slim.d.ts');
     expect(grabUrlPkg.unpkg).toBe('dist/grab-api-slim.es.js');
@@ -74,7 +74,7 @@ describe('grab-url exports map', () => {
 
   it('exposes the DOM + zip build as grab-url/full', () => {
     expect(grabUrlPkg.exports['./full'].import).toBe('./dist/grab-api.es.js');
-    expect(grabUrlPkg.exports['./full'].require).toBe('./dist/grab-api.cjs.js');
+    expect(grabUrlPkg.exports['./full'].require).toBe('./dist/grab-api.cjs');
   });
 
   it('keeps grab-url/slim as an alias of the default, not a second copy', () => {
@@ -177,4 +177,124 @@ describe('api2client stays a thin wrapper', () => {
     // generated SDK and the host app would end up with two `grab.mock`s.
     expect(code).toMatch(/from\s*["']grab-url(\/slim)?["']/);
   });
+});
+
+// ─── grab-api.js ─────────────────────────────────────────────────────────────
+
+/**
+ * `grab-api.js` publishes the same `grab()` core as `grab-url`, without the
+ * animations, the sphere or the CLI. It builds from its own vite config into
+ * its own dist, so the two can drift — these checks are what stops the drift
+ * from reaching npm.
+ */
+describe('grab-api.js publishes the core on its own', () => {
+  const grabApiRoot = join(repoRoot, 'packages/grab-api');
+  const pkg = readJson(join(grabApiRoot, 'package.json'));
+  const apiDist = join(grabApiRoot, 'dist');
+
+  it('is publishable, not a private workspace package', () => {
+    expect(pkg.private).toBeUndefined();
+    expect(pkg.name).toBe('grab-api.js');
+    expect(pkg.publishConfig.access).toBe('public');
+  });
+
+  it('carries the metadata npm renders on the package page', () => {
+    expect(pkg.description).toBeTruthy();
+    expect(pkg.license).toBe(grabUrlPkg.license);
+    expect(pkg.author).toBe(grabUrlPkg.author);
+    expect(pkg.homepage).toBe(grabUrlPkg.homepage);
+    expect(pkg.repository.directory).toBe('packages/grab-api');
+    expect(pkg.keywords.length).toBeGreaterThan(10);
+    expect(pkg.engines.node).toBe(grabUrlPkg.engines.node);
+  });
+
+  it('resolves the bare import to the slim build, same as grab-url', () => {
+    expect(pkg.exports['.'].import).toBe('./dist/grab-api-slim.es.js');
+    expect(pkg.exports['.'].require).toBe('./dist/grab-api-slim.cjs');
+    expect(pkg.exports['.'].types).toBe('./dist/grab-api-slim.d.ts');
+    expect(pkg.exports['./slim']).toEqual(pkg.exports['.']);
+    expect(pkg.exports['./full'].import).toBe('./dist/grab-api.es.js');
+  });
+
+  it('declares no runtime dependencies and no bin', () => {
+    expect(pkg.dependencies).toBeUndefined();
+    expect(pkg.bin).toBeUndefined();
+    expect(pkg.scripts.postinstall).toBeUndefined();
+  });
+
+  it('ships only the built output, never the source that imports @grab-url/log', () => {
+    // `src/` resolves `@grab-url/log`, a private workspace package with no
+    // dist. Shipped as-is it would be unresolvable in a consumer's install.
+    expect(pkg.files).not.toContain('src');
+    expect(pkg.files).toContain('dist');
+  });
+
+  it('builds from its own config, not grab-url\'s', () => {
+    expect(pkg.scripts.build).toBe('vite build --config vite.config.ts');
+    expect(existsSync(join(grabApiRoot, 'vite.config.ts'))).toBe(true);
+  });
+
+  const apiBuilt = existsSync(join(apiDist, 'grab-api-slim.es.js'));
+
+  it.runIf(apiBuilt || process.env.CI)('keeps its default entry as slim as grab-url\'s', () => {
+    const walk = (entry: string) => {
+      const seen = new Set<string>();
+      const visit = (file: string) => {
+        if (seen.has(file) || !existsSync(join(apiDist, file))) return;
+        seen.add(file);
+        const code = readFileSync(join(apiDist, file), 'utf8');
+        for (const [, target] of code.matchAll(/(?:from|import)\s*\(?["']\.\/([^"']+)["']/g)) {
+          visit(target);
+        }
+      };
+      visit(entry);
+      return [...seen];
+    };
+    const slim = walk('grab-api-slim.es.js');
+    const code = slim.map((f) => readFileSync(join(apiDist, f), 'utf8')).join('\n');
+    expect(code).not.toMatch(/linkedom|archiver|jszip|fflate|DOMParser/i);
+    expect(slim.reduce((t, f) => t + statSync(join(apiDist, f)).size, 0)).toBeLessThan(30_000);
+  });
+
+  it.runIf(apiBuilt || process.env.CI)('emits self-contained declarations', () => {
+    // Rolled up by api-extractor. Left unrolled, the emitted d.ts points at
+    // `../../log-json/src/...` — a path outside the tarball.
+    for (const types of ['grab-api-slim.d.ts', 'grab-api.d.ts']) {
+      const dts = readFileSync(join(apiDist, types), 'utf8');
+      expect(dts).not.toMatch(/from\s*["']\.\.\//);
+      expect(dts).not.toMatch(/@grab-url\/log/);
+    }
+  });
+});
+
+// ─── CJS entries have to be require()-able ───────────────────────────────────
+
+/**
+ * Both packages are `"type": "module"`. Node reads *any* `.js` file under that
+ * as ESM, so a CJS entry named `grab-api-slim.cjs.js` threw "exports is not
+ * defined in ES module scope" on the first `require()` — the published 3.0.0
+ * had no working CJS entry at all. The extension is the whole fix.
+ */
+describe('the CJS entries are named .cjs', () => {
+  for (const [label, pkgPath, distDir] of [
+    ['grab-url', 'packages/grab-url', join(repoRoot, 'packages/grab-url/dist')],
+    ['grab-api.js', 'packages/grab-api', join(repoRoot, 'packages/grab-api/dist')],
+  ] as const) {
+    const pkg = readJson(join(repoRoot, pkgPath, 'package.json'));
+
+    it(`${label} points every require condition at a .cjs file`, () => {
+      expect(pkg.type).toBe('module');
+      expect(pkg.main.endsWith('.cjs')).toBe(true);
+      for (const [subpath, conditions] of Object.entries(pkg.exports)) {
+        if (typeof conditions !== 'object' || conditions === null) continue;
+        const require_ = (conditions as Record<string, string>).require;
+        if (!require_) continue;
+        expect(`${subpath}: ${require_}`).toMatch(/\.cjs$/);
+      }
+    });
+
+    it.runIf(existsSync(distDir))(`${label} emits no .cjs.js file`, () => {
+      expect(readdirSync(distDir).filter((n) => n.endsWith('.cjs.js'))).toEqual([]);
+    });
+  }
 });

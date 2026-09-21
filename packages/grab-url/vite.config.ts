@@ -99,7 +99,13 @@ export default defineConfig({
         log: resolve(__dirname, "../../packages/log-json/src/log-json.ts"),
       },
       formats: ["es", "cjs"],
-      fileName: (format, entryName) => `${entryName}.${format}.js`,
+      // The CJS entries must end in `.cjs`, not `.cjs.js`. This package is
+      // `"type": "module"`, so Node reads any `.js` file as ESM — a
+      // `require()` of a `.cjs.js` entry died on "exports is not defined in ES
+      // module scope" before it ran a line. Rollup already names the shared
+      // CJS chunks `.cjs`; only the entries went through this callback.
+      fileName: (format, entryName) =>
+        format === "cjs" ? `${entryName}.cjs` : `${entryName}.es.js`,
     },
     rollupOptions: {
       output: {

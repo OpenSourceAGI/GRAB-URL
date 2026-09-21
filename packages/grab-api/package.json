@@ -1,18 +1,104 @@
 {
   "name": "grab-api.js",
-  "private": true,
+  "version": "3.0.0",
+  "description": "Generate Request to API from Browser — the core grab() request manager. One function, zero dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries, rate-limiting, mock testing, pagination and a DevTools overlay.",
   "type": "module",
-  "main": "./src/index.slim.ts",
+  "packageManager": "npm@11.19.1",
+  "author": "vtempest <vtempest@github.com>",
+  "license": "PROSPER-1.0.0",
+  "licenseUrl": "https://rights.institute/prosper",
+  "main": "./dist/grab-api-slim.cjs",
+  "types": "./dist/grab-api-slim.d.ts",
+  "module": "./dist/grab-api-slim.es.js",
   "exports": {
-    ".": "./src/index.slim.ts",
-    "./full": "./src/index.ts",
-    "./slim": "./src/index.slim.ts"
+    ".": {
+      "types": "./dist/grab-api-slim.d.ts",
+      "import": "./dist/grab-api-slim.es.js",
+      "require": "./dist/grab-api-slim.cjs"
+    },
+    "./full": {
+      "types": "./dist/grab-api.d.ts",
+      "import": "./dist/grab-api.es.js",
+      "require": "./dist/grab-api.cjs"
+    },
+    "./slim": {
+      "types": "./dist/grab-api-slim.d.ts",
+      "import": "./dist/grab-api-slim.es.js",
+      "require": "./dist/grab-api-slim.cjs"
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "LICENSE.md",
+    "README.md"
+  ],
   "scripts": {
-    "build": "vite build --config ../../packages/grab-url/vite.config.ts"
+    "build": "vite build --config vite.config.ts",
+    "prepublishOnly": "npm run build",
+    "ship": "bun x standard-version --release-as patch; rm CHANGELOG.md; npm publish"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "archiver-web": "*",
-    "linkedom": "^0.18.12"
-  }
+    "linkedom": "^0.18.12",
+    "terser": "^5.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "keywords": [
+    "api",
+    "axios",
+    "request",
+    "browser",
+    "tanstack",
+    "query",
+    "post",
+    "mock-api",
+    "fetch",
+    "http",
+    "http-client",
+    "rest-client",
+    "api-client",
+    "fetch-wrapper",
+    "request-deduplication",
+    "caching",
+    "retry",
+    "rate-limiting",
+    "mock-testing",
+    "pagination",
+    "infinite-scroll",
+    "devtools",
+    "grab",
+    "grab-url",
+    "openapi",
+    "typescript",
+    "zero-dependencies"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSourceAGI/GRAB-URL.git",
+    "directory": "packages/grab-api"
+  },
+  "homepage": "https://grab.js.org",
+  "bugs": {
+    "url": "https://github.com/OpenSourceAGI/GRAB-URL/issues",
+    "email": "vtempest@github.com"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/vtempest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "sideEffects": false,
+  "unpkg": "dist/grab-api-slim.es.js",
+  "jsdelivr": "dist/grab-api-slim.es.js"
 }

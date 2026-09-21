@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "checkJs": false,
+    "noImplicitAny": false,
+    "declarationDir": "./dist",
+    "outDir": "./dist",
+    "strict": false,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    // `@grab-url/log` is a private workspace package with no dist, so TypeScript
+    // has nothing to resolve the bare specifier to. The same mapping exists in
+    // vite.config.ts for the bundler; without it here the declaration build
+    // reports TS2792 on every file that logs.
+    "paths": {
+      "@grab-url/log": ["../log-json/src/log-json.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "../log-json/src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
