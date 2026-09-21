@@ -14,30 +14,65 @@
 </p>
 <!-- template-git-repo:badges:end -->
 
-# @grab-url/grab-api
+# grab-api.js
 
-Core implementation of `grab()` — the single-function request manager that ships in [`grab-url`](https://grab.js.org). One function, no runtime dependencies, minimalist syntax. This is the workspace package; most users should consume the published `grab-url` package instead.
+**`grab()` on its own.** One function, zero runtime dependencies, minimalist syntax —
+auto-JSON, request dedupe, caching, retries, rate limiting, a mock server, pagination and
+a DevTools overlay. This is the core of [`grab-url`](https://www.npmjs.com/package/grab-url),
+published without the loading icons and spinners that ride along in it.
 
 ```bash
-npm i grab-url
+npm i grab-api.js
 ```
 
 ```ts
-import grab, { log } from "grab-url";
+import grab, { log } from "grab-api.js";
 
 const res = await grab("search", { query: "search words", post: true });
 log(res);
 ```
 
+## Which package do I want?
+
+Same `grab()`, same options, same globals. The difference is only what else comes along.
+
+| Package | Gives you | Pick it when |
+| --- | --- | --- |
+| **`grab-api.js`** | `grab()` and `log()` | You want the request client and nothing else |
+| [`grab-url`](https://www.npmjs.com/package/grab-url) | the same, plus `grab-url/animations` (~25 tree-shakable SVG spinners) and `grab-url/icons/quantum-sphere` (a 3D React/Svelte loader) | You also want the loading UI |
+| [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli) | the `grab-url` / `grab` / `g` commands | You want the terminal downloader |
+
+> **Install one of the first two, not both.** They are built from the same source, so a
+> project holding both ends up with two `grab()` modules — two `grab.mock` registries, two
+> `grab.log` arrays and two caches — and a stub registered on one is invisible to the
+> other. If you already depend on `grab-url`, you already have everything here.
+
+## Slim by default
+
+The bare import is the **slim** build: ~15 kB raw, ~5 kB gzipped, with no DOM parser and no
+archive extractor reachable from it. That is every feature below except the two that need a
+heavy library — `unzip` and `parseDOM` — which live one subpath over:
+
+```ts
+import grab from "grab-api.js";        // default — ~5 kB gzipped
+import grab from "grab-api.js/full";   // + `unzip` and `parseDOM`
+```
+
+`grab-api.js/full` adds linkedom (~174 kB) and the archive extractor, both behind lazy
+imports, so they download only when a response actually needs one of them.
+`grab-api.js/slim` also resolves, as an alias of the default — the identical module, so a
+stub on `grab.mock` registered through either specifier is visible to the other.
+
 ## What's in this package
 
-| Folder         | Purpose                                                                                  |
-| -------------- | ---------------------------------------------------------------------------------------- |
-| [common/](common/)     | Shared `GrabOptions` / `GrabFunction` / `GrabLogEntry` types and small utilities         |
-| [core/](core/)         | The main `grab()` implementation, request executor, flow control, cache, regrab events   |
-| [response/](response/) | Response parsing, JSON conversion, and infinite-scroll pagination handling               |
-| [devtools/](devtools/) | `Ctrl+Alt+I` in-browser overlay showing requests, responses, timing, and JSON structure  |
-| [index.ts](index.ts)   | Public entry point — wires up globals (`window.grab`, `window.log`) and exports the API  |
+| Folder | Purpose |
+| --- | --- |
+| [src/common/](src/common/) | Shared `GrabOptions` / `GrabFunction` / `GrabLogEntry` types and small utilities |
+| [src/core/](src/core/) | The main `grab()` implementation, request executor, flow control, cache, regrab events |
+| [src/response/](src/response/) | Response parsing, JSON conversion, and infinite-scroll pagination handling |
+| [src/devtools/](src/devtools/) | `Ctrl+Alt+I` in-browser overlay showing requests, responses, timing, and JSON structure |
+| [src/index.slim.ts](src/index.slim.ts) | The default entry — wires up globals (`window.grab`, `window.log`) and exports the API |
+| [src/index.ts](src/index.ts) | The `/full` entry — the same, plus the ZIP and DOM post-processors |
 
 ## Features (full list)
 
@@ -58,13 +93,13 @@ log(res);
 15. **Debug logging** — `log()` prints colored JSON structure, response, and timing.
 16. **Rate limiting** — require a minimum delay between requests to prevent cascading multi-click responses.
 17. **Repeat / polling** — repeat N times or every X seconds.
-18. **Auto-unzip** — automatically extracts ZIP responses using archiver-web. Set `unzip: false` to disable.
-19. **DOM parsing** — automatically parses HTML responses using linkedom. Pass `dom: "selector"` for CSS selector extraction or `dom: false` to disable.
+18. **Auto-unzip** — automatically extracts ZIP responses using archiver-web. Set `unzip: false` to disable. Import from `grab-api.js/full`.
+19. **DOM parsing** — automatically parses HTML responses using linkedom. Pass `dom: "selector"` for CSS selector extraction or `dom: false` to disable. Import from `grab-api.js/full`.
 
 ## Usage
 
 ```ts
-import grab from "grab-url";
+import grab from "grab-api.js";
 
 let res = $state({}) as {
   results: Array<{ title: string }>;
@@ -115,8 +150,16 @@ In Node.js / Bun the same names are attached to `globalThis`.
 ## Build
 
 ```bash
-bun run build   # vite build, uses repo's vite.config.ts
+npm run build   # vite build --config vite.config.ts → dist/
 ```
+
+Builds only this package's two entries. `grab-url` builds the same source from its own
+config, so a change here lands in both — see
+[`.claude/architecture/build.md`](../../.claude/architecture/build.md).
+
+## License
+
+[PROSPER 1.0.0](LICENSE.md)
 
 ## Links
 

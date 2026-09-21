@@ -106,6 +106,18 @@ still resolves, as an alias of the default — it is the identical module, so a 
 The **CLI is its own package**, [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli).
 Installing the library runs no install script and pulls nothing down.
 
+### The three packages
+
+| Package | Gives you | Pick it when |
+| --- | --- | --- |
+| **[`grab-url`](https://www.npmjs.com/package/grab-url)** | `grab()`, `log()`, plus `grab-url/animations` (~25 tree-shakable SVG spinners) and `grab-url/icons/quantum-sphere` (a 3D React/Svelte loader) | You want the request client and the loading UI |
+| [`grab-api.js`](https://www.npmjs.com/package/grab-api.js) | `grab()` and `log()` — the same core, same `/full` subpath, nothing else | You only want the request client |
+| [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli) | the `grab-url` / `grab` / `g` commands | You want the terminal downloader |
+
+`grab-url` and `grab-api.js` are built from the same source, so **install one, not both** —
+a project holding both ends up with two `grab()` modules, two `grab.mock` registries and
+two caches, and a stub registered on one is invisible to the other.
+
 ### Examples
 
 **CLI File Downloader** — `npm i -g grab-url-cli`, or `npx grab-url-cli`

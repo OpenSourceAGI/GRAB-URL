@@ -1,13 +1,24 @@
-# CLAUDE.md — `@grab-url/grab-api`
+# CLAUDE.md — `grab-api.js`
 
-**Private — never published.** This package *is* `grab-url`:
-`packages/grab-url/vite.config.ts` compiles `src/index.slim.ts` into
-`dist/grab-api-slim.*` and `packages/grab-url/package.json` exposes that as the
-package's **main entry**.
+**Published twice.** This source is compiled by two configs into two npm
+packages:
 
-So its public API is `grab-url`'s public API. There is no separate
-`@grab-url/grab-api` for anyone to install, and a breaking change here is a
-breaking change to the published package.
+| Built by | Into | Published as |
+| --- | --- | --- |
+| `packages/grab-url/vite.config.ts` | `packages/grab-url/dist/grab-api-slim.*` · `grab-api.*` | `grab-url` and `grab-url/full` |
+| `packages/grab-api/vite.config.ts` | `packages/grab-api/dist/index.slim.*` · `index.*` | `grab-api.js` and `grab-api.js/full` |
+
+`grab-url` adds the loading icons (`/animations`, `/icons/quantum-sphere`);
+`grab-api.js` is `grab()` and `log()` alone. Otherwise they are the same bytes
+from the same files, so **a breaking change here is a breaking change to both**,
+and both need a version bump.
+
+`test/packaging.test.ts` compares the exported names of the two builds and fails
+if they drift.
+
+A consumer installs one or the other, **never both**: two packages means two
+modules, two `grab.mock` registries, two `grab.log` arrays and two caches. Any
+doc that mentions the pair has to say so.
 
 ## Zero runtime dependencies
 
@@ -19,13 +30,15 @@ check before reaching for a helper library.
 
 | Source | Ships as | Carries |
 | --- | --- | --- |
-| `src/index.slim.ts` | **`grab-url`** and `grab-url/slim` | `request-executor-slim.ts` — fetch, mocks, no post-processing |
-| `src/index.ts` | `grab-url/full` | the above plus `content-processors.ts`: unzip (archiver-web) and DOM parsing (linkedom) |
+| `src/index.slim.ts` | **`grab-url`** · `grab-url/slim` · **`grab-api.js`** · `grab-api.js/slim` | `request-executor-slim.ts` — fetch, mocks, no post-processing |
+| `src/index.ts` | `grab-url/full` · `grab-api.js/full` | the above plus `content-processors.ts`: unzip (archiver-web) and DOM parsing (linkedom) |
 
-Since 3.0 the **bare import is the slim one**, so an ordinary
+Since 3.0 the **bare import is the slim one** in both packages, so an ordinary
 `import grab from "grab-url"` costs ~16 kB (~7 kB gzipped) and no DOM parser.
-`grab-url/slim` is kept as an alias pointing at the identical files, which means
-one module instance and one `grab.mock` across both specifiers.
+The `/slim` subpath is kept as an alias pointing at the identical files, which
+means one module instance and one `grab.mock` across both specifiers *within a
+package* — across the two packages it is still two modules, which is why a
+consumer picks one.
 
 What keeps it slim is the module graph: `index.slim.ts` imports
 `request-executor-slim.ts`, which never touches `content-processors.ts`. So
@@ -35,7 +48,8 @@ the default import.** Heavy work belongs behind `content-processors.ts`, which
 only the full entry reaches, and behind a lazy `import()` inside it.
 
 `test/packaging.test.ts` walks the built bundles and fails if linkedom,
-archiver-web, jszip or fflate becomes reachable from `grab-api-slim.es.js`.
+archiver-web, jszip or fflate becomes reachable from either package's default
+entry (`grab-api-slim.es.js`, `index.slim.es.js`).
 
 ## What the client guarantees
 
@@ -55,6 +69,11 @@ automatic. Don't add a path that bypasses them.
   is a different package (`grab-url-cli`), with its own build and its own
   externals list.
 - Tests live in **`packages/grab-url/test/`** (`grab.test.ts`), not here.
-- After changing it: `npm run build` in `packages/grab-url`, then confirm both
-  `dist/grab-api-slim.*` (the default) and `dist/grab-api.*` (`/full`) are
-  produced, and run `test/packaging.test.ts`.
+- After changing it, build **both** packages — `npm run build` in
+  `packages/grab-url` *and* in `packages/grab-api` — then run
+  `test/packaging.test.ts`. Building only one leaves the drift check comparing a
+  fresh bundle against a stale one.
+- Alias targets in either vite config stay **extensionless**. A `.ts` there ends
+  up inside the emitted `.d.ts` as `from './…/log-json.ts'`, which is not in the
+  tarball and which a consumer cannot import. See
+  [`build.md`](../../../.claude/architecture/build.md#aliases).

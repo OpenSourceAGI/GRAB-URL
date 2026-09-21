@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "checkJs": false,
+    "noImplicitAny": false,
+    "declarationDir": "./dist",
+    "outDir": "./dist",
+    "strict": false,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    // Without this, vite-plugin-dts cannot resolve the alias and emits
+    // `import { log } from '../../log-json/src/log-json.ts'` into the entry
+    // .d.ts — a path that points outside the published tarball. The mapping is
+    // deliberately extensionless: TypeScript emits the mapped specifier
+    // verbatim, and a `.ts` extension inside a shipped .d.ts fails for any
+    // consumer without `allowImportingTsExtensions`.
+    "paths": {
+      "@grab-url/log": ["../log-json/src/log-json"]
+    }
+  },
+  "include": ["src/**/*.ts", "../log-json/src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

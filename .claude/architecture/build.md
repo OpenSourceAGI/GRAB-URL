@@ -7,6 +7,7 @@ of archive bins that no browser will ever run.
 | Config | Builds | Published as |
 | --- | --- | --- |
 | `packages/grab-url/vite.config.ts` | the library entries | `grab-url` |
+| `packages/grab-api/vite.config.ts` | just `grab()`, no loading icons | `grab-api.js` |
 | `packages/grab-url-cli/vite.config.ts` | the transfer CLI | `grab-url-cli` |
 | `packages/archiver-web/vite.config.ts` | the extractor + its two bins | `archiver-web` |
 
@@ -49,7 +50,8 @@ tracked. It is not build output — it is the hand-written UI Tauri serves as
 `frontendDist` (see `src-tauri/tauri.conf.json`), so `.gitignore` re-includes
 that one directory.
 
-CI (`tests.yml`) builds the four published packages before running the suite,
+CI (`tests.yml`, and the `packages` leg of `test-coverage.yml`) builds the
+published packages before running the suite,
 because `test/packaging.test.ts` reads the built bundles to check that the
 default import is still slim. A build break now fails the gate.
 
@@ -96,6 +98,23 @@ this. It never fired — the importer of `archiver-web` is
 `content-processors.ts`, never `index.slim.ts`. It is gone.)
 `test/packaging.test.ts` walks the built graph and fails if anything heavy
 becomes reachable from the default entry.
+
+### `grab-api.js` — `packages/grab-api/vite.config.ts`
+
+The same source as the library's two grab entries, published on its own for
+consumers who want `grab()` without the spinners and the sphere. Its entries are
+named for the source files (`index.slim`, `index`) rather than for grab-url's
+dist (`grab-api-slim`, `grab-api`), and `log-json` is bundled in rather than
+exposed as a separate entry.
+
+**The two must not drift.** `test/packaging.test.ts` compares the exported names
+of both packages' built entries and fails if they differ. It also checks that
+nothing named `animations` or `quantum-sphere` lands in this dist.
+
+A consumer should install `grab-url` **or** `grab-api.js`, never both: they are
+separate modules built from one source, so holding both means two `grab.mock`
+registries, two `grab.log` arrays and two caches. Say so in any doc that
+mentions the pair.
 
 ### The CLI — `packages/grab-url-cli/vite.config.ts`
 
@@ -154,6 +173,14 @@ executable.
 name `grab-url`** to the in-repo source, so the generated Hey API client — which
 imports `grab-url` by package name — resolves to the same source inside the
 monorepo as it does for a consumer.
+
+**Alias targets are extensionless**, and that is not cosmetic. `vite-plugin-dts`
+rewrites an aliased import in the emitted `.d.ts` using the alias target, so a
+`.ts` on the alias ships as `import { log } from './…/log-json.ts'` inside the
+declarations — pointing at a `.ts` the tarball does not contain, with an
+extension no consumer can import without `allowImportingTsExtensions`. Both
+published packages had exactly that until 3.0. `build.lib.entry` paths keep
+their extensions; only the aliases drop them.
 
 The subpaths are listed **before** the bare name, because a string alias matches
 as a prefix: with `grab-url` first, `grab-url/full` would be rewritten to

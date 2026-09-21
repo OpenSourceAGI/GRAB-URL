@@ -60,7 +60,7 @@ jobs:
       # the same reason; this job was the one place the step was missing.
       - name: Build the published packages
         if: matrix.name == 'packages'
-        run: npx turbo run build --filter=grab-url --filter=grab-url-cli --filter=archiver-web --filter=api2client
+        run: npx turbo run build --filter=grab-url --filter=grab-api.js --filter=grab-url-cli --filter=archiver-web --filter=api2client
 
       - name: Run tests with coverage
         working-directory: ${{ matrix.dir }}
