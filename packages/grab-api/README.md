@@ -10,7 +10,11 @@
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/discussions"><img src="https://img.shields.io/github/discussions/OpenSourceAGI/GRAB-URL" alt="GitHub Discussions" /></a>
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/commits/master/"><img src="https://img.shields.io/github/last-commit/OpenSourceAGI/GRAB-URL.svg" alt="GitHub last commit" /></a>
     <br />
+    <a href="https://www.npmjs.com/package/grab-api.js"><img src="https://img.shields.io/npm/v/grab-api.js.svg" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/grab-api.js"><img src="https://img.shields.io/npm/dm/grab-api.js.svg" alt="NPM Monthly Downloads" /></a>
+    <a href="https://bundlephobia.com/package/grab-api.js"><img src="https://img.shields.io/bundlephobia/minzip/grab-api.js" alt="Bundle size" /></a>
     <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" />
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
 </p>
 <!-- template-git-repo:badges:end -->
 

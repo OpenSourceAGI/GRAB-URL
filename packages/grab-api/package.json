@@ -39,6 +39,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "archiver-web": "*",
     "linkedom": "^0.18.12",
     "terser": "^5.46.0",
