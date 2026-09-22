@@ -2,7 +2,7 @@
   "name": "grab-url",
   "description": "Generate Request to API from Browser — The FBEST Request Manager: Functionally Brilliant, Elegantly Simple Tool. One function, zero dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries, rate-limiting, mock testing, pagination, and loading icons.",
   "type": "module",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "packageManager": "npm@11.19.1",
   "author": "vtempest <vtempest@github.com>",
   "license": "PROSPER-1.0.0",
