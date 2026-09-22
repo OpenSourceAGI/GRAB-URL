@@ -81,7 +81,7 @@ function exportedNames(file: string, distDir = dist): string[] {
 // been run yet, and failing on that would be noise.
 const built =
   existsSync(join(dist, 'grab-api-slim.es.js')) &&
-  existsSync(join(grabApiDist, 'index.slim.es.js'));
+  existsSync(join(grabApiDist, 'grab-api-slim.es.js'));
 const describeBuilt = built ? describe : process.env.CI ? describe : describe.skip;
 
 // ─── the exports map ─────────────────────────────────────────────────────────
@@ -178,63 +178,32 @@ describeBuilt('the built bundles', () => {
 
 // ─── grab-api.js, the same core published on its own ─────────────────────────
 
-describe('grab-api.js is a publishable package', () => {
-  it('is not private and carries what npm needs', () => {
-    expect(grabApiPkg.private).toBeUndefined();
-    expect(grabApiPkg.name).toBe('grab-api.js');
-    expect(grabApiPkg.version).toMatch(/^\d+\.\d+\.\d+/);
-    expect(grabApiPkg.description).toBeTruthy();
-    expect(grabApiPkg.license).toBe(grabUrlPkg.license);
-    expect(grabApiPkg.repository.directory).toBe('packages/grab-api');
-    expect(grabApiPkg.keywords.length).toBeGreaterThan(5);
-    expect(grabApiPkg.files).toContain('dist');
-    expect(grabApiPkg.publishConfig.access).toBe('public');
-  });
-
-  it('mirrors grab-url: slim by default, /full for DOM and zip', () => {
-    expect(grabApiPkg.exports['.'].import).toBe('./dist/index.slim.es.js');
-    expect(grabApiPkg.exports['./full'].import).toBe('./dist/index.es.js');
-    expect(grabApiPkg.exports['./slim']).toEqual(grabApiPkg.exports['.']);
-    expect(grabApiPkg.main).toBe('./dist/index.slim.cjs.js');
-    expect(grabApiPkg.module).toBe('./dist/index.slim.es.js');
-    expect(grabApiPkg.types).toBe('./dist/index.slim.d.ts');
-    expect(grabApiPkg.unpkg).toBe('dist/index.slim.es.js');
-  });
-
-  it('declares no runtime dependencies and no bin', () => {
-    expect(grabApiPkg.dependencies).toBeUndefined();
-    expect(grabApiPkg.bin).toBeUndefined();
-  });
-
-  it('builds from its own config, not grab-url\'s', () => {
-    // Sharing grab-url's config would emit the spinners and the sphere here
-    // too — the whole point of this package is that it does not carry them.
-    expect(grabApiPkg.scripts.build).toBe('vite build --config vite.config.ts');
-    expect(existsSync(join(grabApiRoot, 'vite.config.ts'))).toBe(true);
-  });
-});
-
 describeBuilt('grab-api.js and grab-url do not drift', () => {
   const heavy = /linkedom|archiver|jszip|fflate|DOMParser/i;
 
+  // Both packages name their entries the same; only the dist they sit in
+  // differs, so every comparison below is grab-api.js's dist against
+  // grab-url's.
   it('exports exactly the same names from both default entries', () => {
-    expect(exportedNames('index.slim.es.js', grabApiDist)).toEqual(
-      exportedNames('grab-api-slim.es.js'),
+    expect(exportedNames('grab-api-slim.es.js', grabApiDist)).toEqual(
+      exportedNames('grab-api-slim.es.js', dist),
     );
   });
 
   it('exports exactly the same names from both full entries', () => {
-    expect(exportedNames('index.es.js', grabApiDist)).toEqual(exportedNames('grab-api.es.js'));
+    expect(exportedNames('grab-api.es.js', grabApiDist)).toEqual(
+      exportedNames('grab-api.es.js', dist),
+    );
   });
 
   it('keeps its default entry free of the DOM parser and the unzipper', () => {
-    const files = reachableFrom('index.slim.es.js', grabApiDist);
+    const files = reachableFrom('grab-api-slim.es.js', grabApiDist);
     expect(sourceOf(files, grabApiDist)).not.toMatch(heavy);
     expect(bytesOf(files, grabApiDist)).toBeLessThan(30_000);
   });
 
   it('still gives grab-api.js/full the DOM parser and the unzipper', () => {
-    const files = reachableFrom('index.es.js', grabApiDist);
+    const files = reachableFrom('grab-api.es.js', grabApiDist);
     expect(sourceOf(files, grabApiDist)).toMatch(/DOMParser|parseHTML/);
   });
 
@@ -247,8 +216,10 @@ describeBuilt('grab-api.js and grab-url do not drift', () => {
     // vite-plugin-dts rewrites an aliased import using the alias target, so a
     // `.ts` on the alias ships `from './…/log-json.ts'` in the .d.ts — a file
     // the tarball does not contain, and an extension a consumer cannot import.
+    // grab-api.js rolls its declarations up, so its entry sits at the dist
+    // root; grab-url keeps the per-file tree.
     for (const [distDir, entry] of [
-      [grabApiDist, 'grab-api/src/index.slim.d.ts'],
+      [grabApiDist, 'grab-api-slim.d.ts'],
       [dist, 'grab-api/src/index.slim.d.ts'],
     ] as const) {
       const types = readFileSync(join(distDir, entry), 'utf8');
@@ -295,9 +266,8 @@ describe('api2client stays a thin wrapper', () => {
  * from reaching npm.
  */
 describe('grab-api.js publishes the core on its own', () => {
-  const grabApiRoot = join(repoRoot, 'packages/grab-api');
-  const pkg = readJson(join(grabApiRoot, 'package.json'));
-  const apiDist = join(grabApiRoot, 'dist');
+  const pkg = grabApiPkg;
+  const apiDist = grabApiDist;
 
   it('is publishable, not a private workspace package', () => {
     expect(pkg.private).toBeUndefined();
@@ -342,26 +312,6 @@ describe('grab-api.js publishes the core on its own', () => {
   });
 
   const apiBuilt = existsSync(join(apiDist, 'grab-api-slim.es.js'));
-
-  it.runIf(apiBuilt || process.env.CI)('keeps its default entry as slim as grab-url\'s', () => {
-    const walk = (entry: string) => {
-      const seen = new Set<string>();
-      const visit = (file: string) => {
-        if (seen.has(file) || !existsSync(join(apiDist, file))) return;
-        seen.add(file);
-        const code = readFileSync(join(apiDist, file), 'utf8');
-        for (const [, target] of code.matchAll(/(?:from|import)\s*\(?["']\.\/([^"']+)["']/g)) {
-          visit(target);
-        }
-      };
-      visit(entry);
-      return [...seen];
-    };
-    const slim = walk('grab-api-slim.es.js');
-    const code = slim.map((f) => readFileSync(join(apiDist, f), 'utf8')).join('\n');
-    expect(code).not.toMatch(/linkedom|archiver|jszip|fflate|DOMParser/i);
-    expect(slim.reduce((t, f) => t + statSync(join(apiDist, f)).size, 0)).toBeLessThan(30_000);
-  });
 
   it.runIf(apiBuilt || process.env.CI)('emits self-contained declarations', () => {
     // Rolled up by api-extractor. Left unrolled, the emitted d.ts points at

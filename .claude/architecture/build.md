@@ -102,10 +102,13 @@ becomes reachable from the default entry.
 ### `grab-api.js` — `packages/grab-api/vite.config.ts`
 
 The same source as the library's two grab entries, published on its own for
-consumers who want `grab()` without the spinners and the sphere. Its entries are
-named for the source files (`index.slim`, `index`) rather than for grab-url's
-dist (`grab-api-slim`, `grab-api`), and `log-json` is bundled in rather than
-exposed as a separate entry.
+consumers who want `grab()` without the spinners and the sphere. Its entries
+carry the same dist names as grab-url's (`grab-api-slim`, `grab-api`), so the
+two exports maps read alike, and `log-json` is bundled in rather than exposed as
+a separate entry. Declarations are **rolled up** here (`rollupTypes: true`),
+unlike grab-url's per-file trees: the source imports `@grab-url/log`, which is
+private and never published, so an unrolled entry `.d.ts` would point at
+`../../log-json/src/…` — a path outside the tarball.
 
 **The two must not drift.** `test/packaging.test.ts` compares the exported names
 of both packages' built entries and fails if they differ. It also checks that

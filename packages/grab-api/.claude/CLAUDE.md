@@ -6,7 +6,7 @@ packages:
 | Built by | Into | Published as |
 | --- | --- | --- |
 | `packages/grab-url/vite.config.ts` | `packages/grab-url/dist/grab-api-slim.*` · `grab-api.*` | `grab-url` and `grab-url/full` |
-| `packages/grab-api/vite.config.ts` | `packages/grab-api/dist/index.slim.*` · `index.*` | `grab-api.js` and `grab-api.js/full` |
+| `packages/grab-api/vite.config.ts` | `packages/grab-api/dist/grab-api-slim.*` · `grab-api.*` | `grab-api.js` and `grab-api.js/full` |
 
 `grab-url` adds the loading icons (`/animations`, `/icons/quantum-sphere`);
 `grab-api.js` is `grab()` and `log()` alone. Otherwise they are the same bytes
@@ -49,7 +49,7 @@ only the full entry reaches, and behind a lazy `import()` inside it.
 
 `test/packaging.test.ts` walks the built bundles and fails if linkedom,
 archiver-web, jszip or fflate becomes reachable from either package's default
-entry (`grab-api-slim.es.js`, `index.slim.es.js`).
+entry — both dists name it `grab-api-slim.es.js`.
 
 ## What the client guarantees
 

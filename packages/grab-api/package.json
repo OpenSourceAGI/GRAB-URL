@@ -7,30 +7,29 @@
   "author": "vtempest <vtempest@github.com>",
   "license": "PROSPER-1.0.0",
   "licenseUrl": "https://rights.institute/prosper",
-  "main": "./dist/index.slim.cjs.js",
-  "module": "./dist/index.slim.es.js",
-  "types": "./dist/index.slim.d.ts",
+  "main": "./dist/grab-api-slim.cjs",
+  "module": "./dist/grab-api-slim.es.js",
+  "types": "./dist/grab-api-slim.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.slim.d.ts",
-      "import": "./dist/index.slim.es.js",
-      "require": "./dist/index.slim.cjs.js"
+      "types": "./dist/grab-api-slim.d.ts",
+      "import": "./dist/grab-api-slim.es.js",
+      "require": "./dist/grab-api-slim.cjs"
     },
     "./full": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "types": "./dist/grab-api.d.ts",
+      "import": "./dist/grab-api.es.js",
+      "require": "./dist/grab-api.cjs"
     },
     "./slim": {
-      "types": "./dist/index.slim.d.ts",
-      "import": "./dist/index.slim.es.js",
-      "require": "./dist/index.slim.cjs.js"
+      "types": "./dist/grab-api-slim.d.ts",
+      "import": "./dist/grab-api-slim.es.js",
+      "require": "./dist/grab-api-slim.cjs"
     },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "src",
     "LICENSE.md",
     "README.md"
   ],
@@ -95,6 +94,6 @@
     "provenance": true
   },
   "sideEffects": false,
-  "unpkg": "dist/index.slim.es.js",
-  "jsdelivr": "dist/index.slim.es.js"
+  "unpkg": "dist/grab-api-slim.es.js",
+  "jsdelivr": "dist/grab-api-slim.es.js"
 }

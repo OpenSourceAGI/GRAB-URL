@@ -2,42 +2,68 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
-// `grab-api.js` publishes this package's two entries on their own — just
-// `grab()`, without the loading icons and spinners that ride along in
-// `grab-url`. Same source, so the two must stay in step: the entry shape here
-// mirrors `packages/grab-url/vite.config.ts`, slim as the default and `./full`
-// for the DOM + zip build. See `.claude/architecture/build.md`.
+// `grab-api.js` publishes the core request manager on its own — the same
+// `grab()` that `grab-url` ships, without the loading animations, the quantum
+// sphere or the CLI. `packages/grab-url/vite.config.ts` builds the umbrella
+// package from this same source; this config builds only what belongs here, so
+// the two dists never have to agree on anything but the entry names.
+//
+// The build is deliberately kept to the two entries the `exports` map names.
+// An entry added here ends up in every consumer's install.
 
+// `@grab-url/log` is a private workspace package: it has no dist and is never
+// published, so it is inlined into both bundles rather than left as an import
+// a consumer could not resolve. `grab-url` does the same.
+//
+// The target is extensionless, like every alias in this repo: vite-plugin-dts
+// builds the specifier it writes into an emitted `.d.ts` from the alias target,
+// and a `.ts` there ships a path no consumer can import. See
+// `.claude/architecture/build.md#aliases`.
+const sharedAlias = {
+  "@grab-url/log": resolve(__dirname, "../log-json/src/log-json"),
+};
+
+// `jszip` is resolved at runtime by archiver-web (local install, then CDN), so
+// it is never bundled and never a dependency of this package.
 const runtimeResolvedPkgs = ["jszip"];
 
 export default defineConfig({
   resolve: {
-    alias: {
-      // log-json is bundled in rather than exposed as a separate entry: this
-      // package's product is `grab()`, and `log()` comes with it.
-      "@grab-url/log": resolve(__dirname, "../log-json/src/log-json"),
-    },
+    alias: sharedAlias,
   },
   plugins: [
     dts({
       insertTypesEntry: true,
       include: ["src/**/*.ts", "../log-json/src/**/*.ts"],
+      exclude: ["**/node_modules/**", "**/dist/**", "**/*.test.ts"],
       outDir: "dist",
-      rollupTypes: false,
+      // Rolled up, unlike `grab-url`'s per-file trees. The source imports
+      // `@grab-url/log`, which is private and never published: left unrolled,
+      // the emitted `index.slim.d.ts` points at `../../log-json/src/...`, a
+      // path that escapes the tarball and resolves to nothing once installed.
+      // api-extractor inlines those types instead, so each entry's `.d.ts` is
+      // self-contained.
+      rollupTypes: true,
     }),
   ],
   build: {
     target: "es2022",
     lib: {
       entry: {
-        // `index.slim` is what the bare `grab-api.js` import resolves to.
-        // `index` is `grab-api.js/full`, which reaches `content-processors.ts`
-        // and through it linkedom and archiver-web, both lazily.
-        "index.slim": resolve(__dirname, "src/index.slim.ts"),
-        index: resolve(__dirname, "src/index.ts"),
+        // `grab-api-slim` is what bare `grab-api.js` resolves to — the default
+        // import. `grab-api` is the `grab-api.js/full` build, which reaches
+        // `content-processors.ts` and through it linkedom and archiver-web.
+        "grab-api-slim": resolve(__dirname, "src/index.slim.ts"),
+        "grab-api": resolve(__dirname, "src/index.ts"),
       },
       formats: ["es", "cjs"],
-      fileName: (format, entryName) => `${entryName}.${format}.js`,
+      // The CJS entries must end in `.cjs`, not `.cjs.js`. This package is
+      // `"type": "module"`, so Node reads any `.js` file as ESM — a
+      // `require()` of a `.cjs.js` entry died on "exports is not defined in ES
+      // module scope" before it ran a line. Rollup already names the shared
+      // CJS chunks `.cjs`; only the entries went through this callback.
+      fileName: (format, entryName) =>
+        format === "cjs" ? `${entryName}.cjs` : `${entryName}.es.js`,
     },
     rollupOptions: {
       output: {
