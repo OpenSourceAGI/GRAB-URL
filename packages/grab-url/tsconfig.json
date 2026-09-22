@@ -18,14 +18,17 @@
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true, // Required for Vite
+    // Extensionless on purpose: TypeScript emits a mapped specifier verbatim,
+    // so a `.ts` here lands in the published .d.ts and fails for any consumer
+    // without `allowImportingTsExtensions`.
     "paths": {
-      "grab-url": ["../../packages/grab-api/src/index.ts"],
-      "@grab-url/grab-api": ["../../packages/grab-api/src/index.ts"],
-      "api2client": ["../../packages/api2client/src/index.ts"],
-      "@grab-url/log": ["../../packages/log-json/src/log-json.ts"],
-      "@grab-url/loading-animations": ["../../packages/loading-animations/src/svg/index.ts"],
-      "@grab-url/grab-url-cli": ["../../packages/grab-url-cli/src/index.ts"],
-      "@grab-url/archiver-web": ["../../packages/archiver-web/src/index.ts"]
+      "grab-url": ["../../packages/grab-api/src/index"],
+      "@grab-url/grab-api": ["../../packages/grab-api/src/index"],
+      "api2client": ["../../packages/api2client/src/index"],
+      "@grab-url/log": ["../../packages/log-json/src/log-json"],
+      "@grab-url/loading-animations": ["../../packages/loading-animations/src/svg/index"],
+      "@grab-url/grab-url-cli": ["../../packages/grab-url-cli/src/index"],
+      "@grab-url/archiver-web": ["../../packages/archiver-web/src/index"]
     }
   },
   "include": [

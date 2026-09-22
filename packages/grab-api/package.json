@@ -1,42 +1,42 @@
 {
   "name": "grab-api.js",
   "version": "3.0.0",
-  "description": "Generate Request to API from Browser — the core grab() request manager. One function, zero dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries, rate-limiting, mock testing, pagination and a DevTools overlay.",
+  "description": "The grab() request function on its own — one function, zero dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries, rate-limiting, mock testing, pagination and a DevTools overlay. The core of grab-url, without the loading icons.",
   "type": "module",
   "packageManager": "npm@11.19.1",
   "author": "vtempest <vtempest@github.com>",
   "license": "PROSPER-1.0.0",
   "licenseUrl": "https://rights.institute/prosper",
-  "main": "./dist/grab-api-slim.cjs",
-  "types": "./dist/grab-api-slim.d.ts",
-  "module": "./dist/grab-api-slim.es.js",
+  "main": "./dist/index.slim.cjs.js",
+  "module": "./dist/index.slim.es.js",
+  "types": "./dist/index.slim.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/grab-api-slim.d.ts",
-      "import": "./dist/grab-api-slim.es.js",
-      "require": "./dist/grab-api-slim.cjs"
+      "types": "./dist/index.slim.d.ts",
+      "import": "./dist/index.slim.es.js",
+      "require": "./dist/index.slim.cjs.js"
     },
     "./full": {
-      "types": "./dist/grab-api.d.ts",
-      "import": "./dist/grab-api.es.js",
-      "require": "./dist/grab-api.cjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
     },
     "./slim": {
-      "types": "./dist/grab-api-slim.d.ts",
-      "import": "./dist/grab-api-slim.es.js",
-      "require": "./dist/grab-api-slim.cjs"
+      "types": "./dist/index.slim.d.ts",
+      "import": "./dist/index.slim.es.js",
+      "require": "./dist/index.slim.cjs.js"
     },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
+    "src",
     "LICENSE.md",
     "README.md"
   ],
   "scripts": {
     "build": "vite build --config vite.config.ts",
-    "prepublishOnly": "npm run build",
-    "ship": "bun x standard-version --release-as patch; rm CHANGELOG.md; npm publish"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
@@ -52,10 +52,6 @@
     "axios",
     "request",
     "browser",
-    "tanstack",
-    "query",
-    "post",
-    "mock-api",
     "fetch",
     "http",
     "http-client",
@@ -67,14 +63,14 @@
     "retry",
     "rate-limiting",
     "mock-testing",
+    "mock-api",
     "pagination",
     "infinite-scroll",
     "devtools",
-    "grab",
-    "grab-url",
-    "openapi",
     "typescript",
-    "zero-dependencies"
+    "zero-dependencies",
+    "grab",
+    "grab-url"
   ],
   "repository": {
     "type": "git",
@@ -99,6 +95,6 @@
     "provenance": true
   },
   "sideEffects": false,
-  "unpkg": "dist/grab-api-slim.es.js",
-  "jsdelivr": "dist/grab-api-slim.es.js"
+  "unpkg": "dist/index.slim.es.js",
+  "jsdelivr": "dist/index.slim.es.js"
 }

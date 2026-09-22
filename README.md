@@ -106,29 +106,17 @@ still resolves, as an alias of the default — it is the identical module, so a 
 The **CLI is its own package**, [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli).
 Installing the library runs no install script and pulls nothing down.
 
-### Packages
+### The three packages
 
-Everything above ships from this one monorepo. Pick the package that matches what you need —
-they are all published to npm and all built from the same source.
-
-| Package | Install | What it is |
+| Package | Gives you | Pick it when |
 | --- | --- | --- |
-| [`grab-url`](https://www.npmjs.com/package/grab-url) | `npm i grab-url` | The full library: `grab()`, the loading animations, the quantum sphere and the `log()` logger. Start here. |
-| [`grab-api.js`](https://www.npmjs.com/package/grab-api.js) | `npm i grab-api.js` | Just the request manager — the same `grab()` and `log()`, without the animations or the sphere. Same `.` / `/full` / `/slim` entries, same slim-by-default rule, ~5 kB gzipped. Use it when you want the request layer and nothing else. |
-| [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli) | `npm i -g grab-url-cli` | The `grab` / `grab-url` / `g` command line downloader. |
-| [`api2client`](https://www.npmjs.com/package/api2client) | `npx api2client` | Generates a typed OpenAPI SDK that sends its requests through grab. |
-| [`archiver-web`](https://www.npmjs.com/package/archiver-web) | `npm i archiver-web` | The frontend-only archive extractor behind `unzip`. |
+| **[`grab-url`](https://www.npmjs.com/package/grab-url)** | `grab()`, `log()`, plus `grab-url/animations` (~25 tree-shakable SVG spinners) and `grab-url/icons/quantum-sphere` (a 3D React/Svelte loader) | You want the request client and the loading UI |
+| [`grab-api.js`](https://www.npmjs.com/package/grab-api.js) | `grab()` and `log()` — the same core, same `/full` subpath, nothing else | You only want the request client |
+| [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli) | the `grab-url` / `grab` / `g` commands | You want the terminal downloader |
 
-`grab-url` and `grab-api.js` are the same code with the same API, so switching between
-them is a one-line change to the import:
-
-```ts
-import grab, { log } from "grab-url";     // library + icons
-import grab, { log } from "grab-api.js";  // request manager only
-```
-
-Both are `"type": "module"` with a working CommonJS entry, so `require("grab-api.js")`
-and `import grab from "grab-api.js"` both resolve.
+`grab-url` and `grab-api.js` are built from the same source, so **install one, not both** —
+a project holding both ends up with two `grab()` modules, two `grab.mock` registries and
+two caches, and a stub registered on one is invisible to the other.
 
 ### Examples
 

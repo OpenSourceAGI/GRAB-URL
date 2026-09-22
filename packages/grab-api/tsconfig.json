@@ -17,12 +17,14 @@
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
-    // `@grab-url/log` is a private workspace package with no dist, so TypeScript
-    // has nothing to resolve the bare specifier to. The same mapping exists in
-    // vite.config.ts for the bundler; without it here the declaration build
-    // reports TS2792 on every file that logs.
+    // Without this, vite-plugin-dts cannot resolve the alias and emits
+    // `import { log } from '../../log-json/src/log-json.ts'` into the entry
+    // .d.ts — a path that points outside the published tarball. The mapping is
+    // deliberately extensionless: TypeScript emits the mapped specifier
+    // verbatim, and a `.ts` extension inside a shipped .d.ts fails for any
+    // consumer without `allowImportingTsExtensions`.
     "paths": {
-      "@grab-url/log": ["../log-json/src/log-json.ts"]
+      "@grab-url/log": ["../log-json/src/log-json"]
     }
   },
   "include": ["src/**/*.ts", "../log-json/src/**/*.ts"],
