@@ -21,17 +21,22 @@ const reactExternals = ["react", "react-dom", "react/jsx-runtime", "react/jsx-de
 // it is never bundled and never a dependency of this package.
 const runtimeResolvedPkgs = ["jszip"];
 
+// The alias targets are extensionless on purpose. vite-plugin-dts rewrites an
+// aliased import in the emitted .d.ts to a relative path built from the alias
+// target, so a `.ts` here ships as `import … from './…/log-json.ts'` inside the
+// declarations — which fails for any consumer without
+// `allowImportingTsExtensions`, and points at a `.ts` the tarball does not have.
 const sharedAlias = {
-  "@grab-url/log": resolve(__dirname, "../../packages/log-json/src/log-json.ts"),
-  "@grab-url/grab-api": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
+  "@grab-url/log": resolve(__dirname, "../../packages/log-json/src/log-json"),
+  "@grab-url/grab-api": resolve(__dirname, "../../packages/grab-api/src/index"),
   // The heyapi client imports the published package name; inside the monorepo
   // that resolves to the same source. The subpaths are listed first because a
   // string alias matches as a prefix: "grab-url" alone would rewrite
-  // "grab-url/full" to ".../index.slim.ts/full" and fail to resolve.
-  "grab-url/full": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
-  "grab-url/slim": resolve(__dirname, "../../packages/grab-api/src/index.slim.ts"),
+  // "grab-url/full" to ".../index.slim/full" and fail to resolve.
+  "grab-url/full": resolve(__dirname, "../../packages/grab-api/src/index"),
+  "grab-url/slim": resolve(__dirname, "../../packages/grab-api/src/index.slim"),
   // Bare "grab-url" is the slim entry — same as the published `exports` map.
-  "grab-url": resolve(__dirname, "../../packages/grab-api/src/index.slim.ts"),
+  "grab-url": resolve(__dirname, "../../packages/grab-api/src/index.slim"),
 };
 
 /**

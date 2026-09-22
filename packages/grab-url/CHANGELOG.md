@@ -41,6 +41,19 @@ are unchanged), or `npx grab-url-cli <url>` instead of `npx grab-url <url>`.
 `archiver-web`'s `extract` / `compress` bins likewise build from that package
 rather than riding inside `grab-url`.
 
+**`grab()` is also published on its own**, as
+[`grab-api.js`](https://www.npmjs.com/package/grab-api.js) — the same source and
+the same `/full` and `/slim` subpaths, without the loading icons. Install that
+**or** `grab-url`, never both: they are separate modules built from one source,
+so a project holding both gets two `grab.mock` registries, two `grab.log` arrays
+and two caches.
+
+Both packages' published **type declarations** are fixed too. They carried
+`import { log } from './…/log-json.ts'` — a path to a file the tarball does not
+contain, with an extension a consumer cannot import unless they have
+`allowImportingTsExtensions` on. `vite-plugin-dts` builds that specifier from
+the vite alias target, so the aliases are now extensionless.
+
 ***
 
 ## 1.6.23 — `onRawResponse`, released

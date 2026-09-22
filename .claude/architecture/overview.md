@@ -11,7 +11,7 @@ you run from a terminal is inside what you import in a browser.
 
 | Folder | Published as | What it is |
 | --- | --- | --- |
-| `grab-api` | the `grab-url` main entry (slim) and `grab-url/full` | The `grab()` function. Zero runtime dependencies — that is the product claim. |
+| `grab-api` | the `grab-url` main entry (slim) and `grab-url/full`, **and `grab-api.js` on its own** | The `grab()` function. Zero runtime dependencies — that is the product claim. `grab-api.js` is the same source published without the loading icons; a consumer installs it *or* `grab-url`, never both. |
 | `grab-url-cli` | `grab-url-cli`, with the `grab-url` / `grab` / `g` bins | The download CLI: HTTP, SFTP, torrents/magnets (aria2c), 700+ media sites (yt-dlp), page archiving. **Its own package since 3.0** — importing the library must not install chalk and a yt-dlp binary. |
 | `archiver-web` | `archiver-web`, `grab-url/…` bins | ZIP extract/create on JSZip. Frontend-only, no WASM. Powers auto-unzip. |
 | `api2client` | `api2client` | Generates a typed client from an OpenAPI spec with Hey API, wired to send through `grab` instead of axios. |

@@ -1,18 +1,99 @@
 {
   "name": "grab-api.js",
-  "private": true,
+  "version": "3.0.0",
+  "description": "The grab() request function on its own — one function, zero dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries, rate-limiting, mock testing, pagination and a DevTools overlay. The core of grab-url, without the loading icons.",
   "type": "module",
-  "main": "./src/index.slim.ts",
+  "packageManager": "npm@11.19.1",
+  "author": "vtempest <vtempest@github.com>",
+  "license": "PROSPER-1.0.0",
+  "licenseUrl": "https://rights.institute/prosper",
+  "main": "./dist/index.slim.cjs.js",
+  "module": "./dist/index.slim.es.js",
+  "types": "./dist/index.slim.d.ts",
   "exports": {
-    ".": "./src/index.slim.ts",
-    "./full": "./src/index.ts",
-    "./slim": "./src/index.slim.ts"
+    ".": {
+      "types": "./dist/index.slim.d.ts",
+      "import": "./dist/index.slim.es.js",
+      "require": "./dist/index.slim.cjs.js"
+    },
+    "./full": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./slim": {
+      "types": "./dist/index.slim.d.ts",
+      "import": "./dist/index.slim.es.js",
+      "require": "./dist/index.slim.cjs.js"
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE.md",
+    "README.md"
+  ],
   "scripts": {
-    "build": "vite build --config ../../packages/grab-url/vite.config.ts"
+    "build": "vite build --config vite.config.ts",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "archiver-web": "*",
-    "linkedom": "^0.18.12"
-  }
+    "linkedom": "^0.18.12",
+    "terser": "^5.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "keywords": [
+    "api",
+    "axios",
+    "request",
+    "browser",
+    "fetch",
+    "http",
+    "http-client",
+    "rest-client",
+    "api-client",
+    "fetch-wrapper",
+    "request-deduplication",
+    "caching",
+    "retry",
+    "rate-limiting",
+    "mock-testing",
+    "mock-api",
+    "pagination",
+    "infinite-scroll",
+    "devtools",
+    "typescript",
+    "zero-dependencies",
+    "grab",
+    "grab-url"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSourceAGI/GRAB-URL.git",
+    "directory": "packages/grab-api"
+  },
+  "homepage": "https://grab.js.org",
+  "bugs": {
+    "url": "https://github.com/OpenSourceAGI/GRAB-URL/issues",
+    "email": "vtempest@github.com"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/vtempest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "sideEffects": false,
+  "unpkg": "dist/index.slim.es.js",
+  "jsdelivr": "dist/index.slim.es.js"
 }
