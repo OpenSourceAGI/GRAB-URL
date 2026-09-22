@@ -1,6 +1,6 @@
 {
   "name": "grab-api.js",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "The grab() request function on its own — one function, zero dependencies, minimalist syntax, with auto-JSON, dedupe, caching, retries, rate-limiting, mock testing, pagination and a DevTools overlay. The core of grab-url, without the loading icons.",
   "type": "module",
   "packageManager": "npm@11.19.1",
