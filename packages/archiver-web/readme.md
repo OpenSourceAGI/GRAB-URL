@@ -20,7 +20,7 @@
 </p>
 <!-- template-git-repo:badges:end -->
 
-# Web Universal Archive Extractor and Creator
+# archiver-web
 
 Universal archive **extractor and creator** for the web. TypeScript, frontend-friendly, uses [JSZip](https://stuk.github.io/jszip/) under the hood and runs in Node.js, the browser, Cloudflare Workers, and the CLI.
 
