@@ -1,0 +1,26 @@
+{
+  "name": "grab-url-example-reactive-angular",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@angular/common": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/platform-browser": "^19.0.0",
+    "grab-url": "^3.0.0",
+    "rxjs": "^7.8.1",
+    "zone.js": "^0.15.0"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^1.10.0",
+    "@angular/build": "^19.0.0",
+    "@angular/compiler-cli": "^19.0.0",
+    "typescript": "~5.6.0",
+    "vite": "latest"
+  }
+}

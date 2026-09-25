@@ -5,11 +5,11 @@
  * background jobs.
  *
  * Usage:
- *   npx grab-url <url> [options]
- *   npx grab-url https://api.example.com/data
- *   npx grab-url https://example.com/file.zip
- *   npx grab-url sftp://user@host/path/file.iso
- *   npx grab-url "magnet:?xt=urn:btih:..." --background
+ *   npx grab-url-cli <url> [options]
+ *   npx grab-url-cli https://api.example.com/data
+ *   npx grab-url-cli https://example.com/file.zip
+ *   npx grab-url-cli sftp://user@host/path/file.iso
+ *   npx grab-url-cli "magnet:?xt=urn:btih:..." --background
  */
 
 import fs from "fs";
@@ -359,8 +359,10 @@ if (__isMain) {
 
   // --- yt-dlp installation (no URL needed) ---
   if (argv["install-ytdlp"]) {
-    // dist/grab-url-cli.es.js and packages/grab-url-cli/src/index.ts sit at
-    // different depths, so look for the script from both.
+    // dist/grab-url-cli.es.js and src/index.ts both sit one level under the
+    // package root, so `../scripts` reaches the installer from either. The
+    // second candidate is the grab-url 2.x layout, where the CLI shipped
+    // inside the `grab-url` package rather than as `grab-url-cli`.
     const installer = [
       path.resolve(__dirname, "..", "scripts", "install-yt-dlp.mjs"),
       path.resolve(__dirname, "..", "..", "grab-url", "scripts", "install-yt-dlp.mjs"),

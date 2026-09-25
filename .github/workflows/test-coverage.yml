@@ -1,0 +1,77 @@
+name: Coverage
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One workspace's failure should not hide the coverage of the other.
+      fail-fast: false
+      matrix:
+        include:
+          # `packages/grab-url` owns the monorepo's whole suite: its Vitest
+          # project is rooted at the repository, so it covers every package's
+          # `src/` and writes its lcov to the repository-root `coverage/`.
+          # The report carries one flag per covered package; `flag_management`
+          # in codecov.yml slices it by path so each package gets its own
+          # number.
+          - name: packages
+            dir: packages/grab-url
+            script: test:coverage
+            lcov: coverage/lcov.info
+            flags: api2client,archiver-web,grab-api,grab-url-cli,loading-animations,log-json,quantum-sphere-loading-animation
+          # The Tauri wrapper keeps its own suite and its own coverage dir.
+          - name: native-app-wrapper
+            dir: apps/grab-url-native-wrapper
+            script: coverage
+            lcov: apps/grab-url-native-wrapper/coverage/lcov.info
+            flags: native-app-wrapper
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Node 22 ships npm 10, which cannot resolve this workspace tree at all:
+      # `npm install` dies with "Cannot read properties of null (reading
+      # 'edgesOut')". Corepack activates the npm pinned by `packageManager` in
+      # the root package.json, so CI installs with the same npm as developers.
+      - name: Activate the pinned npm
+        run: corepack enable npm
+
+      - name: Install dependencies
+        run: npm install
+
+      # test/packaging.test.ts reads the built bundles, and it forces those
+      # checks on whenever CI is set rather than skipping them — so without a
+      # build the suite dies on ENOENT for packages/*/dist. tests.yml builds for
+      # the same reason; this job was the one place the step was missing.
+      - name: Build the published packages
+        if: matrix.name == 'packages'
+        run: npx turbo run build --filter=grab-url --filter=grab-api.js --filter=grab-url-cli --filter=archiver-web --filter=api2client
+
+      - name: Run tests with coverage
+        working-directory: ${{ matrix.dir }}
+        run: npm run ${{ matrix.script }}
+
+      - name: Upload coverage to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ matrix.lcov }}
+          flags: ${{ matrix.flags }}
+          slug: OpenSourceAGI/GRAB-URL
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false

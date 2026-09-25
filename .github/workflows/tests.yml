@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [master] # adjust branch as needed
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -13,22 +13,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js # change if you use Python, Go, etc.
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      # Node 22 ships npm 10, which cannot resolve this workspace tree at all:
+      # `npm install` dies with "Cannot read properties of null (reading
+      # 'edgesOut')". Corepack activates the npm pinned by `packageManager`.
+      - name: Activate the pinned npm
+        run: corepack enable npm
 
       - name: Install dependencies
         run: npm install
 
+      # test/packaging.test.ts reads the built bundles to check that the
+      # default `grab-url` import stays slim and that the CLI is not inside it.
+      # Those checks skip when there is no dist, so the build has to run first —
+      # which also means a broken build no longer reaches master unnoticed.
+      - name: Build the published packages
+        run: npx turbo run build --filter=grab-url --filter=grab-api.js --filter=grab-url-cli --filter=archiver-web --filter=api2client
+
+      # Codecov uploads are owned by the Coverage workflow, which flags each
+      # workspace separately. This job is the pass/fail gate.
       - name: Run tests with coverage
         run: npm run test:coverage
-
-      - name: Upload coverage reports to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: OpenSourceAGI/grab-url
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false

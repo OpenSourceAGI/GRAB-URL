@@ -286,3 +286,37 @@ Every operation in the spec becomes an MCP tool, classified by risk (`low`/`medi
 ```
 
 Full reference: [API2AI: OpenAPI to MCP-Use Server](/docs/openapi-services/api2ai-mcp-server).
+
+---
+
+# One spec, all three
+
+The SDK, the MCP server and the API reference all read the same file, so they
+cannot drift from each other — there is only one spec to change.
+
+```bash
+npx api2client ./openapi.json ./src/client            # typed SDK, sent by grab
+npx api2ai ./openapi.json ./mcp-server --name my-api  # MCP server for agents
+```
+
+For the third, render the spec with any OpenAPI viewer —
+[Scalar](https://scalar.com)'s `createApiReference` mounts it into a page in one
+call:
+
+```ts
+import { createApiReference } from "@scalar/api-reference";
+import spec from "../openapi.json";
+
+createApiReference(document.getElementById("api-reference")!, { content: spec });
+```
+
+The example below does all three at once, and includes an
+[`mcp-use`](https://mcp-use.com) client that connects to the generated server,
+lists its tools and calls one.
+
+<StackBlitzExample
+  title="Open the one-spec example"
+  description="A typed SDK sending through grab, an MCP server generated from the same spec, and the API reference rendered beside them."
+  github="OpenSourceAGI/GRAB-URL/tree/master/examples/openapi-mcp-docs"
+  openFile="src/main.ts"
+/>

@@ -1,0 +1,19 @@
+{
+  "name": "grab-url-example-reactive-preact",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "grab-url": "^3.0.0",
+    "preact": "latest"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  }
+}

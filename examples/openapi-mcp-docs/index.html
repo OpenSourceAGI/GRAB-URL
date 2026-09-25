@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>grab-url · One spec, three outputs</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>One spec, three outputs</h1>
+      <p>
+        <code>openapi.json</code> generates a typed SDK sent by
+        <code>grab</code>, an MCP server for AI agents, and the API reference
+        below — all from the same file.
+      </p>
+
+      <h2>1. The generated SDK, calling through grab</h2>
+      <pre id="output">Loading…</pre>
+
+      <h2>2. The generated MCP server</h2>
+      <pre id="tools">Loading…</pre>
+
+      <h2>3. The generated API reference</h2>
+    </main>
+    <div id="api-reference"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

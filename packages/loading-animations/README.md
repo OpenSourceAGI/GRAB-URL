@@ -25,7 +25,7 @@
 Two tree-shakable collections of loading animations:
 
 - **SVG** — 25 animated SVG spinners for the browser, each rendered by a single function call. Customize colors, size, width, and height per call.
-- **CLI** — Unicode/emoji spinner frame data for terminal UIs (used by [`@grab-url/cli`](../grab-url-cli)).
+- **CLI** — Unicode/emoji spinner frame data for terminal UIs (used by [`grab-url-cli`](../grab-url-cli)).
 
 Both are zero-dependency and named-exported so bundlers strip out anything you don't use.
 

@@ -17,6 +17,14 @@ using pnpm.
 
 **npm.** `packageManager` pins `npm@11.19.1`, the committed lockfile is
 `package-lock.json`, and CI runs `npm install` (tests) and `npm ci` (Pages).
+`.gitignore` ignores `*lock.json` and then re-includes `package-lock.json` — do
+not drop that negation. Without it the file is untracked, `npm ci` has nothing
+to install from, and `actions/setup-node`'s `cache: npm` fails the Pages job
+before it starts with *"Dependencies lock file is not found"*.
+
+Both workflows that install run `corepack enable npm` first: Node 22's bundled
+npm 10 cannot resolve this workspace tree at all (`Cannot read properties of
+null (reading 'edgesOut')`).
 There is no `.npmrc`: its one key, `package-manager-strict=false`, is a pnpm
 setting that npm 11 warns about on every install, so it now lives in
 `pnpm-workspace.yaml` as `packageManagerStrict: false`.
@@ -71,24 +79,35 @@ There are no per-package test folders. A new test for
 `packages/whatever/src/thing.ts` goes in `test/thing.test.ts`.
 
 Coverage (v8) includes `packages/**/src/**` and excludes `dist`, `.d.ts`,
-Svelte sources, `svg/` and `demo/` directories.
+Svelte sources, `svg/` and `demo/` directories. The Vitest project is rooted at
+the **monorepo**, not at `packages/grab-url` — Vitest only instruments files
+inside the project root, so rooting it at the package reported nothing for
+`grab-api`, `log-json`, `api2client` or `archiver-web`. That is also why every
+test imports a sibling package as `../../<package>/src/...`: the paths are
+relative to the test file, and a `../` path only ever resolved by accident
+through Vite's fallback to the project root.
+
+The report is written to the repository-root `coverage/`, with paths relative
+to the repository so Codecov can map them.
 
 ```bash
 npm run test
 npm run test:coverage    # what CI runs
 npm run test:ui
-npm run test:cli         # a real download against a live Ubuntu ISO URL
 ```
 
-`test:cli` hits the network and downloads a large file. It is a smoke test, not
-part of the suite — don't wire it into CI.
+`packages/grab-url-cli`'s `npm run test:cli` hits the network and downloads a
+large file. It is a smoke test, not part of the suite — don't wire it into CI.
 
-## `postinstall` downloads yt-dlp
+## `postinstall` downloads yt-dlp — in `grab-url-cli`, not the library
 
-`scripts/install-yt-dlp.mjs --postinstall` runs on every install. If an install
-appears to hang or fails behind a proxy, that is where to look:
+`packages/grab-url-cli/scripts/install-yt-dlp.mjs --postinstall` runs when
+`grab-url-cli` is installed. Installing the `grab-url` library downloads
+nothing. If a CLI install appears to hang or fails behind a proxy, that is where
+to look:
 
 ```bash
+cd packages/grab-url-cli
 npm run ytdlp            # force a re-download
 npm run ytdlp:sidecar    # fetch the sidecar binary for a packaged app
 ```

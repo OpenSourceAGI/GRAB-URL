@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: "https://registry.npmjs.org"
 
       - uses: oven-sh/setup-bun@v2
@@ -66,8 +66,15 @@ jobs:
 
               remote_version=$(npm view "$name" version 2>/dev/null || echo "")
 
-              if [ "$remote_version" = "$version" ]; then
-                echo "🔼 Bumping $name because $version already exists on npm"
+              # Anything at or behind the registry cannot be published: npm
+              # rejects a version it already has. Comparing only for equality
+              # missed the behind case, which is how three packages ended up
+              # stuck — see the `always()` on the bump step below. Re-anchor on
+              # the registry, then bump from there.
+              if [ -n "$remote_version" ] && \
+                 [ "$(printf '%s\n%s\n' "$version" "$remote_version" | sort -V | head -1)" = "$version" ]; then
+                echo "🔼 Bumping $name: $version is not ahead of $remote_version on npm"
+                npm version "$remote_version" --no-git-tag-version --allow-same-version
                 npm version patch --no-git-tag-version
                 version=$(node -e "const p=require('./package.json'); console.log(p.version)")
               fi
@@ -92,9 +99,20 @@ jobs:
             exit 1
           fi
 
+      # always(), not success(): a run that publishes some packages and fails on
+      # others still bumped the ones that went out. Dropping those bumps is what
+      # left the repo claiming versions older than the registry's.
       - name: Commit version bumps
-        if: success()
+        if: always()
         run: |
+          # The publish loop runs `npm install` inside each package. In a
+          # workspace that rewrites the ROOT lockfile down to just that
+          # package's tree, and committing the result left `npm ci` — which
+          # pages.yml and Vercel both use — unable to install. Throw that away
+          # and rebuild the lockfile from the bumped package.json files.
+          git checkout -- package-lock.json
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
           git add packages/*/package.json package-lock.json
           git diff --staged --quiet && echo "No version changes to commit" && exit 0
           git commit -m "chore: bump published package versions [skip ci]"

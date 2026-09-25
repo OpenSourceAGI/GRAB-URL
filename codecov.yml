@@ -14,10 +14,46 @@ comment:
   behavior: default
   require_changes: false
 
+# One Vitest project (packages/grab-url) covers every package's `src/`, so the
+# per-package breakdown comes from filtering that single report by path rather
+# than from separate uploads. Flags are named after the workspace directory —
+# npm names like `@grab-url/log` are not valid flag names.
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: api2client
+      paths:
+        - packages/api2client/
+    - name: archiver-web
+      paths:
+        - packages/archiver-web/
+    - name: grab-api
+      paths:
+        - packages/grab-api/
+    - name: grab-url-cli
+      paths:
+        - packages/grab-url-cli/
+    - name: loading-animations
+      paths:
+        - packages/loading-animations/
+    - name: log-json
+      paths:
+        - packages/log-json/
+    - name: quantum-sphere-loading-animation
+      paths:
+        - packages/quantum-sphere-loading-animation/
+    - name: native-app-wrapper
+      paths:
+        - apps/grab-url-native-wrapper/
+
 ignore:
-  - "dist"
-  - "docs"
-  - "grab-help-docs"
-  - "test"
+  - "**/dist/**"
+  - "**/test/**"
   - "**/*.test.ts"
   - "**/svg/**"
+  - "**/demo/**"
+  - "docs/**"
+  - "examples/**"
+  - "apps/grab-help-docs/**"
+  - "starter-templates/**"

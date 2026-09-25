@@ -50,7 +50,7 @@ await grab("users", {
 ### Reactive Loading Status
 
 
-<Tabs  groupId="language"  items={['React', 'Vue', 'Svelte']}>
+<Tabs  groupId="language"  items={['React', 'Preact', 'Vue', 'Vue Options', 'Svelte', 'Solid', 'Angular', 'Qwik']}>
 <Tab value="React" >
 
 ```jsx
@@ -93,6 +93,43 @@ function UserProfile() {
 
 </Tab>
 
+<Tab value="Preact" >
+
+```jsx
+import { useEffect, useState } from "preact/hooks";
+import grab from "grab-url";
+
+function UserProfile() {
+  const [userState, setUserState] = useState({});
+
+  useEffect(() => {
+    grab("user", { response: setUserState });
+  }, []);
+
+  return (
+    <div>
+      {userState.isLoading && <div>Loading...</div>}
+      {userState.error && <div>Error: {userState.error}</div>}
+      {userState.name && (
+        <div>
+          <h2>{userState.name}</h2>
+          <p>{userState.email}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+<StackBlitzExample
+  title="Run the Preact example"
+  description="The React pattern on preact/hooks — the same setter goes into grab's `response` option."
+  github="OpenSourceAGI/GRAB-URL/tree/master/examples/reactive-preact"
+  openFile="src/App.tsx"
+/>
+
+</Tab>
+
 <Tab value="Svelte" >
 
 ```javascript
@@ -100,8 +137,9 @@ function UserProfile() {
   import grab from 'grab-url';
 
 
+  // grab puts the parsed body on `data`, so that is what the list reads.
   let searchResults = $state({
-    results: [],
+    data: [],
     isLoading: false,
     error: null
   });
@@ -126,9 +164,9 @@ function UserProfile() {
   <div class="loading">Searching...</div>
 {:else if searchResults.error}
   <div class="error">{searchResults.error}</div>
-{:else if searchResults.results}
+{:else if searchResults.data}
   <div class="results">
-    {#each searchResults.results as product}
+    {#each searchResults.data as product}
       <div class="product-card">
         <h3>{product.name}</h3>
         <p>${product.price}</p>
@@ -163,7 +201,7 @@ function UserProfile() {
     </div>
     <div v-else class="user-list">
       <div 
-        v-for="user in userResults.users" 
+        v-for="user in userResults.data" 
         :key="user.id"
         class="user-card"
       >
@@ -176,8 +214,9 @@ function UserProfile() {
 import { ref, reactive } from 'vue';
 import grab from 'grab-url';
 const searchTerm = ref('');
+// grab puts the parsed body on `data`, so that is what the list reads.
 const userResults = reactive({
-  users: [],
+  data: [],
   isLoading: false,
   error: null
 });
@@ -198,6 +237,177 @@ const searchUsers = async () => {
   description="A search-as-you-type list backed by grab's reactive `response` option."
   github="OpenSourceAGI/GRAB-URL/tree/master/examples/reactive-vue"
   openFile="src/App.vue"
+/>
+
+</Tab>
+
+<Tab value="Vue Options" >
+
+```javascript
+<template>
+  <div>
+    <input v-model="searchTerm" @input="searchUsers" placeholder="Search users..." />
+    <div v-if="userResults.isLoading" class="loading">Loading users...</div>
+    <div v-else-if="userResults.error" class="error">{{ userResults.error }}</div>
+    <div v-else class="user-list">
+      <div v-for="user in userResults.data" :key="user.id" class="user-card">
+        {{ user.name }} - {{ user.email }}
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import grab from 'grab-url';
+
+// Everything data() returns is already reactive, so this.userResults goes
+// straight into grab's response option — no ref or reactive() call needed.
+export default {
+  data() {
+    return {
+      searchTerm: '',
+      userResults: { data: [], isLoading: false, error: null }
+    };
+  },
+  methods: {
+    async searchUsers() {
+      if (this.searchTerm.length < 2) return;
+
+      await grab('users/search', {
+        response: this.userResults,
+        query: this.searchTerm
+      });
+    }
+  }
+};
+</script>
+```
+
+<StackBlitzExample
+  title="Run the Vue Options API example"
+  description="The same search-as-you-type list, written with the Options API."
+  github="OpenSourceAGI/GRAB-URL/tree/master/examples/reactive-vue-options"
+  openFile="src/App.vue"
+/>
+
+</Tab>
+
+<Tab value="Solid" >
+
+```jsx
+import { createMutable } from "solid-js/store";
+import { onMount, Show } from "solid-js";
+import grab from "grab-url";
+
+function UserProfile() {
+  // createMutable is a deep proxy, so the writes grab makes to this object are
+  // the reactive updates — no setter to thread through.
+  const user = createMutable({});
+
+  onMount(() => {
+    grab("user", { response: user });
+  });
+
+  return (
+    <div>
+      <Show when={user.isLoading}><div>Loading...</div></Show>
+      <Show when={user.error}><div>Error: {user.error}</div></Show>
+      <Show when={user.name}>
+        <div>
+          <h2>{user.name}</h2>
+          <p>{user.email}</p>
+        </div>
+      </Show>
+    </div>
+  );
+}
+```
+
+<StackBlitzExample
+  title="Run the Solid example"
+  description="A createMutable store handed straight to grab's reactive `response` option."
+  github="OpenSourceAGI/GRAB-URL/tree/master/examples/reactive-solid"
+  openFile="src/App.tsx"
+/>
+
+</Tab>
+
+<Tab value="Angular" >
+
+```typescript
+import { Component, signal } from "@angular/core";
+import grab from "grab-url";
+
+@Component({
+  selector: "app-user-profile",
+  standalone: true,
+  template: `
+    @if (user().isLoading) { <div>Loading...</div> }
+    @if (user().error) { <div>Error: {{ user().error }}</div> }
+    @if (user().name) {
+      <div>
+        <h2>{{ user().name }}</h2>
+        <p>{{ user().email }}</p>
+      </div>
+    }
+  `,
+})
+export class UserProfileComponent {
+  user = signal<Record<string, any>>({});
+
+  constructor() {
+    // grab calls `response` with a new object for each state the request
+    // reaches, which is exactly what a signal wants.
+    grab("user", {
+      response: (next: Record<string, any>) => this.user.set({ ...next }),
+    });
+  }
+}
+```
+
+<StackBlitzExample
+  title="Run the Angular example"
+  description="A standalone component whose signal is fed by grab's reactive `response` option."
+  github="OpenSourceAGI/GRAB-URL/tree/master/examples/reactive-angular"
+  openFile="src/app.component.ts"
+/>
+
+</Tab>
+
+<Tab value="Qwik" >
+
+```jsx
+import { component$, useStore, useVisibleTask$ } from "@builder.io/qwik";
+import grab from "grab-url";
+
+export const UserProfile = component$(() => {
+  // useStore returns a reactive proxy, so the writes grab makes to it are what
+  // re-render the component.
+  const user = useStore({});
+
+  useVisibleTask$(() => {
+    grab("user", { response: user });
+  });
+
+  return (
+    <div>
+      {user.isLoading && <div>Loading...</div>}
+      {user.error && <div>Error: {user.error}</div>}
+      {user.name && (
+        <div>
+          <h2>{user.name}</h2>
+          <p>{user.email}</p>
+        </div>
+      )}
+    </div>
+  );
+});
+```
+
+<StackBlitzExample
+  title="Run the Qwik example"
+  description="A useStore proxy driven by grab's reactive `response` option inside a useVisibleTask$."
+  github="OpenSourceAGI/GRAB-URL/tree/master/examples/reactive-qwik"
+  openFile="src/App.tsx"
 />
 
 </Tab>
@@ -445,5 +655,15 @@ If the API you're calling has an OpenAPI spec, generate the client instead of ha
   title="Open the Hey API SDK example"
   description="A generated Petstore SDK with per-request caching, errors returned as data, and grab.mock stubbing an endpoint."
   github="OpenSourceAGI/GRAB-URL/tree/master/examples/api2client-petstore"
+  openFile="src/main.ts"
+/>
+
+The same spec can generate an MCP server for AI agents and the API reference
+alongside the SDK — one file, three outputs:
+
+<StackBlitzExample
+  title="Open the one-spec example"
+  description="A typed SDK sending through grab, an MCP server generated from the same spec, and the API reference rendered beside them."
+  github="OpenSourceAGI/GRAB-URL/tree/master/examples/openapi-mcp-docs"
   openFile="src/main.ts"
 />

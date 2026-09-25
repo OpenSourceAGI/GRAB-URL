@@ -30,85 +30,89 @@ npm i archiver-web
 
 ## Quick Start
 
-**Extract a folder out of a remote archive:**
+**Extract a folder out of an archive:**
 
 ```ts
-import { extractFolder } from "archiver-web";
+import { extract } from "archiver-web";
 
-const files = await extractFolder({
-  archiveUrl: "https://github.com/user/repo/archive/main.zip",
+const response = await fetch("https://github.com/user/repo/archive/main.zip");
+
+const files = await extract({
+  archiveBuffer: await response.arrayBuffer(),
   folderPath: "src/",
 });
-// [{ path: 'main.ts', size: 2048, content: '...', mime: 'text/typescript' }]
+// [{ path: 'main.ts', size: 2048, content: '...', mime: 'application/octet-stream' }]
 ```
 
 **Create an archive from in-memory files:**
 
 ```ts
-import { createArchive, ArchiveCompression, ArchiveFormat } from "archiver-web";
+import { compress } from "archiver-web";
 
-const archive = await createArchive({
+const archive = await compress({
   files: [{ path: "hello.txt", content: "World!" }],
-  outputName: "out.tar.gz",
-  compression: ArchiveCompression.GZIP,
+  outputName: "out.zip",
 });
+// { blob, mime: 'application/zip', downloadName: 'out.zip' }
 ```
 
-## Format Comparison
+## Format
 
-| Format      | Compression | Speed      | Size       | % Reduction (10MB) | Use Case         |
-| ----------- | ----------- | ---------- | ---------- | ------------------ | ---------------- |
-| **ZIP**     | Deflate 1-9 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐   | **79%**            | Web/distribution |
-| **7z**      | LZMA 1-9    | ⭐⭐⭐     | ⭐⭐⭐⭐⭐ | **88%**            | Max compression  |
-| **TAR.GZ**  | GZIP 1-9    | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | **72%**            | Linux/fast       |
-| **TAR.BZ2** | BZIP2 1-9   | ⭐⭐       | ⭐⭐⭐⭐   | **82%**            | Medium Unix      |
-| **TAR**     | None        | ⭐⭐⭐⭐⭐ | ⭐         | **0%**             | Bundling         |
+ZIP only, with DEFLATE at levels 1-9 (default 6) — JSZip is the whole engine, so
+there is no 7z, TAR or BZIP2 here, and password-protected archives throw.
 
 ## API
 
 ```ts
-// Extract a folder (or single file path) out of a remote archive
-extractFolder({
-  archiveUrl: string,
+// Read an archive's bytes. folderPath keeps only entries under that prefix and
+// strips it from the returned paths.
+extract({
+  archiveBuffer: ArrayBuffer,
   folderPath?: string,
-  password?: string,
-});
+  password?: string,   // throws — JSZip cannot decrypt
+}): Promise<Array<{ path: string; size: number; content: string; mime: string }>>
 
-// Create an archive from a list of files
-createArchive({
-  files: Array<{ path: string; content: string | Uint8Array | Blob }>,
+// The same, incrementally: onFile fires per entry instead of buffering them all.
+extractStream({
+  stream: ReadableStream,
+  onFile?: (file: { path: string; size: number; content: string }) => void,
+}): Promise<void>
+
+// Create a ZIP from a list of files
+compress({
+  files: Array<{ path: string; content: string | Uint8Array | ArrayBuffer | Blob }>,
   outputName: string,
-  format?: ArchiveFormat,
-  compression?: ArchiveCompression,
-  compressionLevel?: 1 | 3 | 6 | 9, // 1 = fastest, 9 = best
-});
+  compressionLevel?: 1 | 3 | 6 | 9,   // 1 = fastest, 9 = best
+}): Promise<{ blob: Blob; mime: string; downloadName: string }>
 ```
 
 ## Usage Recipes
 
 ```ts
-// Extract just the React `packages/react` source from upstream
-const reactSrc = await extractFolder({
-  archiveUrl: "https://github.com/facebook/react/archive/main.zip",
-  folderPath: "react-*/packages/react",
+// Pull just one folder out of a repo tarball
+const response = await fetch("https://github.com/facebook/react/archive/main.zip");
+
+const reactSrc = await extract({
+  archiveBuffer: await response.arrayBuffer(),
+  folderPath: "react-main/packages/react/",
 });
 
-// Repackage it as 7z at max compression
-const tiny7z = await createArchive({
+// Repackage it at max compression
+const repacked = await compress({
   files: reactSrc,
-  outputName: "react.7z",
-  compression: ArchiveCompression.LZMA,
-  compressionLevel: 9, // ~88% reduction
+  outputName: "react.zip",
+  compressionLevel: 9,
 });
 ```
 
 ## CLI
 
-The package exposes two bins for one-off use:
+The package exposes two bins for one-off use. Both read stdin when no file is
+given, and write to stdout when no output is given:
 
 ```bash
-npx extract <archiveUrl> [folderPath]
-npx compress <inputDir> <outputName>
+npx extract <archive.zip> -o <out-dir> [-d <folder-in-archive>]
+npx compress <files...> -o <out.zip> [-l <1-9>]
 ```
 
 ## Development

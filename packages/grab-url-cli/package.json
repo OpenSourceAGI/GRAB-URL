@@ -1,16 +1,39 @@
 {
-  "name": "@grab-url/cli",
-  "private": true,
+  "name": "grab-url-cli",
+  "version": "1.0.0",
+  "description": "The grab-url transfer CLI: resumable HTTP/SFTP downloads, torrents and magnets via aria2c, 700+ media sites via yt-dlp, and whole-page archiving. Ships as its own package so importing grab-url stays a 5kB library.",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/grab-url-cli.cjs.js",
+  "module": "./dist/grab-url-cli.es.js",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./dist/grab-url-cli.es.js",
+      "require": "./dist/grab-url-cli.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "grab-url": "./dist/grab-url-cli.es.js",
+    "grab": "./dist/grab-url-cli.es.js",
+    "g": "./dist/grab-url-cli.es.js"
+  },
+  "files": [
+    "dist",
+    "scripts/install-yt-dlp.mjs",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "vite build --config vite.config.ts",
+    "prepublishOnly": "npm run build",
+    "postinstall": "node ./scripts/install-yt-dlp.mjs --postinstall",
+    "ytdlp": "node ./scripts/install-yt-dlp.mjs --force",
+    "ytdlp:sidecar": "node ./scripts/install-yt-dlp.mjs --sidecar",
+    "test:cli": "node ./dist/grab-url-cli.es.js https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso"
   },
   "dependencies": {
     "chalk": "^5.6.2",
     "cli-progress": "^3.12.0",
-    "cli-table3": "^0.6.5",
-    "loading-animations": "*"
+    "cli-table3": "^0.6.5"
   },
   "peerDependencies": {
     "extract-webpage": ">=1.2.310"
@@ -19,5 +42,51 @@
     "extract-webpage": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "loading-animations": "*",
+    "terser": "^5.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "keywords": [
+    "cli",
+    "download",
+    "downloader",
+    "file-downloader",
+    "resume",
+    "yt-dlp",
+    "aria2",
+    "torrent",
+    "magnet",
+    "sftp",
+    "web-archiving",
+    "grab-url"
+  ],
+  "author": "vtempest <vtempest@github.com>",
+  "license": "PROSPER-1.0.0",
+  "licenseUrl": "https://rights.institute/prosper",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSourceAGI/GRAB-URL.git",
+    "directory": "packages/grab-url-cli"
+  },
+  "homepage": "https://grab.js.org",
+  "bugs": {
+    "url": "https://github.com/OpenSourceAGI/GRAB-URL/issues",
+    "email": "vtempest@github.com"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/vtempest"
   }
 }

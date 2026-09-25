@@ -295,8 +295,10 @@ function generatePackageJson(serverName, tools, port) {
       dev: 'node --watch src/index.js',
     },
     dependencies: {
+      // mcp-use has required `zod@^4` as a peer since 1.12; pinning ^3 here
+      // made every generated server fail `npm install` on ERESOLVE.
       'mcp-use': '^1.11.2',
-      'zod': '^3.23.0',
+      'zod': '^4.0.0',
       'dotenv': '^16.4.0',
     },
     engines: { node: '>=18.0.0' },

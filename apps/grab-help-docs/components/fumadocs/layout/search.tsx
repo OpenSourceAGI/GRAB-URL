@@ -1,6 +1,6 @@
 /**
  * @file search.tsx
- * @description Custom search dialog component using Orama for documentation search.
+ * @description Custom search dialog component backed by the Fumadocs static search index.
  */
 'use client';
 import {
@@ -15,15 +15,7 @@ import {
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
-import { create } from '@orama/orama';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
-
-function initOrama() {
-  return create({
-    schema: { _: 'string' },
-    language: 'english',
-  });
-}
 
 export default function DefaultSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
@@ -32,7 +24,6 @@ export default function DefaultSearchDialog(props: SharedProps) {
     // `basePath` rewrites links and assets but not fetch() URLs, so the GitHub Pages
     // build (served under /<repo>) has to prefix the search index path itself.
     from: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/docs/api/docs-search`,
-    initOrama,
     locale,
   });
 

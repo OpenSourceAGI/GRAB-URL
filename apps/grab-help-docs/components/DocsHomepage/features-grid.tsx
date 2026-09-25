@@ -42,12 +42,12 @@ const categories = [
       {
         icon: Braces,
         title: "DOM Parsing",
-        description: "Automatically parses HTML responses. Pass dom: \"selector\" for CSS extraction or dom: false to disable.",
+        description: "Automatically parses HTML responses. Pass dom: \"selector\" for CSS extraction or dom: false to disable. Import from grab-url/full.",
       },
       {
         icon: PackageOpen,
         title: "Auto-Unzip",
-        description: "Automatically extracts ZIP responses into { data: { filename: content } }. Set unzip: false to disable.",
+        description: "Automatically extracts ZIP responses into { data: { filename: content } }. Set unzip: false to disable. Import from grab-url/full.",
       },
       {
         icon: Upload,
@@ -140,7 +140,7 @@ const categories = [
       {
         icon: Terminal,
         title: "CLI Testing",
-        description: "npm i -g grab-url for command line API testing with params and JSON payloads.",
+        description: "npm i -g grab-url-cli for command line API testing with params and JSON payloads.",
       },
     ],
   },

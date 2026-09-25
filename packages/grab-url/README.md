@@ -1,5 +1,6 @@
-<!-- template-git-repo:badges:start -->
-<p align="center">
+
+<p align="center"> 
+        <img src="https://i.imgur.com/HVLYLqR.png" /> <br />
     <a href="https://deepwiki.com/OpenSourceAGI/GRAB-URL"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" /></a>
     <a href="https://grab.js.org"><img src="https://img.shields.io/badge/Docs-blue?logo=ReadTheDocs&logoColor=white" alt="Documentation" /></a>
     <a href="https://stackblitz.com/github/OpenSourceAGI/GRAB-URL/tree/master/examples/basic-request"><img height="20px" src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" /></a>
@@ -8,8 +9,6 @@
     <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/dm/grab-url.svg" alt="NPM Monthly Downloads" /></a>
     <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/v/grab-url.svg" alt="npm version" /></a>
     <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/dt/grab-url.svg" alt="NPM Total Downloads" /></a>
-    <a href="https://www.npmjs.com/package/grab-url"><img src="https://img.shields.io/npm/types/grab-url" alt="TypeScript types" /></a>
-    <a href="https://packagephobia.com/result?p=grab-url"><img src="https://packagephobia.com/badge?p=grab-url" alt="Install size" /></a>
     <a href="https://codecov.io/gh/OpenSourceAGI/GRAB-URL"><img src="https://codecov.io/gh/OpenSourceAGI/GRAB-URL/graph/badge.svg" alt="Coverage" /></a>
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/actions/workflows/tests.yml"><img src="https://github.com/OpenSourceAGI/GRAB-URL/actions/workflows/tests.yml/badge.svg?branch=master" alt="CI status" /></a>
     <br />
@@ -22,17 +21,15 @@
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/discussions"><img src="https://img.shields.io/github/discussions/OpenSourceAGI/GRAB-URL" alt="GitHub Discussions" /></a>
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/graphs/contributors"><img src="https://img.shields.io/github/commit-activity/m/OpenSourceAGI/GRAB-URL" alt="Commit activity" /></a>
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/commits/master/"><img src="https://img.shields.io/github/last-commit/OpenSourceAGI/GRAB-URL.svg" alt="GitHub last commit" /></a>
-    <a href="https://discord.gg/SJdBqBz3tV"><img src="https://img.shields.io/discord/1110227955554209923.svg?label=Chat&logo=Discord&colorB=7289da&style=flat" alt="Join Discord" /></a>
-    <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request"><img src="https://img.shields.io/badge/PRs--welcome-brightgreen" alt="PRs Welcome" /></a>
+    <a href="https://discord.gg/SJdBqBz3tV"><img src="https://img.shields.io/discord/1110227955554209923.svg?label=Chat&logo=Discord&colorB=7289da&style=flat" alt="Join Discord" /></a><a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" /></a>
     <br />
     <img src="https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=white" alt="Claude" /> <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /> <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=white" alt="React" />     <a href="https://grab.js.org"><img src="https://i.imgur.com/mbZKlD0.png" alt="grab.js.org" /></a>
-    <br />
-        <img src="https://i.imgur.com/xzFQmrD.jpeg" />
+   
 </p>
 <!-- template-git-repo:badges:end -->
 
 ```bash
-npm i grab-url
+npm i grab-url          # ~5 kB gzipped, zero dependencies, no install scripts
 ```
 
 ### GRAB: Generate Request to API from Browser
@@ -44,8 +41,8 @@ npm i grab-url
 _Send anything, get back parsed data — no boilerplate per content type._
 
 - **Auto-JSON Convert**: Pass parameters and get response or error in JSON, handling other data types as is.
-- **Auto-Unzip**: Automatically extracts ZIP responses into `{ data: { filename: content } }` using archiver-web. Set `unzip: false` to disable.
-- **DOM Parsing**: Automatically parses HTML responses. Pass `parseDOM: "selector"` for CSS selector extraction or `parseDOM: false` to disable. Uses linkedom.
+- **Auto-Unzip**: Automatically extracts ZIP responses into `{ data: { filename: content } }` using archiver-web. Set `unzip: false` to disable. Import from `grab-url/full` — see [Slim by default](#slim-by-default).
+- **DOM Parsing**: Automatically parses HTML responses. Pass `parseDOM: "selector"` for CSS selector extraction or `parseDOM: false` to disable. Uses linkedom. Import from `grab-url/full` — see [Slim by default](#slim-by-default).
 - **Request Stategies**: [🎯 Examples](https://grab.js.org/docs/examples) show common stategies like debounce, repeat, proxy, unit tests, interceptors, file upload, etc
 
 #### Reliability & Traffic Control
@@ -86,27 +83,61 @@ _Drop it into any stack, any runtime, or generate a whole client from a spec._
 - **Framework Agnostic**: Alternatives like TanStack work only in component initialization and depend on React & others.
 - **[OpenAPI SDKs](https://grab.js.org/docs/openapi-services)**: Generate a typed client from any OpenAPI spec with [Hey API](https://heyapi.dev) and have it send requests with grab instead of axios: `npx api2client ./openapi.yaml ./src/client`. Every endpoint gets caching, retries, rate limiting, dedupe and mocks.
 
+### Slim by default
+
+`import grab from "grab-url"` gives you the **slim** build: about 5 kB gzipped, zero
+dependencies, nothing lazily reachable that you did not ask for. That is every feature
+above except the two that need a heavy library — ZIP extraction and HTML/DOM parsing.
+
+Those two live one subpath away:
+
+```ts
+import grab from "grab-url";        // default — ~5 kB gzipped
+import grab from "grab-url/full";   // + `unzip` and `parseDOM`
+```
+
+`grab-url/full` adds linkedom (~174 kB) and the archive extractor, both behind lazy
+imports, so they download only when a response actually needs one of them. `grab-url/slim`
+still resolves, as an alias of the default — it is the identical module, so a stub on
+`grab.mock` registered through either specifier is visible to the other.
+
+The **CLI is its own package**, [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli).
+Installing the library runs no install script and pulls nothing down.
+
+### The three packages
+
+| Package | Gives you | Pick it when |
+| --- | --- | --- |
+| **[`grab-url`](https://www.npmjs.com/package/grab-url)** | `grab()`, `log()`, plus `grab-url/animations` (~25 tree-shakable SVG spinners) and `grab-url/icons/quantum-sphere` (a 3D React/Svelte loader) | You want the request client and the loading UI |
+| [`grab-api.js`](https://www.npmjs.com/package/grab-api.js) | `grab()` and `log()` — the same core, same `/full` subpath, nothing else | You only want the request client |
+| [`grab-url-cli`](https://www.npmjs.com/package/grab-url-cli) | the `grab-url` / `grab` / `g` commands | You want the terminal downloader |
+
+`grab-url` and `grab-api.js` are built from the same source, so **install one, not both** —
+a project holding both ends up with two `grab()` modules, two `grab.mock` registries and
+two caches, and a stub registered on one is invisible to the other.
+
 ### Examples
 
-**CLI File Downloader**
+**CLI File Downloader** — `npm i -g grab-url-cli`, or `npx grab-url-cli`
 ```bash
-npx grab-url https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
+npx grab-url-cli https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
 
-# 700+ media sites are detected by domain and pulled with yt-dlp, installed on npm install
-npx grab-url "https://www.youtube.com/watch?v=VIDEO_ID"
-npx grab-url https://soundcloud.com/artist/track -a mp3
+# 700+ media sites are detected by domain and pulled with yt-dlp, which
+# installing grab-url-cli fetches for you
+npx grab-url-cli "https://www.youtube.com/watch?v=VIDEO_ID"
+npx grab-url-cli https://soundcloud.com/artist/track -a mp3
 
 # SFTP, torrents and magnet links (needs aria2c installed)
-npx grab-url sftp://user@host/srv/backup.tar.gz --password hunter2
-npx grab-url "magnet:?xt=urn:btih:HASH" -d ./downloads
+npx grab-url-cli sftp://user@host/srv/backup.tar.gz --password hunter2
+npx grab-url-cli "magnet:?xt=urn:btih:HASH" -d ./downloads
 
 # Archive a page into ./<Page Title>/ - article, cite, transcript and any video
 # (needs `npm i -g extract-webpage`; the video step needs yt-dlp)
-npx grab-url https://example.com/article --page
+npx grab-url-cli https://example.com/article --page
 
 # Detach and keep going in the background; Ctrl+C on any transfer offers the same
-npx grab-url https://example.com/big.iso --background
-npx grab-url --jobs
+npx grab-url-cli https://example.com/big.iso --background
+npx grab-url-cli --jobs
 ```
 
 

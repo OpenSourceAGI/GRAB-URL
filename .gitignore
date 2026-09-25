@@ -10,7 +10,12 @@ dist
 # frontendDist (see packages/native-app-wrapper/src-tauri/tauri.conf.json),
 # not build output.
 !packages/native-app-wrapper/dist/
+# Every other lockfile stays out, but package-lock.json is committed on
+# purpose: `pages.yml` and Vercel install with `npm ci`, which needs it, and it
+# is what pins the compatible fumadocs-openapi / fumadocs-ui pair the docs build
+# depends on. See .claude/architecture/monorepo.md.
 *lock.json
+!package-lock.json
 # output
 out
 *.tgz

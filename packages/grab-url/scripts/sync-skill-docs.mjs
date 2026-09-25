@@ -10,9 +10,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const SKILL = resolve(root, "skills/use-grab-request/SKILL.md");
-const PAGE = resolve(root, "grab-help-docs/content/docs/claude-skill.mdx");
+// Both live at the repo root, not inside this package — the script moved here
+// with the rest of `packages/grab-url/scripts/` and kept the old depth.
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const SKILL = resolve(repoRoot, "skills/use-grab-request/SKILL.md");
+const PAGE = resolve(repoRoot, "apps/grab-help-docs/content/docs/claude-skill.mdx");
 
 const HEADER = `---
 title: Claude Skill & AI Code Editors

@@ -16,11 +16,15 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "bin": {
+    "api2ai": "./lib/api2ai/generate-mcp-use-server.js"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "lib/api2ai"
   ],
   "scripts": {
     "build": "next build",

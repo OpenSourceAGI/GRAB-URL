@@ -4,7 +4,7 @@
  *   - transfer/media-domains.ts   (domain matching)
  *   - transfer/ytdlp-transfer.ts  (target detection, arg building, readout parsing)
  *   - transfer/ytdlp-binary.ts    (naming, search paths, discovery)
- *   - scripts/install-yt-dlp.mjs  (argument parsing, platform → asset mapping)
+ *   - grab-url-cli/scripts/install-yt-dlp.mjs  (argument parsing, platform → asset mapping)
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
@@ -14,7 +14,7 @@ import {
     matchMediaDomain,
     isMediaDomain,
     hostnameOf,
-} from '../grab-url-cli/src/transfer/media-domains.ts';
+} from '../../grab-url-cli/src/transfer/media-domains.ts';
 
 import {
     isYtDlpTarget,
@@ -26,7 +26,7 @@ import {
     describeYtDlpExit,
     resolveYtDlpSite,
     YTDLP_PROGRESS_TEMPLATE,
-} from '../grab-url-cli/src/transfer/ytdlp-transfer.ts';
+} from '../../grab-url-cli/src/transfer/ytdlp-transfer.ts';
 
 import {
     ytDlpExecutableName,
@@ -37,7 +37,7 @@ import {
     probeYtDlp,
     findYtDlp,
     ytDlpInstallHint,
-} from '../grab-url-cli/src/transfer/ytdlp-binary.ts';
+} from '../../grab-url-cli/src/transfer/ytdlp-binary.ts';
 
 import {
     parseArgs,
@@ -46,7 +46,7 @@ import {
     tripleFromSidecarPath,
     targetTriple,
     executableName,
-} from '../scripts/install-yt-dlp.mjs';
+} from '../../grab-url-cli/scripts/install-yt-dlp.mjs';
 
 // ─── Domain matching ──────────────────────────────────────────────────────────
 

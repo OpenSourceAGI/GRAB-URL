@@ -3,51 +3,40 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
-const nodeBuiltins = [
-  "fs",
-  "path",
-  "stream/promises",
-  "stream",
-  "readline",
-  "url",
-  "util",
-  "os",
-  "crypto",
-  "child_process",
-  "events",
-  "buffer",
-  "process",
-  "assert",
-  "timers",
-  "tty",
-  "zlib",
-  "http",
-  "https",
-  "net",
-  "dns",
-  "cluster",
-  "worker_threads",
-];
+// This config builds **the library only** — what `import ... from "grab-url"`
+// resolves to. The two programs that used to ride along in this bundle now
+// build from their own configs, so neither reaches the published `grab-url`:
+//
+//   packages/grab-url-cli/vite.config.ts   the `grab-url` / `grab` / `g` bins
+//   packages/archiver-web/vite.config.ts   the `extract` / `compress` bins
+//
+// Keep it that way. An entry added here ends up in every consumer's install.
 
-// `extract-webpage` is the qwksearch content extractor behind `grab-url --page`.
-// It is an optional peer dependency loaded through a runtime `import()`, and it
-// drags in jsdom/linkedom, so it must never be pulled into the CLI bundle.
-const externalPkgs = ["chalk", "cli-table3", "cli-progress", "cli-spinners", "extract-webpage"];
 // React must never be bundled into `dist/quantum-sphere.*`: the host app already
 // has its own copy, and a second one makes every hook in QuantumOrbital throw
 // "Invalid hook call". No other entry imports React, so this is a no-op for them.
 const reactExternals = ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"];
-const slimExternalPkgs = [...externalPkgs, "archiver-web", "linkedom"];
 
+// `jszip` is resolved at runtime by archiver-web (local install, then CDN), so
+// it is never bundled and never a dependency of this package.
+const runtimeResolvedPkgs = ["jszip"];
+
+// The alias targets are extensionless on purpose. vite-plugin-dts rewrites an
+// aliased import in the emitted .d.ts to a relative path built from the alias
+// target, so a `.ts` here ships as `import … from './…/log-json.ts'` inside the
+// declarations — which fails for any consumer without
+// `allowImportingTsExtensions`, and points at a `.ts` the tarball does not have.
 const sharedAlias = {
-  "@grab-url/log": resolve(__dirname, "../../packages/log-json/src/log-json.ts"),
-  "@grab-url/grab-api": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
-  // The heyapi client imports the published package name; inside the
-  // monorepo that resolves to the same source. The slim subpath is listed
-  // first because a string alias matches as a prefix: "grab-url" alone would
-  // rewrite "grab-url/slim" to ".../index.ts/slim" and fail to resolve.
-  "grab-url/slim": resolve(__dirname, "../../packages/grab-api/src/index.slim.ts"),
-  "grab-url": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
+  "@grab-url/log": resolve(__dirname, "../../packages/log-json/src/log-json"),
+  "@grab-url/grab-api": resolve(__dirname, "../../packages/grab-api/src/index"),
+  // The heyapi client imports the published package name; inside the monorepo
+  // that resolves to the same source. The subpaths are listed first because a
+  // string alias matches as a prefix: "grab-url" alone would rewrite
+  // "grab-url/full" to ".../index.slim/full" and fail to resolve.
+  "grab-url/full": resolve(__dirname, "../../packages/grab-api/src/index"),
+  "grab-url/slim": resolve(__dirname, "../../packages/grab-api/src/index.slim"),
+  // Bare "grab-url" is the slim entry — same as the published `exports` map.
+  "grab-url": resolve(__dirname, "../../packages/grab-api/src/index.slim"),
 };
 
 /**
@@ -75,7 +64,15 @@ const sharedPlugins = [
   useClientDirective,
   dts({
     insertTypesEntry: true,
-    include: ["../../packages/**/*.ts", "../../packages/**/*.tsx"],
+    // Only the packages the entries below are built from. Widening this ships
+    // declaration trees for the CLI and the codegen client inside `grab-url`.
+    include: [
+      "../../packages/grab-api/**/*.ts",
+      "../../packages/log-json/**/*.ts",
+      "../../packages/loading-animations/**/*.ts",
+      "../../packages/quantum-sphere-loading-animation/**/*.ts",
+      "../../packages/quantum-sphere-loading-animation/**/*.tsx",
+    ],
     exclude: [
       "../../packages/quantum-sphere-loading-animation/svelte/**",
       "../../packages/quantum-sphere-loading-animation/src/svelte/**",
@@ -97,45 +94,32 @@ export default defineConfig({
     target: "es2022",
     lib: {
       entry: {
-        "grab-api": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
+        // `grab-api-slim` is what bare `grab-url` resolves to — the default
+        // import. `grab-api` is the `grab-url/full` build, which reaches
+        // `content-processors.ts` and through it linkedom and archiver-web.
         "grab-api-slim": resolve(__dirname, "../../packages/grab-api/src/index.slim.ts"),
+        "grab-api": resolve(__dirname, "../../packages/grab-api/src/index.ts"),
         animations: resolve(__dirname, "../../packages/loading-animations/src/svg/index.ts"),
         "quantum-sphere": resolve(__dirname, "../../packages/quantum-sphere-loading-animation/src/icons.ts"),
         log: resolve(__dirname, "../../packages/log-json/src/log-json.ts"),
-        "grab-url-cli": resolve(__dirname, "../../packages/grab-url-cli/src/index.ts"),
-        "archiver-web": resolve(
-          __dirname,
-          "../../packages/archiver-web/src/index.ts",
-        ),
-        "bin-extract": resolve(
-          __dirname,
-          "../../packages/archiver-web/src/bin-extract.ts",
-        ),
-        "bin-compress": resolve(
-          __dirname,
-          "../../packages/archiver-web/src/bin-compress.ts",
-        ),
       },
       formats: ["es", "cjs"],
-      fileName: (format, entryName) => `${entryName}.${format}.js`,
+      // The CJS entries must end in `.cjs`, not `.cjs.js`. This package is
+      // `"type": "module"`, so Node reads any `.js` file as ESM — a
+      // `require()` of a `.cjs.js` entry died on "exports is not defined in ES
+      // module scope" before it ran a line. Rollup already names the shared
+      // CJS chunks `.cjs`; only the entries went through this callback.
+      fileName: (format, entryName) =>
+        format === "cjs" ? `${entryName}.cjs` : `${entryName}.es.js`,
     },
     rollupOptions: {
       output: {
         inlineDynamicImports: false,
-        banner: (chunk) => {
-          if (chunk.name.startsWith("bin-") || chunk.name === "grab-url-cli") {
-            return "#!/usr/bin/env node\n";
-          }
-          return "";
-        },
       },
-      external: (id, importer) => {
-        if (id.startsWith("node:") || nodeBuiltins.includes(id)) return true;
-        if (externalPkgs.includes(id)) return true;
+      external: (id) => {
+        if (id.startsWith("node:")) return true;
         if (reactExternals.includes(id)) return true;
-        if (id === "jszip") return true;
-        // Externalize heavy deps for slim build entry
-        if (slimExternalPkgs.includes(id) && importer?.includes("index.slim")) return true;
+        if (runtimeResolvedPkgs.includes(id)) return true;
         return false;
       },
     },
@@ -145,7 +129,13 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    include: ["test/**/*.test.ts"],
+    // The suite lives here but exercises every package's source, so the test
+    // project is rooted at the monorepo. Vitest only instruments files that
+    // sit inside the project root: rooted at this package, v8 reported nothing
+    // for `grab-api`, `log-json`, `api2client` or `archiver-web`, and the
+    // coverage globs below could not reach them either.
+    root: resolve(__dirname, "../.."),
+    include: ["packages/grab-url/test/**/*.test.ts"],
     resolve: {
       alias: {
         ...sharedAlias,
@@ -159,9 +149,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "lcov"],
-      reportsDirectory: "../../coverage",
+      reportsDirectory: "coverage",
       reportOnFailure: true,
-      include: ["../../packages/**/src/**"],
+      include: ["packages/**/src/**"],
       exclude: [
         "**/node_modules/**",
         "**/dist/**",

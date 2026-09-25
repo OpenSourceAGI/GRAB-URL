@@ -42,6 +42,13 @@ jobs:
           cache: npm
           node-version: 22
 
+      # Node 22 ships npm 10, which cannot resolve this workspace tree:
+      # `npm install` dies with "Cannot read properties of null (reading
+      # 'edgesOut')". Corepack activates the npm pinned by `packageManager`,
+      # the same one that wrote package-lock.json. Matches tests.yml.
+      - name: Activate the pinned npm
+        run: corepack enable npm
+
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5

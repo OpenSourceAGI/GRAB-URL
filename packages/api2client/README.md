@@ -225,7 +225,9 @@ Reconnects honor the server's `retry:` field and send `Last-Event-ID` from the l
 
 ## Requirements
 
-Requests are sent with **`grab-url/slim`** — the same `grab()`, without the bundled `linkedom`/`archiver-web` HTML and archive extractors an OpenAPI response never needs. Anything reaching for `grab.mock` or `grab.log` alongside an SDK has to import the same entry; `grab-url` and `grab-url/slim` are separate modules with separate `mock` and `log`, and a stub registered on one is invisible to the other.
+Requests are sent with **`grab-url/slim`** — the same `grab()`, without the `linkedom`/`archiver-web` HTML and archive extractors an OpenAPI response never needs. Since **grab-url 3.0** that is also what the bare `grab-url` import resolves to: `.` and `./slim` name the identical files, so they are one module with one `mock` and one `log`, and a stub registered through either specifier is visible to the other. (In 2.x they were separate modules and a stub on one was invisible to the other — this client requires `grab-url` ≥ 3.)
+
+grab itself is never bundled here. `dist/index.es.js` is about 20 kB, and a generated SDK plus this transport layer stays well under 100 kB; the heavy `grab-url/full` build is unreachable from it.
 
 Needs a `grab-url` whose **slim** entry advertises the `onRawResponse` hook — check `grab.supports?.onRawResponse` — which is what reports the response status, headers and parsed error payloads. The slim executor has called the hook since 1.6.23, but the slim entry did not set the flag until the release this client ships with, so an older slim grab silently fell back.
 

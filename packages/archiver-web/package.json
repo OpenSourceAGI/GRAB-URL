@@ -1,12 +1,12 @@
 {
   "name": "archiver-web",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "Universal Archive Extractor & Creator using JSZip. Frontend-only, no WASM.",
   "type": "module",
   "main": "./src/index.ts",
   "bin": {
-    "extract": "./dist/bin-extract.js",
-    "compress": "./dist/bin-compress.js"
+    "extract": "./dist/bin-extract.es.js",
+    "compress": "./dist/bin-compress.es.js"
   },
   "types": "./src/index.ts",
   "exports": {
@@ -14,14 +14,16 @@
   },
   "scripts": {
     "ship": "bun x standard-version --release-as patch;rm CHANGELOG.md; npm publish",
-    "build": "vite build --config ../../packages/grab-url/vite.config.ts",
-    "test": "tsx test.ts"
+    "build": "vite build --config vite.config.ts",
+    "test": "tsx test.ts",
+    "prepublishOnly": "npm run build"
   },
   "optionalDependencies": {
     "fflate": "^0.8.2",
     "jszip": "^3.10.1"
   },
   "devDependencies": {
+    "terser": "^5.46.0",
     "tsx": "^4.23.13",
     "typescript": "^5.4.0",
     "vite": "^7.3.1",
@@ -36,5 +38,10 @@
   "bugs": {
     "url": "https://github.com/OpenSourceAGI/GRAB-URL/issues"
   },
-  "homepage": "https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/archiver-web#readme"
+  "homepage": "https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/archiver-web#readme",
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ]
 }

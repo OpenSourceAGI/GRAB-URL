@@ -4,32 +4,63 @@ All documentation lives in the user guide, **`grab-help-docs/content/docs`** —
 Next.js + Fumadocs app. Nothing else in this repo is documentation prose, with
 the package `README.md`s and the agent skill as the two deliberate exceptions.
 
-## `docs/` at the root is gone
+## `docs/` at the root is gone — again
 
 It held three files and no documentation: a Jekyll `_config.yml`, an
 `index.html` redirect to grab.js.org, and a `README.md` describing itself.
 
 They were left over from when GitHub Pages deployed from a branch folder —
 `/docs` being the only folder name Pages accepts besides the repository root.
-**Pages no longer works that way.** Settings → Pages → Source is "GitHub
-Actions", and `.github/workflows/pages.yml` publishes the static export built
-from `grab-help-docs/out`. Nothing read `docs/` at all, so PR #47 deleted the
-folder (commit `c894e60`).
+PR #47 deleted the folder (commit `c894e60`), and this note then claimed Source
+was "GitHub Actions" and told you not to recreate it.
 
-Verify that claim rather than trusting this paragraph: the `Deploy docs to
-Pages` workflow ends in `actions/deploy-pages@v5`, which **only succeeds when
-Source is "GitHub Actions"**, and it is green on `master`.
+**Both halves of that turned out to be wrong.** Commit `25e0c46` restored the
+folder, and Source was still "Deploy from a branch", so the site published was
+the Jekyll stub, not the docs app:
 
-So: put no documentation here, and do not recreate the folder.
+```
+https://opensourceagi.github.io/GRAB-URL/       200, 708 bytes of redirect
+https://opensourceagi.github.io/GRAB-URL/docs   404
+```
 
-## grab.js.org is down, and `docs/` is still why
+Two publishers were contending for one Pages site. GitHub's branch-based
+`pages build and deployment` kept winning — it ran and succeeded even on commits
+where `pages.yml`'s `paths` filter skipped our own workflow, which is only
+possible when Source is a branch. Our `Deploy docs to Pages` built fine every
+time and then died in its deploy job, twice in a row:
+
+```
+Current status: purging_cdn
+##[error]Timeout reached, aborting!
+```
+
+`actions/deploy-pages@v5` cannot finish a CDN purge for a site something else
+owns. So the folder is deleted again here — but **deleting it is only half the
+fix, and the half that does nothing on its own**:
+
+1. Settings → Pages → Source = **"GitHub Actions"**. Dashboard-only; no commit
+   can do it.
+2. Then `docs/` can go, which is what this note's own history is about.
+
+Do them in that order. Removing the folder while Source is still `/docs` leaves
+the branch build with nothing to publish.
+
+So: put no documentation here — and if the folder reappears a third time, check
+the Pages Source before believing it is vestigial.
+
+## grab.js.org was down, and `docs/` was why
+
+**It is back up.** https://grab.js.org serves the Fumadocs app again — a 200
+with the real `_next` bundle, carrying current `master`. The root `vercel.json`
+below, plus Root Directory being empty, is what fixed it. The history is kept
+because the settings it names still have to stay as they are.
 
 Every deployment of the `grab-url` Vercel project
-(`prj_sZH39yA62rJ7ZKn3pjFpLVYH1320`, team `vtempest-apps`) is failing, production
-included, and has been since the docs app was renamed `docs/` →
-`grab-help-docs/`. Because production never built, **https://grab.js.org serves
-Vercel's `DEPLOYMENT_NOT_FOUND` 404** — the DNS is fine, there is simply nothing
-behind it. `js-org/js.org`'s `cnames_active.js` maps
+(`prj_sZH39yA62rJ7ZKn3pjFpLVYH1320`, team `vtempest-apps`) used to fail,
+production included, ever since the docs app was renamed `docs/` →
+`grab-help-docs/`. Because production never built, **https://grab.js.org served
+Vercel's `DEPLOYMENT_NOT_FOUND` 404** — the DNS was fine, there was simply
+nothing behind it. `js-org/js.org`'s `cnames_active.js` maps
 `"grab": "cname.vercel-dns.com"`, so the hostname resolves into Vercel and
 nowhere else.
 
@@ -94,14 +125,14 @@ arrangement — Root Directory `grab-help-docs`, paths relative to it. It is
 inert while the Root Directory is the repo root. Whichever directory Vercel is
 pointed at, one of the two files describes the build.
 
-The GitHub Pages deploy of the same docs is **green** and unaffected — it is the
-working copy of the site while Vercel is broken. It is not a drop-in
-replacement for grab.js.org, though: moving the hostname there means adding the
+The GitHub Pages deploy of the same docs is the **broken** one now — see
+[the `docs/` section](#docs-at-the-root-is-gone--again). It was never a drop-in
+replacement for grab.js.org anyway: moving the hostname there means adding the
 custom domain in Settings → Pages (so `configure-pages` stops emitting the
 `/GRAB-URL` base path) *and* a PR against `js-org/js.org` repointing the CNAME
 at `opensourceagi.github.io`, and it costs the middleware, the Server Action and
-the POST route handler that `build-static-pages.mjs` prunes. Fixing the Vercel
-project is the smaller change.
+the POST route handler that `build-static-pages.mjs` prunes. grab.js.org is the
+site; Pages is the spare.
 
 ## Adding a page
 
@@ -132,12 +163,14 @@ the next `npm run make`.
 
 | Target | Built by | Notes |
 | --- | --- | --- |
-| **https://grab.js.org** (Vercel) | `grab-help-docs/vercel.json` → `turbo run build --filter=grab-help-docs` | The full app — middleware, a Server Action and a POST route handler all work. **Currently down**: Root Directory is still `docs`, which no longer exists, so production never built and the hostname answers `DEPLOYMENT_NOT_FOUND`. See [the section above](#grabjsorg-is-down-and-docs-is-still-why). |
-| **GitHub Pages** | `.github/workflows/pages.yml` → `grab-help-docs/scripts/build-static-pages.mjs` → `actions/deploy-pages@v5` | A static export, served from `grab-help-docs/out`. `output: 'export'` supports none of those three server pieces, so the script **prunes them from the working tree** before building. It is destructive by design and refuses to run outside CI without `--force`. Green on `master`. |
+| **https://grab.js.org** (Vercel) | the root `vercel.json` → `turbo run build --filter=grab-help-docs` | The full app — middleware, a Server Action and a POST route handler all work. **Up**, serving current `master`, as long as Root Directory stays empty. See [the section above](#grabjsorg-was-down-and-docs-was-why). |
+| **GitHub Pages** | `.github/workflows/pages.yml` → `grab-help-docs/scripts/build-static-pages.mjs` → `actions/deploy-pages@v5` | A static export, served from `grab-help-docs/out`. `output: 'export'` supports none of those three server pieces, so the script **prunes them from the working tree** before building. It is destructive by design and refuses to run outside CI without `--force`. The build job is green on `master`; the **deploy** job times out in `purging_cdn` until Pages Source is "GitHub Actions" — see [the section above](#docs-at-the-root-is-gone--again). |
 
 The Pages workflow uses `npm ci`, not a floating install: `package-lock.json`
 pins a compatible `fumadocs-openapi` / `fumadocs-ui` pair and a fresh resolve
-picks versions that break the build.
+picks versions that break the build. That only works because `.gitignore`
+re-includes `package-lock.json` after ignoring `*lock.json` — see
+[monorepo.md](monorepo.md#package-manager).
 
 ## Package READMEs and the root README
 

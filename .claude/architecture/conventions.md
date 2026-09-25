@@ -48,9 +48,22 @@ network shaped and only a test pins them down.
 
 | Workflow | Trigger | What it guards |
 | --- | --- | --- |
-| `tests.yml` | push to master, PR | `npm install` then `npm run test:coverage`, uploaded to Codecov |
+| `tests.yml` | push to master, PR | `npm install` then `npm run test:coverage` — the pass/fail gate |
+| `test-coverage.yml` | push to master, PR, manual | Runs each workspace that has a suite and uploads its lcov to Codecov |
 | `pages.yml` | changes to `grab-help-docs/`, `packages/`, the lockfile | Static-exports the docs and publishes to GitHub Pages. Uses `npm ci` deliberately. |
 | `npm-publish.yml` | push to master | Publishes to npm |
+
+Both test workflows run `corepack enable npm` before installing. The npm that
+ships with Node 22 is npm 10, and it cannot resolve this workspace tree at all —
+`npm install` dies with `Cannot read properties of null (reading 'edgesOut')`.
+Corepack activates the npm pinned by `packageManager`, so CI installs with the
+same npm as developers.
+
+Codecov flags are named after the workspace directory (npm names like
+`@grab-url/log` are not valid flag names). Only `packages/grab-url` and
+`apps/grab-url-native-wrapper` have suites; because the `grab-url` suite covers
+every package's source in one report, `flag_management` in `codecov.yml` slices
+that report by path to give each package its own flag.
 
 ## Publishing
 
@@ -65,9 +78,11 @@ will be missing for consumers while working locally.
 ## Security
 
 - Never commit secrets, credentials or API keys.
-- `postinstall` downloads a yt-dlp binary (`scripts/install-yt-dlp.mjs`). Treat
-  changes to it as security-relevant: it fetches and executes a third-party
-  binary on every consumer's machine.
+- `grab-url-cli`'s `postinstall` downloads a yt-dlp binary
+  (`packages/grab-url-cli/scripts/install-yt-dlp.mjs`). Treat changes to it as
+  security-relevant: it fetches and executes a third-party binary on every
+  consumer's machine. The `grab-url` library itself runs no install script —
+  keep it that way.
 - The license is PROSPER; contributions are under it.
 
 ## Agent-specific rules

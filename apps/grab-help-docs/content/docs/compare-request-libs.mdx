@@ -13,7 +13,6 @@ import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 
 | Feature | [GRAB](https://github.com/vtempest/GRAB-URL) | [Axios](https://github.com/axios/axios) | [TanStack Query](https://github.com/TanStack/query) | [SWR](https://github.com/vercel/swr) | [Alova](https://github.com/alovajs/alova) | [SuperAgent](https://github.com/ladjs/superagent) | [Apisauce](https://github.com/infinitered/apisauce) | [Ky](https://github.com/sindresorhus/ky) |
 | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | 
-| Size | ✅ 4KB | ❌ 13KB | ❌ 39KB | ✅ 4.2KB | ✅ 4KB | ❌ 19KB | ❌ 15KB (with axios) | ✅ 4KB |
 | Zero Dependencies | ✅ Yes | ❌ No | ❌ No | ❌ No | ✅ Yes | ❌ No | ❌ Needs Axios | ✅ Yes |
 | isLoading State Handling | ✅ Auto-managed | ❌ Manual | ✅ Yes | ✅ Yes | ✅ Yes | ❌ Manual | ❌ Manual | ❌ Manual |
 | Auto JSON Handling | ✅ Automatic | ✅ Configurable | ❌ Manual | ❌ Manual | ✅ Automatic | ✅ Automatic | ✅ Automatic | ✅ Automatic |
@@ -32,7 +31,7 @@ import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 ### Key Strengths of GRAB
 
 - **Simplicity**: One function covers all use cases, with no complex setup or configuration.
-- **Lightweight**: At just 3KB, it's significantly smaller than most alternatives.
+- **Lightweight**: Zero runtime dependencies, so nothing is pulled in behind it.
 - **Instant Productivity**: Works seamlessly with any framework or plain JavaScript.
 - **Testing Ready**: Built-in mocking removes the need for external tools like MSW or Nock.
 - **Smart Defaults**: Automatically detects localhost for debugging and handles JSON out of the box.
