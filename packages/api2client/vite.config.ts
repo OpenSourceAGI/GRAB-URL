@@ -4,10 +4,18 @@ import dts from "vite-plugin-dts";
 
 // grab is never bundled: the generated SDK and the app it lives in must share
 // one grab module, or a stub registered on `grab.mock` is invisible to the
-// other copy. Every grab entry is listed so a published SDK that imports the
-// bare name stays external too — and so the heavy `grab-url/full` build can
-// never be pulled into this bundle.
-const external = ["grab-url", "grab-url/slim", "grab-url/full", "@hey-api/openapi-ts"];
+// other copy. The client imports `grab-api.js` — the bare grab() without
+// grab-url's loading icons — and every grab entry is listed so the heavy
+// `/full` builds can never be pulled into this bundle.
+const external = [
+  "grab-api.js",
+  "grab-api.js/slim",
+  "grab-api.js/full",
+  "grab-url",
+  "grab-url/slim",
+  "grab-url/full",
+  "@hey-api/openapi-ts",
+];
 
 export default defineConfig({
   plugins: [

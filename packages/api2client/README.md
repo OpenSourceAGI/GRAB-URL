@@ -171,7 +171,7 @@ createClient(createConfig({ baseUrl, devtools: false }));  // off, even locally
 `grab.mock` keys are request paths (with or without a leading slash), so an SDK endpoint can be stubbed without touching the network:
 
 ```ts
-import { grab } from "grab-url/slim";
+import { grab } from "grab-api.js";
 
 grab.mock["/pets/42"] = { response: { id: "42", name: "Rex" } };
 
@@ -225,11 +225,13 @@ Reconnects honor the server's `retry:` field and send `Last-Event-ID` from the l
 
 ## Requirements
 
-Requests are sent with **`grab-url/slim`** — the same `grab()`, without the `linkedom`/`archiver-web` HTML and archive extractors an OpenAPI response never needs. Since **grab-url 3.0** that is also what the bare `grab-url` import resolves to: `.` and `./slim` name the identical files, so they are one module with one `mock` and one `log`, and a stub registered through either specifier is visible to the other. (In 2.x they were separate modules and a stub on one was invisible to the other — this client requires `grab-url` ≥ 3.)
+Requests are sent with **[`grab-api.js`](https://www.npmjs.com/package/grab-api.js)** — the `grab()` request function on its own, without grab-url's loading icons or the `linkedom`/`archiver-web` HTML and archive extractors an OpenAPI response never needs. Its default entry is the slim build, which keeps the install and bundle small.
 
-grab itself is never bundled here. `dist/index.es.js` is about 20 kB, and a generated SDK plus this transport layer stays well under 100 kB; the heavy `grab-url/full` build is unreachable from it.
+`grab-api.js` and `grab-url` are separate packages, so each has its own `mock` and `log`. To stub or inspect SDK requests, import grab from `grab-api.js`, as above — a stub registered on `grab-url`'s grab is invisible to the SDK.
 
-Needs a `grab-url` whose **slim** entry advertises the `onRawResponse` hook — check `grab.supports?.onRawResponse` — which is what reports the response status, headers and parsed error payloads. The slim executor has called the hook since 1.6.23, but the slim entry did not set the flag until the release this client ships with, so an older slim grab silently fell back.
+grab itself is never bundled here. `dist/index.es.js` is about 20 kB, and a generated SDK plus this transport layer stays well under 100 kB; the heavy `/full` build is unreachable from it.
+
+Needs a `grab-api.js` (or older `grab-url`) whose **slim** entry advertises the `onRawResponse` hook — check `grab.supports?.onRawResponse` — which is what reports the response status, headers and parsed error payloads. The slim executor has called the hook since 1.6.23, but the slim entry did not set the flag until the release this client ships with, so an older slim grab silently fell back.
 
 The client detects support and never sends options an older grab would turn into query parameters, so it still runs on one that lacks the flag — but a failed request then comes back as grab's error message (`"HTTP error: 404 Not Found"`) with **no `response` at all**, so `result.response.status` throws, and `retryAttempts`/`cacheForTime` are not applied. Anything that branches on the status needs the flag.
 

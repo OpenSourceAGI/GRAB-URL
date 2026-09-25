@@ -6,7 +6,7 @@
  * in for `@hey-api/client-fetch` or `@hey-api/client-axios`.
  */
 
-import type { GrabFunction } from "grab-url/slim";
+import type { GrabFunction } from "grab-api.js";
 
 import type {
   ServerSentEventsOptions,

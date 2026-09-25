@@ -7,8 +7,8 @@
  * of axios' or fetch's bare behavior.
  */
 
-import { grab as defaultGrab, isLocalhost, setupDevTools } from "grab-url/slim";
-import type { GrabOptions } from "grab-url/slim";
+import { grab as defaultGrab, isLocalhost, setupDevTools } from "grab-api.js";
+import type { GrabOptions } from "grab-api.js";
 
 import { createSseClient } from "./core/sse";
 import type { Client, Config, RequestOptions, ResponseStyle } from "./types";
