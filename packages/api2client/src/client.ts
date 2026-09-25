@@ -70,7 +70,7 @@ const emptyData = (parseAs: Config["parseAs"]) => {
 
 /**
  * Whether the installed grab reports the `onRawResponse` hook, added in
- * grab-url 1.6.23. Instances made with `grab.instance()` do not carry the
+ * grab 1.6.23. Instances made with `grab.instance()` do not carry the
  * flag, so the imported grab answers for the library as a whole.
  *
  * Without it the client still works, but a failed request reports grab's

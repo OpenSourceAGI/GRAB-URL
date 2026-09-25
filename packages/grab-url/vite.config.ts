@@ -29,10 +29,14 @@ const runtimeResolvedPkgs = ["jszip"];
 const sharedAlias = {
   "@grab-url/log": resolve(__dirname, "../../packages/log-json/src/log-json"),
   "@grab-url/grab-api": resolve(__dirname, "../../packages/grab-api/src/index"),
-  // The heyapi client imports the published package name; inside the monorepo
-  // that resolves to the same source. The subpaths are listed first because a
-  // string alias matches as a prefix: "grab-url" alone would rewrite
-  // "grab-url/full" to ".../index.slim/full" and fail to resolve.
+  // api2client imports the published package name `grab-api.js`; inside the
+  // monorepo that resolves to the same source. The subpaths are listed first
+  // because a string alias matches as a prefix: "grab-api.js" alone would
+  // rewrite "grab-api.js/full" to ".../index.slim/full" and fail to resolve.
+  "grab-api.js/full": resolve(__dirname, "../../packages/grab-api/src/index"),
+  "grab-api.js/slim": resolve(__dirname, "../../packages/grab-api/src/index.slim"),
+  // Bare "grab-api.js" is the slim entry — same as the published `exports` map.
+  "grab-api.js": resolve(__dirname, "../../packages/grab-api/src/index.slim"),
   "grab-url/full": resolve(__dirname, "../../packages/grab-api/src/index"),
   "grab-url/slim": resolve(__dirname, "../../packages/grab-api/src/index.slim"),
   // Bare "grab-url" is the slim entry — same as the published `exports` map.

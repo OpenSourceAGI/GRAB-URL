@@ -3,10 +3,10 @@
  * Nothing here imports fetch or axios — the SDK's transport is grab, so grab
  * options can be passed per request and grab.mock can stub any endpoint.
  */
-// The slim entry, because that is the one api2client sends with. Importing
-// "grab-url" here instead would load a second copy of the library with its own
-// `mock` and `log`, and the stub below would never be consulted.
-import { grab } from "grab-url/slim";
+// The same package api2client sends with. Importing "grab-url" here instead
+// would load a second copy of grab with its own `mock` and `log`, and the stub
+// below would never be consulted.
+import { grab } from "grab-api.js";
 
 import { client } from "./client/client.gen";
 import { addPet, findPetsByStatus, getPetById } from "./client/sdk.gen";

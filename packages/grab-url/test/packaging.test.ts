@@ -236,13 +236,17 @@ describe('api2client stays a thin wrapper', () => {
 
   it('never bundles grab — every entry is external', () => {
     const config = readFileSync(join(api2clientRoot, 'vite.config.ts'), 'utf8');
-    for (const entry of ['"grab-url"', '"grab-url/slim"', '"grab-url/full"']) {
+    for (const entry of [
+      '"grab-api.js"', '"grab-api.js/slim"', '"grab-api.js/full"',
+      '"grab-url"', '"grab-url/slim"', '"grab-url/full"',
+    ]) {
       expect(config).toContain(entry);
     }
   });
 
-  it('requires the grab-url major whose default import is slim', () => {
-    expect(pkg.dependencies['grab-url']).toBe('^3.0.0');
+  it('depends on grab-api.js, not the full grab-url', () => {
+    expect(pkg.dependencies['grab-api.js']).toBe('^3.0.1');
+    expect(pkg.dependencies['grab-url']).toBeUndefined();
   });
 
   const api2clientDist = join(api2clientRoot, 'dist/index.es.js');
@@ -253,7 +257,8 @@ describe('api2client stays a thin wrapper', () => {
     expect(statSync(api2clientDist).size).toBeLessThan(100_000);
     // The import has to survive as an import — if grab were inlined the
     // generated SDK and the host app would end up with two `grab.mock`s.
-    expect(code).toMatch(/from\s*["']grab-url(\/slim)?["']/);
+    expect(code).toMatch(/from\s*["']grab-api\.js["']/);
+    expect(code).not.toMatch(/["']grab-url(\/\w+)?["']/);
   });
 });
 

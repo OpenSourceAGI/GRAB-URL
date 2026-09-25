@@ -9,7 +9,7 @@
     "codegen": "api2client https://petstore3.swagger.io/api/v3/openapi.json ./src/client"
   },
   "dependencies": {
-    "grab-url": "^3.0.0",
+    "grab-api.js": "^3.0.1",
     "api2client": "^2.0.0"
   },
   "devDependencies": {

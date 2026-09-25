@@ -1,8 +1,8 @@
-# grab-url · Hey API SDK
+# grab-api.js · Hey API SDK
 
 A generated OpenAPI SDK for the [Swagger Petstore](https://petstore3.swagger.io), wired to
 [`api2client`](https://github.com/vtempest/GRAB-URL/tree/master/packages/api2client)
-so every endpoint is sent by [`grab-url`](https://github.com/vtempest/grab-url) instead of fetch or axios.
+so every endpoint is sent by [`grab-api.js`](https://www.npmjs.com/package/grab-api.js) instead of fetch or axios.
 
 ```bash
 npm install
