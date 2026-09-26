@@ -1,14 +1,15 @@
 {
-  "name": "api2ai",
+  "name": "api2ai-mcp-generator",
   "version": "0.2.18",
-  "description": "Generate production-ready MCP servers from any OpenAPI specification using the highly-used and convenient [mcp-use](https://mcp-use.com) framework",
+  "description": "The api2ai.com dashboard: browse, design, and export OpenAPI specs as MCP servers. The `api2ai` CLI/generator itself now lives in packages/api2ai.",
   "license": "rights.institute/prosper",
   "author": "vtempest",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenSourceAGI/starter-app-dev-tools/tree/master/packages/api2ai-mcp-generator"
+    "url": "git+https://github.com/OpenSourceAGI/GRAB-URL.git",
+    "directory": "apps/api2ai-mcp-generator"
   },
-  "homepage": "https://github.com/OpenSourceAGI/starter-app-dev-tools/tree/master/packages/api2ai-mcp-generator",
+  "homepage": "https://github.com/OpenSourceAGI/GRAB-URL/tree/master/apps/api2ai-mcp-generator",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -16,15 +17,11 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "bin": {
-    "api2ai": "./lib/api2ai/generate-mcp-use-server.js"
-  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "lib/api2ai"
+    "dist"
   ],
   "scripts": {
     "build": "next build",

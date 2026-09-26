@@ -52,7 +52,7 @@ Open http://localhost:3000/inspector to test your tools!
 ### CLI
 
 ```bash
-node generate-mcp-use-server.js <openapi-spec> [output-folder] [options]
+npx api2ai <openapi-spec> [output-folder] [options]
 
 Options:
   --name <name>            Server name (default: api-mcp-server)
@@ -69,32 +69,32 @@ Options:
 
 ```bash
 # From remote URL
-node generate-mcp-use-server.js \
+npx api2ai \
   https://api.example.com/openapi.json \
   ./my-server \
   --name my-api
 
 # From local file
-node generate-mcp-use-server.js \
+npx api2ai \
   ./specs/my-api.yaml \
   ./my-mcp-server \
   --port 8080
 
 # With custom base URL
-node generate-mcp-use-server.js \
+npx api2ai \
   ./petstore.json \
   ./petstore \
   --base-url https://petstore.example.com/v3
 
 # Include only read-only tools tagged "public"
-node generate-mcp-use-server.js \
+npx api2ai \
   ./api.json \
   ./readonly-server \
   --include-tags public \
   --exclude-tags admin,internal
 
 # Enable writes (mutations) explicitly
-node generate-mcp-use-server.js \
+npx api2ai \
   ./api.json \
   ./full-server \
   --allow-mutations \
@@ -104,7 +104,7 @@ node generate-mcp-use-server.js \
 ### Programmatic Usage
 
 ```javascript
-import { generateMcpServer, extractTools, loadOpenApiSpec } from './generate-mcp-use-server.js';
+import { generateMcpServer, extractTools, loadOpenApiSpec } from 'api2ai';
 
 // Generate complete server
 const result = await generateMcpServer(
