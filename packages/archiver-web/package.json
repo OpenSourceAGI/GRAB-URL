@@ -1,7 +1,7 @@
 {
   "name": "archiver-web",
   "version": "1.1.7",
-  "description": "Universal Archive Extractor & Creator using JSZip. Frontend-only, no WASM.",
+  "description": "Universal Archive Extractor & Creator. ZIP/GZIP via JSZip and fflate (no WASM); TAR, BZIP2, XZ, 7z and RAR via an on-demand WASM engine.",
   "type": "module",
   "main": "./src/index.ts",
   "bin": {
@@ -20,7 +20,8 @@
   },
   "optionalDependencies": {
     "fflate": "^0.8.2",
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "libarchive.js": "^2.0.2"
   },
   "devDependencies": {
     "terser": "^5.46.0",

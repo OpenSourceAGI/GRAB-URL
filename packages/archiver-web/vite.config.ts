@@ -41,8 +41,12 @@ export default defineConfig({
       external: (id) => {
         if (id.startsWith("node:") || nodeBuiltins.includes(id)) return true;
         // Resolved at runtime from a local install or the CDN — see the
-        // loaders in `src/index.ts`.
-        if (id === "jszip") return true;
+        // loaders in `src/index.ts`. Never bundled, so a local install
+        // doesn't defeat the lazy-load. `libarchive.js/...` also covers its
+        // `dist/libarchive-node.mjs` Node-specific subpath import.
+        if (id === "jszip" || id === "fflate" || id === "libarchive.js" || id.startsWith("libarchive.js/")) {
+          return true;
+        }
         return false;
       },
     },

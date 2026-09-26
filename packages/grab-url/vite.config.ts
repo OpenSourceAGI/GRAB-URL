@@ -17,9 +17,16 @@ import dts from "vite-plugin-dts";
 // "Invalid hook call". No other entry imports React, so this is a no-op for them.
 const reactExternals = ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"];
 
-// `jszip` is resolved at runtime by archiver-web (local install, then CDN), so
-// it is never bundled and never a dependency of this package.
+// `jszip` and `libarchive.js` are resolved at runtime by archiver-web (local
+// install, then CDN), so neither is ever bundled or a dependency of this
+// package. `libarchive.js` also has to stay unbundled rather than merely
+// "not a dependency": its Node build imports bare `worker_threads`/`url`,
+// and this package's build must never see a Node builtin (see
+// packages/grab-api/.claude/CLAUDE.md) — tracing into it here fails the
+// exact same way archiver-web's own build did before it externalized
+// `libarchive.js` too.
 const runtimeResolvedPkgs = ["jszip"];
+const runtimeResolvedPkgPrefixes = ["libarchive.js"];
 
 // The alias targets are extensionless on purpose. vite-plugin-dts rewrites an
 // aliased import in the emitted .d.ts to a relative path built from the alias
@@ -124,6 +131,7 @@ export default defineConfig({
         if (id.startsWith("node:")) return true;
         if (reactExternals.includes(id)) return true;
         if (runtimeResolvedPkgs.includes(id)) return true;
+        if (runtimeResolvedPkgPrefixes.some((pkg) => id === pkg || id.startsWith(`${pkg}/`))) return true;
         return false;
       },
     },
