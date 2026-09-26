@@ -13,6 +13,40 @@ export interface ExtractEvent {
 }
 
 /**
+ * Archive container/compression kinds recognized by `extract`/`compress`.
+ * `zip` and `gzip` are handled without WASM (JSZip / fflate); every other
+ * kind is handled by a lazily-loaded libarchive.js (WebAssembly) backend.
+ */
+export type ArchiveKind =
+  | "zip"
+  | "gzip"
+  | "tar"
+  | "tar-gzip"
+  | "tar-bzip2"
+  | "tar-xz"
+  | "bzip2"
+  | "xz"
+  | "seven-zip"
+  | "rar"
+  | "unknown";
+
+/**
+ * Options for extract().
+ */
+export interface ExtractOptions {
+  /** The archive to extract */
+  archiveBuffer: ArrayBuffer;
+  /** Folder to extract (e.g., 'src/'), empty=root */
+  folderPath?: string;
+  /** Password for encrypted archives (only supported via the libarchive.js backend) */
+  password?: string;
+  /** Original filename; used to pick a codec and to tell e.g. `.tar.gz` from `.gz` apart */
+  filename?: string;
+  /** Force a specific archive kind instead of auto-detecting from filename/magic bytes */
+  format?: ArchiveKind;
+}
+
+/**
  * Options for compress().
  */
 export interface CreateOptions {
@@ -21,10 +55,12 @@ export interface CreateOptions {
     path: string;
     content: string | Uint8Array | ArrayBuffer | Blob;
   }>;
-  /** Output filename (.zip) */
+  /** Output filename (e.g. 'out.zip', 'out.tar.gz') */
   outputName: string;
-  /** Compression level 1-9 (default 6) */
+  /** Compression level 1-9 (default 6). Only applies to the zip/gzip backends. */
   compressionLevel?: number;
+  /** Force a specific archive kind instead of inferring one from outputName's extension */
+  format?: ArchiveKind;
 }
 
 /**
