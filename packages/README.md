@@ -1,8 +1,10 @@
 # Packages
 
+- **[api2ai](api2ai/)**: A CLI (`npx api2ai`) that generates a production-ready MCP server from any OpenAPI spec, using the mcp-use framework. Every tool is risk-classified and policy-gated, with HTTP hardening built into the generated server.
+
 - **[api2client](api2client/)**: A Hey API client that sends generated OpenAPI SDK requests through grab instead of axios or fetch. You get caching, retries, rate limiting, deduplication and mocks without changing your generated SDK.
 
-- **[archiver-web](archiver-web/)**: A universal archive extractor and creator for the browser, built on JSZip. It runs entirely on the frontend with no WASM.
+- **[archiver-web](archiver-web/)**: A browser-first archive extractor and creator that lazy-loads only the codec a file needs — JSZip/fflate for ZIP and GZIP, no WASM. An optional WebAssembly libarchive backend loads on demand for TAR, BZIP2, XZ, 7z and RAR.
 
 - **[grab-api](grab-api/)**: The standalone `grab()` request function: one function, zero dependencies, with auto-JSON, dedupe, caching, retries, rate limiting, mocks and pagination. It is the core of grab-url without the loading icons.
 

@@ -1,0 +1,33 @@
+{
+  "name": "api2ai",
+  "version": "1.0.0",
+  "description": "Generate a production-ready MCP server (mcp-use framework) from any OpenAPI specification.",
+  "type": "module",
+  "bin": {
+    "api2ai": "./src/generate-mcp-use-server.js"
+  },
+  "main": "./src/generate-mcp-use-server.js",
+  "exports": {
+    ".": "./src/generate-mcp-use-server.js"
+  },
+  "optionalDependencies": {
+    "js-yaml": "^4.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSourceAGI/GRAB-URL.git",
+    "directory": "packages/api2ai"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenSourceAGI/GRAB-URL/issues"
+  },
+  "homepage": "https://github.com/OpenSourceAGI/GRAB-URL/tree/master/packages/api2ai#readme",
+  "files": [
+    "src",
+    "README.md"
+  ]
+}

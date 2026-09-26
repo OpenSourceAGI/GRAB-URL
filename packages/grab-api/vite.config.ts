@@ -23,9 +23,15 @@ const sharedAlias = {
   "@grab-url/log": resolve(__dirname, "../log-json/src/log-json"),
 };
 
-// `jszip` is resolved at runtime by archiver-web (local install, then CDN), so
-// it is never bundled and never a dependency of this package.
+// `jszip` and `libarchive.js` are resolved at runtime by archiver-web (local
+// install, then CDN), so neither is ever bundled or a dependency of this
+// package. `libarchive.js` also has to stay unbundled rather than merely
+// "not a dependency": its Node build imports bare `worker_threads`/`url`,
+// and this package's build must never see a Node builtin (see this
+// directory's CLAUDE.md) — tracing into it here fails the exact same way
+// archiver-web's own build did before it externalized `libarchive.js` too.
 const runtimeResolvedPkgs = ["jszip"];
+const runtimeResolvedPkgPrefixes = ["libarchive.js"];
 
 export default defineConfig({
   resolve: {
@@ -72,6 +78,7 @@ export default defineConfig({
       external: (id) => {
         if (id.startsWith("node:")) return true;
         if (runtimeResolvedPkgs.includes(id)) return true;
+        if (runtimeResolvedPkgPrefixes.some((pkg) => id === pkg || id.startsWith(`${pkg}/`))) return true;
         return false;
       },
     },

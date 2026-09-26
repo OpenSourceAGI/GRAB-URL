@@ -6,15 +6,17 @@
  * Generates a complete MCP server using the mcp-use framework from any OpenAPI spec.
  *
  * Usage:
- *   node generate-mcp-use-server.js <openapi-spec> [output-folder] [options]
+ *   npx api2ai <openapi-spec> [output-folder] [options]
  *
  * Examples:
- *   node generate-mcp-use-server.js ./petstore.json ./my-mcp-server
- *   node generate-mcp-use-server.js https://petstore3.swagger.io/api/v3/openapi.json ./petstore-mcp --base-url https://petstore3.swagger.io/api/v3
+ *   npx api2ai ./petstore.json ./my-mcp-server
+ *   npx api2ai https://petstore3.swagger.io/api/v3/openapi.json ./petstore-mcp --base-url https://petstore3.swagger.io/api/v3
  */
 
 import fs from 'fs/promises';
+import { realpathSync } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 // ============================================================================
 // OpenAPI Spec Loading & Parsing
@@ -963,8 +965,10 @@ Then open http://localhost:${port}/inspector to test your tools!
 
 export { generateMcpServer, extractTools, loadOpenApiSpec };
 
-// CLI entry point
-const isMainModule = process.argv[1]?.includes('api2ai');
+// CLI entry point. realpathSync follows the npm/npx bin symlink so this
+// still matches when invoked as `npx api2ai` (argv[1] is the symlink in
+// node_modules/.bin, not this file's real path).
+const isMainModule = Boolean(process.argv[1]) && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isMainModule) {
   const args = process.argv.slice(2);
