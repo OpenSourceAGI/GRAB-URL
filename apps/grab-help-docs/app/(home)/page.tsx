@@ -6,6 +6,7 @@ import { HeroSection } from "@/components/DocsHomepage/hero-section"
 import { FeaturesGrid } from "@/components/DocsHomepage/features-grid"
 import { CodeExample } from "@/components/DocsHomepage/code-example"
 import { ComparisonTable } from "@/components/DocsHomepage/comparison-table"
+import { LoadingGallery } from "@/components/DocsHomepage/loading-gallery"
 import { OpenApiSection } from "@/components/DocsHomepage/openapi-section"
 import { Footer } from "@/components/DocsHomepage/footer"
 // import API2AILanding from "@/components/DocsHomepage/api2ai-section"
@@ -23,6 +24,7 @@ export default function Home() {
       <FeaturesGrid />
       <CodeExample />
       <ComparisonTable />
+      <LoadingGallery />
       <OpenApiSection />
       {/* <API2AILanding /> */}
       {/* <Footer /> */}

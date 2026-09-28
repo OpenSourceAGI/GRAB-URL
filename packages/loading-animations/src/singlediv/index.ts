@@ -1,16 +1,23 @@
-// Random single-div CSS drawings from https://a.singlediv.com by Lynn Fisher.
+// Random single-div CSS drawings from https://a.singlediv.com by Lynn Fisher
+// (main.css + the 2014-2019.css archive, 294 drawings in total).
 // The stylesheet is lazy loaded (only when the target scrolls into view) and
 // rendered inside a Shadow DOM so its global CSS reset never touches the host page.
 
-/** Stylesheet holding every single-div drawing, keyed by element id. */
+/** Stylesheet for the current drawings (2020 onward, incl. #divtober). */
 export const SINGLEDIV_CSS_URL = "https://a.singlediv.com/css/main.css";
 
+/** Stylesheet for the archived 2014–2019 drawings. */
+export const SINGLEDIV_2014_2019_CSS_URL = "https://a.singlediv.com/css/2014-2019.css";
+
+/** Both stylesheets; every drawing lives in exactly one of them. */
+export const SINGLEDIV_CSS_URLS: readonly string[] = [SINGLEDIV_CSS_URL, SINGLEDIV_2014_2019_CSS_URL];
+
 /**
- * Every drawing id selector found in `main.css` (the `#id` in `<div class="entry" id="...">`).
+ * Drawing id selectors (the `#id` in `<div class="entry" id="...">`) found in each stylesheet.
  * Bundled because a.singlediv.com sends no CORS headers, so the browser cannot read the
- * rules back out of the cross-origin stylesheet. Refresh with `loadSingleDivIds()`.
+ * rules back out of the cross-origin stylesheets. Refresh with `loadSingleDivIds()`.
  */
-export const SINGLEDIV_IDS: readonly string[] = [
+export const SINGLEDIV_MAIN_IDS: readonly string[] = [
   "rosette-1", "rosette-2", "rosette-3", "hello", "icon-film", "icon-camera",
   "icon-polaroid", "aesthetic", "grid", "byebyecube", "radio", "washi",
   "planet", "licorice", "six", "window", "noodles1", "noodles2", "noodles3",
@@ -34,6 +41,46 @@ export const SINGLEDIV_IDS: readonly string[] = [
   "witchy", "fin",
 ];
 
+export const SINGLEDIV_2014_2019_IDS: readonly string[] = [
+  "camera", "bloody-mary", "cpt-america", "breakfast", "battery",
+  "marshmallow", "sushi", "brazil", "soccer", "key", "mickey-hat",
+  "hobbit-door", "tardis", "marker", "crayon", "moleskine", "macarons",
+  "mario-tube", "mario-mushroom", "cupcake", "vacancy", "candy-apple",
+  "corn-dog", "shirt-tag", "button", "luggage-tag1", "luggage-tag2",
+  "grand-budapest", "royal-tenenbaums", "moonrise-kingdom", "lightsaber-darth",
+  "lightsaber-luke", "bb8", "pizza-works", "pizza-marg", "pizza-pie",
+  "vinyl-record", "cassette", "cd", "graham-cracker", "marshmallow2",
+  "chocolate", "cactus1", "cactus2", "cactus3", "inner-tube", "popsicle",
+  "embroidery", "zipper", "jeans-pocket", "ecto-1", "stay-puft", "alamo",
+  "raffle-red", "raffle-yellow", "triforce", "panda-cub", "elephant", "beaver",
+  "tiger", "nibbler", "clock", "supplies", "pencil-cup", "hamburger", "taco",
+  "cheesecake", "pie", "frankenstein", "zombie", "vampire", "mike-wazowski",
+  "sully", "birthday", "candy", "candycorn", "candycane", "syrup", "crait",
+  "padme-amidala", "leia-organa", "rey", "jyn-erso", "rose-tico",
+  "amilyn-holdo", "mon-mothma", "maz-kanata", "ahsoka-tano", "svg",
+  "space-pizza", "space-donuts", "honey-badger", "cobra", "xray",
+  "the-goddman-pen-is-blue", "penrose-triangle", "penrose-triangle-cube",
+  "impossible-rectangle", "impossible-cube", "css-one", "css-two", "css-three",
+  "css-four", "toystory", "theshining", "sandwich", "five", "toast", "poptart",
+  "fred-rogers", "ned-flanders", "ring", "mindless", "bait", "freeze",
+  "build-1", "build-2", "husky", "enchanted", "frail", "swing", "pattern",
+  "snow", "dragon", "ash", "overgrown", "legend", "wild", "ornament", "misfit",
+  "sling", "tread", "treasure", "ghost", "ancient", "dizzy", "tasty", "dark",
+  "coat", "ride", "injured", "catch", "ripe", "cybertruck",
+];
+
+/** Every drawing from both stylesheets. */
+export const SINGLEDIV_IDS: readonly string[] = [...SINGLEDIV_MAIN_IDS, ...SINGLEDIV_2014_2019_IDS];
+
+/** Total number of drawings available (150 + 144 = 294). */
+export const SINGLEDIV_COUNT = SINGLEDIV_IDS.length;
+
+const OLD_IDS = new Set(SINGLEDIV_2014_2019_IDS);
+
+/** Returns the stylesheet URL that contains the given drawing id. */
+export const singleDivCssUrl = (id: string): string =>
+  OLD_IDS.has(id) ? SINGLEDIV_2014_2019_CSS_URL : SINGLEDIV_CSS_URL;
+
 // Drawings whose inner div opts out of the site's default `scale(.8)`.
 const NO_SCALE = new Set([
   "handmade", "rules", "cheesy", "fake", "faraway", "seeing", "sticky", "component",
@@ -42,12 +89,20 @@ const NO_SCALE = new Set([
   "wonder", "mooncake-1", "mooncake-2", "spooky", "contrast", "spice", "loud", "magic",
   "growing", "fan", "zap", "letter", "train", "hairy", "fly", "digital", "noodles1",
   "noodles2", "noodles3", "byebyecube",
+  // 2014-2019
+  "tread", "sling", "misfit", "ornament", "ash", "freeze", "bait", "toast", "poptart",
+  "sandwich", "svg", "leia-organa", "mon-mothma", "padme-amidala", "ahsoka-tano", "rey",
+  "maz-kanata", "jyn-erso", "rose-tico", "amilyn-holdo", "raffle-red", "raffle-yellow",
+  "bb8", "macarons",
 ]);
 
 // Drawings drawn entirely on the `.entry` element itself, with no inner div.
 const NO_INNER = new Set([
   "tangled", "treat", "snack", "dots", "organized", "repeating", "reflection",
   "dotmatrix", "window", "licorice", "washi",
+  // 2014-2019
+  "dark", "wild", "overgrown", "pattern", "theshining", "toystory", "xray", "space-pizza",
+  "space-donuts",
 ]);
 
 export type SingleDivOptions = {
@@ -55,7 +110,7 @@ export type SingleDivOptions = {
   id?: string;
   /** Pool of ids to pick from; defaults to `SINGLEDIV_IDS`. */
   ids?: readonly string[];
-  /** Stylesheet URL (e.g. a self-hosted copy); default `SINGLEDIV_CSS_URL`. */
+  /** Stylesheet URL (e.g. a self-hosted copy); defaults to whichever of the two holds `id`. */
   cssUrl?: string;
   /** Wait until the target is visible before loading the CSS (default true). */
   lazy?: boolean;
@@ -92,16 +147,22 @@ export function parseSingleDivIds(cssText: string): string[] {
 }
 
 /**
- * Fetches the stylesheet and returns all drawing ids in it. Falls back to the bundled
- * `SINGLEDIV_IDS` when the fetch fails (the default URL is blocked by CORS in browsers).
+ * Fetches the stylesheets and returns every drawing id in them, combined. Falls back to the
+ * bundled `SINGLEDIV_IDS` when a fetch fails (the default URLs are blocked by CORS in browsers).
  */
-export async function loadSingleDivIds(cssUrl = SINGLEDIV_CSS_URL): Promise<string[]> {
+export async function loadSingleDivIds(
+  cssUrls: string | readonly string[] = SINGLEDIV_CSS_URLS,
+): Promise<string[]> {
   try {
-    const res = await fetch(cssUrl);
-    if (res.ok) {
-      const ids = parseSingleDivIds(await res.text());
-      if (ids.length) return ids;
-    }
+    const texts = await Promise.all(
+      [cssUrls].flat().map(async (url) => {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`${res.status} ${url}`);
+        return res.text();
+      }),
+    );
+    const ids = [...new Set(texts.flatMap(parseSingleDivIds))];
+    if (ids.length) return ids;
   } catch {}
   return [...SINGLEDIV_IDS];
 }
@@ -124,7 +185,7 @@ export function showRandomSingleDiv(
   const {
     ids = SINGLEDIV_IDS,
     id = randomSingleDivId(ids),
-    cssUrl = SINGLEDIV_CSS_URL,
+    cssUrl = singleDivCssUrl(id),
     lazy = true,
     height = 400,
     scale = 1,

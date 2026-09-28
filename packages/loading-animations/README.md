@@ -25,7 +25,7 @@
 Tree-shakable collections of loading animations:
 
 - **SVG** — 25 animated SVG spinners for the browser, each rendered by a single function call. Customize colors, size, width, and height per call.
-- **Single Div** — a random one of 150 pure-CSS drawings from [a.singlediv.com](https://a.singlediv.com), with the stylesheet lazy loaded on demand.
+- **Single Div** — a random one of **294** pure-CSS drawings from [a.singlediv.com](https://a.singlediv.com) (150 in `main.css` + 144 in `2014-2019.css`), with the stylesheet lazy loaded on demand.
 - **CLI** — Unicode/emoji spinner frame data for terminal UIs (used by [`grab-url-cli`](../grab-url-cli)).
 
 Both are zero-dependency and named-exported so bundlers strip out anything you don't use.
@@ -87,8 +87,16 @@ The raw `.svg` files also live in [src/svg/](src/svg/) if you need to reference 
 ## Single Div usage
 
 Shows a random [single-div CSS drawing](https://a.singlediv.com) by Lynn Fisher as a loading
-placeholder. [`main.css`](https://a.singlediv.com/css/main.css) is only loaded once the target
-scrolls into view, and it is rendered inside a Shadow DOM so the site's global CSS reset never
+placeholder. Drawings come from two stylesheets, combined into one pool of **294**:
+
+| Stylesheet | Drawings |
+| --- | --- |
+| [`main.css`](https://a.singlediv.com/css/main.css) (2020 onward, incl. #divtober) | 150 |
+| [`2014-2019.css`](https://a.singlediv.com/css/2014-2019.css) (archive) | 144 |
+| **Total** (`SINGLEDIV_COUNT`) | **294** |
+
+Only the stylesheet that holds the chosen drawing is loaded, and only once the target
+scrolls into view. It is rendered inside a Shadow DOM so the site's global CSS reset never
 touches your page.
 
 ```ts
@@ -105,17 +113,19 @@ loader.remove();          // when your content is ready
 | -------- | --------------------------------------- | ------------------------------------------------- |
 | `id`     | random                                  | Show a specific drawing instead of a random one   |
 | `ids`    | `SINGLEDIV_IDS`                          | Pool of ids to pick from                          |
-| `cssUrl` | `https://a.singlediv.com/css/main.css`  | Stylesheet URL, e.g. a self-hosted copy           |
+| `cssUrl` | the sheet holding `id`                   | Stylesheet URL, e.g. a self-hosted copy           |
 | `lazy`   | `true`                                  | Wait until the target is visible to load the CSS  |
 | `height` | `400`                                   | Height of the drawing box in px                   |
 | `scale`  | `1`                                     | Zoom factor for the drawing                       |
 
 Other exports:
 
-- `SINGLEDIV_IDS` — all 150 drawing ids (`#id` selectors) from `main.css`, e.g. `bounce`, `lost`, `witchy`, `hello`. Bundled, because a.singlediv.com sends no CORS headers so browsers can't read the rules back from the stylesheet.
+- `SINGLEDIV_IDS` — all 294 drawing ids (`#id` selectors) from both stylesheets, e.g. `bounce`, `witchy`, `camera`, `bb8`. Bundled, because a.singlediv.com sends no CORS headers so browsers can't read the rules back from the stylesheets.
+- `SINGLEDIV_MAIN_IDS` (150) / `SINGLEDIV_2014_2019_IDS` (144) — the ids per stylesheet; `SINGLEDIV_COUNT` — the total (294).
+- `SINGLEDIV_CSS_URL` / `SINGLEDIV_2014_2019_CSS_URL` / `SINGLEDIV_CSS_URLS` — the stylesheet URLs; `singleDivCssUrl(id)` — which one holds a drawing.
 - `randomSingleDivId(ids?)` — pick a random id.
 - `parseSingleDivIds(cssText)` — extract every `#id` selector from CSS text (ignores hex colors).
-- `loadSingleDivIds(cssUrl?)` — fetch a stylesheet and parse its ids, falling back to `SINGLEDIV_IDS` if the fetch fails.
+- `loadSingleDivIds(cssUrls?)` — fetch one or more stylesheets (default: both) and return their combined ids, falling back to `SINGLEDIV_IDS` if a fetch fails.
 
 ## CLI usage
 
