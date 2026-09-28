@@ -22,7 +22,7 @@
 
 # archiver-web
 
-Universal archive **extractor and creator** for the web. TypeScript, frontend-friendly, uses [JSZip](https://stuk.github.io/jszip/) under the hood and runs in Node.js, the browser, Cloudflare Workers, and the CLI.
+Universal archive **extractor and creator** for the web. TypeScript, frontend-friendly, and runs in Node.js, the browser, Cloudflare Workers, and the CLI. Every codec is lazy-loaded on first use — nothing but this package's own tiny wrapper is in your bundle until you actually extract or create an archive.
 
 ```bash
 npm i archiver-web
@@ -58,32 +58,66 @@ const archive = await compress({
 
 ## Format
 
-ZIP only, with DEFLATE at levels 1-9 (default 6) — JSZip is the whole engine, so
-there is no 7z, TAR or BZIP2 here, and password-protected archives throw.
+| Format | Extract | Create | Backend | WASM? |
+|---|---|---|---|---|
+| `.zip` | ✅ | ✅ | [JSZip](https://stuk.github.io/jszip/) | No |
+| `.gz` / `.gzip` | ✅ | ✅ (single file) | [fflate](https://github.com/101arrowz/fflate) | No |
+| `.tar` | ✅ | ✅ | [libarchive.js](https://github.com/nika-begiashvili/libarchivejs) | Yes |
+| `.tar.gz` / `.tgz` | ✅ | ✅ | libarchive.js | Yes |
+| `.tar.bz2` / `.tbz2` | ✅ | ✅ | libarchive.js | Yes |
+| `.tar.xz` / `.txz` | ✅ | ✅ | libarchive.js | Yes |
+| `.bz2` / `.xz` | ❌ (see below) | ✅ (single file) | libarchive.js | Yes |
+| `.7z` | ✅ | ❌ (see below) | libarchive.js | Yes |
+| `.rar` | ✅ | ❌ (proprietary) | libarchive.js | Yes |
+
+The ZIP/GZIP path never touches WebAssembly. Every other format is handled by
+`libarchive.js`, which is only fetched — CDN or local install — the first
+time you extract or create one of those formats. Password-protected archives
+throw for ZIP (JSZip can't decrypt); the libarchive.js path supports a
+`password` option.
+
+Two rough edges in libarchive.js 2.0.2 itself, worked around or surfaced as
+clear errors rather than silently mishandled:
+- **Standalone `.bz2`/`.xz`** (not inside a tar) can be created — the bytes
+  are valid and readable by any standard tool — but this package's own
+  `extract()` can't read them back (libarchive.js's reader doesn't support
+  its "raw" format outside a container). Use `.tar.bz2`/`.tar.xz` for a
+  full round-trip within archiver-web.
+- **`.7z` creation** isn't supported: this library version doesn't write a
+  spec-compliant 7z container. 7z **extraction** is unaffected.
 
 ## API
 
 ```ts
 // Read an archive's bytes. folderPath keeps only entries under that prefix and
-// strips it from the returned paths.
+// strips it from the returned paths. Format is picked from `format`, then from
+// `filename`'s extension, then by sniffing the archive's magic bytes.
 extract({
   archiveBuffer: ArrayBuffer,
   folderPath?: string,
-  password?: string,   // throws — JSZip cannot decrypt
+  password?: string,   // throws for ZIP; decrypts via libarchive.js otherwise
+  filename?: string,   // e.g. "src.tar.gz" — tells tar.gz apart from a plain .gz
+  format?: ArchiveKind,
 }): Promise<Array<{ path: string; size: number; content: string; mime: string }>>
 
 // The same, incrementally: onFile fires per entry instead of buffering them all.
+// ZIP only.
 extractStream({
   stream: ReadableStream,
   onFile?: (file: { path: string; size: number; content: string }) => void,
 }): Promise<void>
 
-// Create a ZIP from a list of files
+// Create an archive from a list of files. Format is picked from `format`, or
+// inferred from outputName's extension (falls back to ZIP).
 compress({
   files: Array<{ path: string; content: string | Uint8Array | ArrayBuffer | Blob }>,
-  outputName: string,
-  compressionLevel?: 1 | 3 | 6 | 9,   // 1 = fastest, 9 = best
+  outputName: string,               // e.g. "out.zip", "out.tar.gz", "out.tar.bz2"
+  compressionLevel?: 1 | 3 | 6 | 9,   // 1 = fastest, 9 = best (zip/gzip only)
+  format?: ArchiveKind,
 }): Promise<{ blob: Blob; mime: string; downloadName: string }>
+
+// "zip" | "gzip" | "tar" | "tar-gzip" | "tar-bzip2" | "tar-xz" | "bzip2" | "xz" | "seven-zip" | "rar" | "unknown"
+detectArchiveKind(filename: string): ArchiveKind
 ```
 
 ## Usage Recipes
@@ -111,8 +145,8 @@ The package exposes two bins for one-off use. Both read stdin when no file is
 given, and write to stdout when no output is given:
 
 ```bash
-npx extract <archive.zip> -o <out-dir> [-d <folder-in-archive>]
-npx compress <files...> -o <out.zip> [-l <1-9>]
+npx extract <archive.zip|.tar|.tar.gz|.tar.bz2|...> -o <out-dir> [-d <folder-in-archive>]
+npx compress <files...> -o <out.zip|out.tar.gz|...> [-l <1-9>]
 ```
 
 ## Development

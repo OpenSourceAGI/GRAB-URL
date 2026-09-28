@@ -122,7 +122,7 @@ two caches, and a stub registered on one is invisible to the other.
 
 **CLI File Downloader** — `npm i -g grab-url-cli`, or `npx grab-url-cli`
 ```bash
-npx grab-url-cli https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
+npx grab-url-cli https://iso.pop-os.org/24.04/amd64/generic/28/pop-os_24.04_amd64_generic_28.iso
 
 # 700+ media sites are detected by domain and pulled with yt-dlp, which
 # installing grab-url-cli fetches for you

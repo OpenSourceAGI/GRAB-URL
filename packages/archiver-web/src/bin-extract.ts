@@ -36,9 +36,11 @@ async function main() {
   }
 
   let archiveBuffer: Buffer;
+  let filename: string | undefined;
 
   if (positionals.length > 0) {
     archiveBuffer = fs.readFileSync(path.resolve(positionals[0]));
+    filename = path.basename(positionals[0]);
   } else {
     if (process.stdin.isTTY) {
       console.error(
@@ -57,6 +59,7 @@ async function main() {
   const files = await extract({
     archiveBuffer: arrayBuf,
     folderPath: values.folder,
+    filename,
   });
 
   if (values.out) {

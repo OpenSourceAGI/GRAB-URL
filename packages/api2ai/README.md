@@ -1,23 +1,15 @@
+# api2ai
 
-<p align="center">
-    <img width="600px" src="https://i.imgur.com/TTJBLxo.png" />
-</p>
-<h3 align="center">
-  <a href="https://github.com/vtempest/GRAB-URL/tree/master/api2ai/example-petstore"> 🎯 Example MCP Server </a>
-</h3>
+Generate production-ready MCP servers from any OpenAPI specification using the
+[mcp-use](https://mcp-use.com) framework (8k+ GitHub stars).
 
+OpenAPI specs are easy to write and organize your code, and there are
+[100s of tools available](https://openapi.tools) such as the
+[OpenAPI Builder web UI](https://www.apibldr.com).
 
-<p align="center">
-   <a href="https://npmjs.org/package/grab-url"><img alt="NPM Version" src="https://img.shields.io/npm/v/grab-url" /></a><a href="https://github.com/vtempest/GRAB-URL/discussions"><img alt="GitHub Discussions"
-        src="https://img.shields.io/github/discussions/vtempest/GRAB-URL" /></a><a href="https://github.blog/developer-skills/github/beginners-guide-to-github-creating-a-pull-request/"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"/></a>
-</p>
-
-
-# API2AI: OpenAPI to MCP-Use Server 
-
-Generate production-ready MCP servers from any OpenAPI specification using the highly-used and convenient [mcp-use](https://mcp-use.com) framework (8k+ GitHub stars).
-
-OpenAPI specs are easy to write and organize your code and have [100s of tools available](https://openapi.tools) such as the [OpenAPI Builder web UI](https://www.apibldr.com).
+```bash
+npm i -g api2ai
+```
 
 ## Features
 
@@ -104,29 +96,29 @@ npx api2ai \
 ### Programmatic Usage
 
 ```javascript
-import { generateMcpServer, extractTools, loadOpenApiSpec } from 'api2ai';
+import { generateMcpServer, extractTools, loadOpenApiSpec } from "api2ai";
 
 // Generate complete server
 const result = await generateMcpServer(
-  'https://api.example.com/openapi.json',
-  './output-folder',
+  "https://api.example.com/openapi.json",
+  "./output-folder",
   {
-    serverName: 'my-api',
-    baseUrl: 'https://api.example.com/v1',
+    serverName: "my-api",
+    baseUrl: "https://api.example.com/v1",
     port: 3000,
     allowMutations: false,       // block POST/PUT/PATCH/DELETE by default
-    includeTags: ['public'],     // only include tools tagged "public"
-    excludeTags: ['admin'],      // exclude tools tagged "admin"
+    includeTags: ["public"],     // only include tools tagged "public"
+    excludeTags: ["admin"],      // exclude tools tagged "admin"
   }
 );
 
 console.log(`Generated ${result.toolCount} tools`);
 
 // Or just extract tools for custom processing
-const spec = await loadOpenApiSpec('./my-spec.json');
+const spec = await loadOpenApiSpec("./my-spec.json");
 const tools = extractTools(spec, {
-  filterFn: (tool) => tool.riskLevel === 'low',  // only safe read-only tools
-  excludeOperationIds: ['deleteUser'],
+  filterFn: (tool) => tool.riskLevel === "low",  // only safe read-only tools
+  excludeOperationIds: ["deleteUser"],
 });
 ```
 
@@ -233,7 +225,7 @@ The generated server supports the OpenAI Apps SDK out of the box.
 
 ```javascript
 const result = await generateMcpServer(specUrl, outputDir, {
-  filterFn: (tool) => tool.riskLevel === 'low',
+  filterFn: (tool) => tool.riskLevel === "low",
 });
 ```
 
@@ -241,7 +233,7 @@ const result = await generateMcpServer(specUrl, outputDir, {
 
 ```javascript
 const result = await generateMcpServer(specUrl, outputDir, {
-  filterFn: (tool) => ['get', 'post'].includes(tool.method),
+  filterFn: (tool) => ["get", "post"].includes(tool.method),
 });
 ```
 
@@ -250,9 +242,9 @@ const result = await generateMcpServer(specUrl, outputDir, {
 ```javascript
 const result = await generateMcpServer(specUrl, outputDir, {
   excludeOperationIds: [
-    'deleteUser',
-    'deleteAllData', 
-    'adminReset',
+    "deleteUser",
+    "deleteAllData",
+    "adminReset",
   ],
 });
 ```
@@ -261,7 +253,7 @@ const result = await generateMcpServer(specUrl, outputDir, {
 
 ```javascript
 const result = await generateMcpServer(specUrl, outputDir, {
-  filterFn: (tool) => tool.pathTemplate.startsWith('/api/v2/'),
+  filterFn: (tool) => tool.pathTemplate.startsWith("/api/v2/"),
 });
 ```
 
@@ -269,11 +261,11 @@ const result = await generateMcpServer(specUrl, outputDir, {
 
 ```javascript
 const result = await generateMcpServer(specUrl, outputDir, {
-  excludeOperationIds: ['deleteUser'],
+  excludeOperationIds: ["deleteUser"],
   allowMutations: false,
-  filterFn: (tool) => 
-    tool.riskLevel === 'low' && 
-    tool.pathTemplate.includes('/public/'),
+  filterFn: (tool) =>
+    tool.riskLevel === "low" &&
+    tool.pathTemplate.includes("/public/"),
 });
 ```
 
@@ -290,3 +282,14 @@ const result = await generateMcpServer(specUrl, outputDir, {
 | Runtime policy | ✅ Generated | ❌ Manual |
 | HTTP hardening | ✅ Built-in | ❌ Manual |
 | Production ready | ✅ Yes | ⚠️ Requires work |
+
+## Development
+
+```bash
+npm install
+node src/generate-mcp-use-server.js ./petstore.json ./out
+```
+
+## License
+
+MIT
