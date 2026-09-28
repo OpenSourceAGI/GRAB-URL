@@ -22,9 +22,10 @@
 
 # @grab-url/loading-animations
 
-Two tree-shakable collections of loading animations:
+Tree-shakable collections of loading animations:
 
 - **SVG** — 25 animated SVG spinners for the browser, each rendered by a single function call. Customize colors, size, width, and height per call.
+- **Single Div** — a random one of 150 pure-CSS drawings from [a.singlediv.com](https://a.singlediv.com), with the stylesheet lazy loaded on demand.
 - **CLI** — Unicode/emoji spinner frame data for terminal UIs (used by [`grab-url-cli`](../grab-url-cli)).
 
 Both are zero-dependency and named-exported so bundlers strip out anything you don't use.
@@ -83,6 +84,39 @@ type LoadingOptions = {
 
 The raw `.svg` files also live in [src/svg/](src/svg/) if you need to reference them directly.
 
+## Single Div usage
+
+Shows a random [single-div CSS drawing](https://a.singlediv.com) by Lynn Fisher as a loading
+placeholder. [`main.css`](https://a.singlediv.com/css/main.css) is only loaded once the target
+scrolls into view, and it is rendered inside a Shadow DOM so the site's global CSS reset never
+touches your page.
+
+```ts
+import { showRandomSingleDiv } from "@grab-url/loading-animations/singlediv";
+// or from source inside this monorepo: "loading-animations/singlediv/src"
+
+const loader = showRandomSingleDiv("#loader", { height: 300, scale: 0.75 });
+console.log(loader.id);   // e.g. "bounce"
+await loader.loaded;      // stylesheet finished loading
+loader.remove();          // when your content is ready
+```
+
+| Option   | Default                                 | Description                                       |
+| -------- | --------------------------------------- | ------------------------------------------------- |
+| `id`     | random                                  | Show a specific drawing instead of a random one   |
+| `ids`    | `SINGLEDIV_IDS`                          | Pool of ids to pick from                          |
+| `cssUrl` | `https://a.singlediv.com/css/main.css`  | Stylesheet URL, e.g. a self-hosted copy           |
+| `lazy`   | `true`                                  | Wait until the target is visible to load the CSS  |
+| `height` | `400`                                   | Height of the drawing box in px                   |
+| `scale`  | `1`                                     | Zoom factor for the drawing                       |
+
+Other exports:
+
+- `SINGLEDIV_IDS` — all 150 drawing ids (`#id` selectors) from `main.css`, e.g. `bounce`, `lost`, `witchy`, `hello`. Bundled, because a.singlediv.com sends no CORS headers so browsers can't read the rules back from the stylesheet.
+- `randomSingleDivId(ids?)` — pick a random id.
+- `parseSingleDivIds(cssText)` — extract every `#id` selector from CSS text (ignores hex colors).
+- `loadSingleDivIds(cssUrl?)` — fetch a stylesheet and parse its ids, falling back to `SINGLEDIV_IDS` if the fetch fails.
+
 ## CLI usage
 
 Each terminal spinner is either a plain `string` (1 char per frame) or a `[string, n]` tuple where `n` is the character length of each frame.
@@ -139,6 +173,7 @@ npx export-svg-typescript@latest -i ./src/svg -o ./src/svg/index.ts
 | ----------------------------------------------------------- | ------------------------------------------------ |
 | [src/svg/index.ts](src/svg/index.ts)                         | Auto-generated barrel of customizable SVG spinners |
 | [src/svg/*.svg](src/svg/)                                    | Source SVG files                                 |
+| [src/singlediv/index.ts](src/singlediv/index.ts)             | Lazy-loaded random single-div CSS drawings       |
 | [src/cli/index.js](src/cli/index.js)                         | Barrel re-export for terminal spinners           |
 | [src/cli/loading-animations-emojis.js](src/cli/loading-animations-emojis.js) | Frame data for terminal spinners         |
 

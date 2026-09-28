@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     dts({
       insertTypesEntry: true,
-      include: ["src/svg/**/*.ts"],
+      include: ["src/svg/**/*.ts", "src/singlediv/**/*.ts"],
       outDir: "dist",
     }),
   ],
@@ -15,6 +15,7 @@ export default defineConfig({
     lib: {
       entry: {
         "svg/index": resolve(__dirname, "src/svg/index.ts"),
+        "singlediv/index": resolve(__dirname, "src/singlediv/index.ts"),
       },
       formats: ["es", "cjs"],
       fileName: (format, entryName) => `${entryName}.${format}.js`,

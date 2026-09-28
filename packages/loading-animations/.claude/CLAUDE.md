@@ -28,6 +28,7 @@ logic). The CLI spinners are the tested half.
 
 ## Layout
 
-`src/svg/` (the SVGs + the generated barrel) · `src/cli/` (terminal spinners)
+`src/svg/` (the SVGs + the generated barrel) · `src/singlediv/` (hand-written;
+lazy loads a.singlediv.com CSS drawings in a Shadow DOM) · `src/cli/` (terminal spinners)
 
 Tests: `test/icon.test.ts`.
