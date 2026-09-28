@@ -12,6 +12,12 @@
       "require": "./dist/svg/index.cjs.js"
     },
     "./svg/src": "./src/svg/index.ts",
+    "./singlediv": {
+      "types": "./dist/singlediv/index.d.ts",
+      "import": "./dist/singlediv/index.es.js",
+      "require": "./dist/singlediv/index.cjs.js"
+    },
+    "./singlediv/src": "./src/singlediv/index.ts",
     ".": {
       "import": "./src/cli/index.js",
       "require": "./src/cli/index.js"
@@ -32,7 +38,9 @@
     "cli",
     "terminal",
     "loader",
-    "ui"
+    "ui",
+    "css",
+    "singlediv"
   ],
   "author": "vtempest",
   "license": "MIT",
