@@ -137,7 +137,9 @@ JSON, text and binary error bodies are all recoverable.
 ### Timeouts
 
 `timeout` is in seconds (default 30) and uses `AbortSignal.timeout`. Where that
-API is missing, no timeout is applied. `cancelOngoingIfNew: true` also disables
+API is missing, no timeout is applied. Runtimes disagree on what a fired timeout
+rejects with (WebKit uses a plain `AbortError`); `grab()` reads the signal's
+`reason`, so the code is `TIMEOUT` on every tested runtime. `cancelOngoingIfNew: true` also disables
 the timeout for that request, because both use the one signal slot.
 
 ## The request pipeline

@@ -15,6 +15,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { grab, GrabError, isGrabError } from '../../grab-api/src/index.slim.ts';
+import { fetchFailure } from '../../grab-api/src/common/grab-error.ts';
 import type { GrabContext, GrabPlugin } from '../../grab-api/src/index.slim.ts';
 
 // ─── fixture server ──────────────────────────────────────────────────────────
@@ -255,6 +256,16 @@ describe('contract: failures resolve, never reject', () => {
     const { result, error } = await failure('/slow', { timeout: 0.05 });
     expect(result.error).toBe('The operation was aborted due to timeout');
     expect(error.code).toBe('TIMEOUT');
+  });
+
+  it('classifies a timeout as TIMEOUT even when fetch rejects with a plain AbortError (WebKit)', () => {
+    const timedOut = { aborted: true, reason: new DOMException('timed out', 'TimeoutError') } as unknown as AbortSignal;
+    const cancelled = { aborted: true, reason: new DOMException('aborted', 'AbortError') } as unknown as AbortSignal;
+    const webkit = new DOMException('Fetch is aborted', 'AbortError');
+    expect(fetchFailure(webkit, timedOut).code).toBe('TIMEOUT');
+    expect(fetchFailure(webkit, cancelled).code).toBe('ABORTED');
+    expect(fetchFailure(webkit).code).toBe('ABORTED');
+    expect(fetchFailure(new TypeError('Load failed')).code).toBe('NETWORK');
   });
 
   it('reports a request cancelled by cancelOngoingIfNew as ABORTED', async () => {

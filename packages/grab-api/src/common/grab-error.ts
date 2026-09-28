@@ -105,10 +105,18 @@ export function isGrabError(error: unknown): error is GrabError {
 /**
  * Classifies whatever fetch() rejected with. The message is kept verbatim —
  * it becomes the response's `.error` string.
+ *
+ * The signal is consulted because runtimes disagree on what a fired
+ * `AbortSignal.timeout` rejects with: Chromium, Firefox, Node, Bun and Deno
+ * reject with a TimeoutError, WebKit with a plain AbortError. The signal's
+ * `reason` is a TimeoutError everywhere.
  */
-export function fetchFailure(e: any): GrabError {
+export function fetchFailure(e: any, signal?: AbortSignal | null): GrabError {
+  const timedOut =
+    e?.name === "TimeoutError" ||
+    (signal?.aborted === true && (signal as any).reason?.name === "TimeoutError");
   const code: GrabErrorCode =
-    e?.name === "TimeoutError" ? "TIMEOUT"
+    timedOut ? "TIMEOUT"
       : e?.name === "AbortError" ? "ABORTED"
         : "NETWORK";
   return new GrabError(e?.message ?? String(e), { code, cause: e });

@@ -42,7 +42,7 @@ export async function executeRequest(
 
     hooks?.transport("fetch");
     const fetchRes = await fetch(baseURL + path + paramsGETRequest, fetchParams).catch(e => {
-        throw fetchFailure(e);
+        throw fetchFailure(e, fetchParams.signal);
     });
 
     // Hand the untouched Response to the caller before parsing so status,
