@@ -27,7 +27,7 @@ grab.defaults = {};
 
 // Feature flags so integrations can detect what this version supports and
 // avoid passing options an older grab would treat as query parameters.
-grab.supports = { onRawResponse: true };
+grab.supports = { onRawResponse: true, plugins: true, grabError: true };
 
 // Handle global registration for both Browser and Node.js environments
 if (typeof window !== "undefined") {
@@ -67,5 +67,7 @@ export default grab;
 
 export { log };
 export * from "./common/types";
+export { GrabError, isGrabError } from "./common/grab-error";
+export type { GrabErrorCode } from "./common/grab-error";
 export * from "./devtools/devtools";
 export * from "./common/utils";

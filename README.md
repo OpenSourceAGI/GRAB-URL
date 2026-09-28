@@ -25,7 +25,7 @@
     <a href="https://github.com/OpenSourceAGI/GRAB-URL/commits/master/"><img src="https://img.shields.io/github/last-commit/OpenSourceAGI/GRAB-URL.svg" alt="GitHub last commit" /></a>
     <a href="https://discord.gg/SJdBqBz3tV"><img src="https://img.shields.io/discord/1110227955554209923.svg?label=Chat&logo=Discord&colorB=7289da&style=flat" alt="Join Discord" /></a><a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" /></a>
     <br />
-    <img src="https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=white" alt="Claude" /> <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /> <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=white" alt="React" />  <a href="https://grab.js.org"><img src="https://img.shields.io/badge/%F0%9F%91%8F%20grab--url-beige" alt="grab.js.org" /></a>
+    <img src="https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=white" alt="Claude" /> <img src="https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white" alt="npm" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /> <img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=white" alt="React" />     <a href="https://grab.js.org"><img src="https://i.imgur.com/mbZKlD0.png" alt="grab.js.org" /></a>
    
 </p>
 <!-- template-git-repo:badges:end -->
@@ -46,6 +46,7 @@ _Send anything, get back parsed data — no boilerplate per content type._
 - **Auto-Unzip**: Automatically extracts ZIP responses into `{ data: { filename: content } }` using archiver-web. Set `unzip: false` to disable. Import from `grab-url/full` — see [Slim by default](#slim-by-default).
 - **DOM Parsing**: Automatically parses HTML responses. Pass `parseDOM: "selector"` for CSS selector extraction or `parseDOM: false` to disable. Uses linkedom. Import from `grab-url/full` — see [Slim by default](#slim-by-default).
 - **Request Stategies**: [🎯 Examples](https://grab.js.org/docs/examples) show common stategies like debounce, repeat, proxy, unit tests, interceptors, file upload, etc
+- **Runtime Support**: [🛡️ Runtime support & behavior contract](https://grab.js.org/docs/runtime-support) lists what each runtime (browsers, Node, Bun, Deno, Workers, SSR) needs, what CI verifies there, the `GrabError` codes and plugin lifecycle, and the known quirks
 
 #### Reliability & Traffic Control
 
@@ -122,7 +123,7 @@ two caches, and a stub registered on one is invisible to the other.
 
 **CLI File Downloader** — `npm i -g grab-url-cli`, or `npx grab-url-cli`
 ```bash
-npx grab-url-cli https://iso.pop-os.org/24.04/amd64/generic/28/pop-os_24.04_amd64_generic_28.iso
+npx grab-url-cli https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
 
 # 700+ media sites are detected by domain and pulled with yt-dlp, which
 # installing grab-url-cli fetches for you

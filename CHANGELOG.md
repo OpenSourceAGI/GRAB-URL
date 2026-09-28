@@ -2,6 +2,36 @@
 
 ***
 
+## Unreleased — the behavior contract
+
+**Not breaking.** Every `.error` string, option and result shape is unchanged;
+everything here is additive.
+
+**A published runtime contract.** [`RUNTIME_SUPPORT.md`](RUNTIME_SUPPORT.md)
+(also at [grab.js.org/docs/runtime-support](https://grab.js.org/docs/runtime-support))
+states what `grab()` needs from browsers, Node, Bun, Deno, Workers and SSR, what
+it guarantees there, and the known quirks. A new `Compatibility` workflow runs
+the contract on Node 18/20/22/24, Bun, Deno, Chromium, Firefox and WebKit against
+the built bundles, and a strict type-level contract against both packages'
+published declarations.
+
+**`GrabError`.** Failures are classified — `HTTP`, `PARSE`, `STREAM`,
+`NETWORK`, `TIMEOUT`, `ABORTED`, `RATE_LIMITED`, `PLUGIN`, `UNKNOWN` — with the
+native `Response` (error body unread), `cause`, `attempt`, `retryable` and a trace
+id. It arrives as the new fourth argument of `onError`.
+
+**Plugins.** `plugins: [...]` — per call, on defaults or on an instance — hooks
+`beforeRequest`, `afterResponse`, `beforeParse`, `afterParse`, `onError` and
+`finally`, with a context carrying the URL, `RequestInit`, response, parsed data
+and `GrabMeta` (timing, attempt, status, transport, cache status). `meta` is
+also kept on each `grab.log` entry. Detect support with
+`grab.supports.plugins` / `grab.supports.grabError`.
+
+Cost: the default import grows from about 16.5 kB to 19.5 kB raw (7.4 → 8.6 kB
+gzipped).
+
+***
+
 ## 3.0.0 — slim by default, CLI split out
 
 **Breaking.** Two changes to what the package is.

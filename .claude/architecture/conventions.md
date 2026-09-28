@@ -50,6 +50,7 @@ network shaped and only a test pins them down.
 | --- | --- | --- |
 | `tests.yml` | push to master, PR | `npm install` then `npm run test:coverage` — the pass/fail gate |
 | `test-coverage.yml` | push to master, PR, manual | Runs each workspace that has a suite and uploads its lcov to Codecov |
+| `compatibility.yml` | push to master, PR, manual | The runtime matrix in `RUNTIME_SUPPORT.md`: contract suite, strict type contract, docs-page sync, then the built bundles on Node 18–24, Bun, Deno and Playwright browsers |
 | `pages.yml` | changes to `grab-help-docs/`, `packages/`, the lockfile | Static-exports the docs and publishes to GitHub Pages. Uses `npm ci` deliberately. |
 | `npm-publish.yml` | push to master | Publishes to npm |
 

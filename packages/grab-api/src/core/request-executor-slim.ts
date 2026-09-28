@@ -6,6 +6,8 @@
 
 import { GrabFunction } from "../common/types";
 import { wait, hasHTMLEntities, convertURLSafeHTMLToHTML, findMockHandler } from "../common/utils";
+import { GrabError, fetchFailure } from "../common/grab-error";
+import { bodyFailure, type ExecutorHooks } from "./pipeline";
 
 export { prepareFetchRequest } from "./request-prep";
 
@@ -20,6 +22,7 @@ export async function executeRequest(
     _parseDOM?: string | boolean,
     unescapeHTML?: boolean,
     onRawResponse?: (response: Response) => void,
+    hooks?: ExecutorHooks,
 ): Promise<any> {
     const target = (typeof window !== "undefined" ? window.grab : (globalThis as any).grab) as GrabFunction;
     const mockHandler = findMockHandler(target, path);
@@ -28,22 +31,32 @@ export async function executeRequest(
     if (mockHandler &&
         (!mockHandler.method || mockHandler.method === fetchParams.method) &&
         (!mockHandler.params || paramsAsText === JSON.stringify(mockHandler.params))) {
+        hooks?.transport("mock");
         await wait(mockHandler.delay || 0);
         return typeof mockHandler.response === "function" ? mockHandler.response(params) : mockHandler.response;
     }
 
+    hooks?.transport("fetch");
     const fetchRes = await fetch(baseURL + path + paramsGETRequest, fetchParams).catch(e => {
-        throw new Error(e.message);
+        throw fetchFailure(e);
     });
 
     // Hand the untouched Response to the caller before parsing so status,
     // statusText and headers stay reachable — the parsed result drops them.
     if (typeof onRawResponse === "function") onRawResponse(fetchRes);
+    await hooks?.response(fetchRes);
 
-    if (!fetchRes.ok) throw new Error(`HTTP error: ${fetchRes.status} ${fetchRes.statusText}`);
+    if (!fetchRes.ok) throw new GrabError(`HTTP error: ${fetchRes.status} ${fetchRes.statusText}`, {
+        code: "HTTP",
+        response: fetchRes,
+    });
 
     if (onStream) {
-        await onStream(fetchRes.body);
+        try {
+            await onStream(fetchRes.body);
+        } catch (e: any) {
+            throw new GrabError(e?.message ?? String(e), { code: "STREAM", cause: e, response: fetchRes });
+        }
         return null;
     }
 
@@ -59,7 +72,7 @@ export async function executeRequest(
                     ? fetchRes.text()
                     : fetchRes.json()
     ).catch(e => {
-        throw new Error("Error parsing response: " + e);
+        throw bodyFailure("Error parsing response: ", e, fetchRes);
     });
 
     // Unescape URL-safe HTML entities in text responses unless disabled with

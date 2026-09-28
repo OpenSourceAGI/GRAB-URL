@@ -21,7 +21,7 @@ grab.defaults = {};
 // integration built on grab-url/slim — api2client, and the OpenAPI SDKs it
 // generates — must see the same flag, or it quietly gives up response
 // statuses, parsed error bodies and retries.
-grab.supports = { onRawResponse: true };
+grab.supports = { onRawResponse: true, plugins: true, grabError: true };
 
 if (typeof window !== "undefined") {
   // @ts-ignore
@@ -54,5 +54,7 @@ export default grab;
 
 export { log };
 export * from "./common/types";
+export { GrabError, isGrabError } from "./common/grab-error";
+export type { GrabErrorCode } from "./common/grab-error";
 export * from "./devtools/devtools";
 export * from "./common/utils";

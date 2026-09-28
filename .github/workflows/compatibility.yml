@@ -1,0 +1,157 @@
+# Checks the runtime support matrix in RUNTIME_SUPPORT.md: every runtime that
+# page marks "Tested" runs the runtime contract here, against the BUILT bundles
+# a consumer installs — not the TypeScript source.
+#
+#   build    — installs, builds both published packages, runs the full contract
+#              suite and the type-level contract, and checks the docs page is in
+#              sync with RUNTIME_SUPPORT.md. Hands the dists to the other jobs.
+#   servers  — test/runtime/smoke.mjs on Node 18/20/22/24, Bun and Deno. Needs
+#              no install: the checks have no dependencies.
+#   browsers — test/runtime/browser.mjs in Chromium, Firefox and WebKit.
+#
+# A runtime added to or removed from the matrix is a contract change: edit
+# RUNTIME_SUPPORT.md in the same PR.
+name: Compatibility
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: compatibility-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Node 22 ships npm 10, which cannot resolve this workspace tree — see
+      # tests.yml. Corepack activates the npm pinned by `packageManager`.
+      - name: Activate the pinned npm
+        run: corepack enable npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build grab-url and grab-api.js
+        run: npx turbo run build --filter=grab-url --filter=grab-api.js
+
+      - name: Behavior contract (real HTTP server)
+        working-directory: packages/grab-url
+        run: npm run test:contract
+
+      # Compiles against the published .d.ts of both packages, strict mode.
+      - name: Type-level contract
+        working-directory: packages/grab-url
+        run: npm run test:types
+
+      - name: Docs page matches RUNTIME_SUPPORT.md
+        working-directory: packages/grab-url
+        run: node scripts/sync-runtime-support.mjs --check
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dists
+          path: |
+            packages/grab-url/dist
+            packages/grab-api/dist
+          retention-days: 3
+
+  servers:
+    needs: build
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One runtime failing should not hide the state of the others.
+      fail-fast: false
+      matrix:
+        include:
+          - { name: node 18, runtime: node, version: 18 }
+          - { name: node 20, runtime: node, version: 20 }
+          - { name: node 22, runtime: node, version: 22 }
+          - { name: node 24, runtime: node, version: 24 }
+          - { name: bun, runtime: bun, version: latest }
+          - { name: deno, runtime: deno, version: v2.x }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dists
+          path: packages
+
+      - if: matrix.runtime == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.version }}
+
+      - if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.version }}
+
+      - if: matrix.runtime == 'deno'
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ matrix.version }}
+
+      - name: Runtime contract — grab-url
+        working-directory: packages/grab-url
+        run: |
+          case "${{ matrix.runtime }}" in
+            node) node test/runtime/smoke.mjs ;;
+            bun)  bun test/runtime/smoke.mjs ;;
+            deno) deno run -A test/runtime/smoke.mjs ;;
+          esac
+
+      # Same source, separate build with rolled-up types — must behave the same.
+      - name: Runtime contract — grab-api.js
+        working-directory: packages/grab-url
+        env:
+          GRAB_ENTRY: ${{ github.workspace }}/packages/grab-api/dist/grab-api-slim.es.js
+        run: |
+          case "${{ matrix.runtime }}" in
+            node) node test/runtime/smoke.mjs ;;
+            bun)  bun test/runtime/smoke.mjs ;;
+            deno) deno run -A test/runtime/smoke.mjs ;;
+          esac
+
+  browsers:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dists
+          path: packages
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Playwright stays out of the workspace's dependencies: it is installed
+      # beside the checkout and handed to the runner by path.
+      - name: Install Playwright and its browsers
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pw" playwright@1
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium firefox webkit
+
+      - name: Runtime contract — Chromium, Firefox, WebKit
+        working-directory: packages/grab-url
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/pw/node_modules/playwright/index.mjs
+        run: node test/runtime/browser.mjs chromium firefox webkit
