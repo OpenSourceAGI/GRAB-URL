@@ -1,6 +1,6 @@
 {
   "name": "loading-animations",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Tree-shakable SVG loading spinners and CLI terminal spinner frame data. Zero dependencies.",
   "type": "module",
   "main": "./src/cli/index.js",
