@@ -1,15 +1,24 @@
-# api2ai
 
-Generate production-ready MCP servers from any OpenAPI specification using the
-[mcp-use](https://mcp-use.com) framework (8k+ GitHub stars).
+<p align="center">
+    <img width="600px" src="https://i.imgur.com/6CKuUBa.png" />
+</p>
+<h3 align="center">
+  <a href="https://github.com/vtempest/GRAB-URL/tree/master/api2ai/example-petstore"> 🎯 Example MCP Server </a>
+</h3>
 
-OpenAPI specs are easy to write and organize your code, and there are
-[100s of tools available](https://openapi.tools) such as the
-[OpenAPI Builder web UI](https://www.apibldr.com).
 
-```bash
-npm i -g api2ai
-```
+<p align="center">
+   <a href="https://npmjs.org/package/grab-url"><img alt="NPM Version" src="https://img.shields.io/npm/v/grab-url" /></a><a href="https://github.com/vtempest/GRAB-URL/discussions"><img alt="GitHub Discussions"
+        src="https://img.shields.io/github/discussions/vtempest/GRAB-URL" /></a><a href="https://github.blog/developer-skills/github/beginners-guide-to-github-creating-a-pull-request/"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"/></a>
+</p>
+
+
+# API2AI: OpenAPI to MCP-Use Server 
+
+Generate production-ready MCP servers from any OpenAPI specification using the highly-used and convenient [mcp-use](https://mcp-use.com) framework (8k+ GitHub stars).
+
+OpenAPI specs are easy to write and organize your code and have [100s of tools available](https://openapi.tools) such as the [OpenAPI Builder web UI](https://www.apibldr.com).
+
 
 ## Features
 
