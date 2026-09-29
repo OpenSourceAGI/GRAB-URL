@@ -51,16 +51,20 @@
   ],
   "scripts": {
     "build": "vite build --config vite.config.ts",
-    "make": "npm run make:icons && npm run make:skill && npm run make:readme && npm run make:docs && npm run build",
+    "make": "npm run make:icons && npm run make:skill && npm run make:runtime && npm run make:readme && npm run make:docs && npm run build",
     "make:docs": "npx turbo run build --filter=grab-help-docs",
     "make:skill": "node ./scripts/sync-skill-docs.mjs",
+    "make:runtime": "node ./scripts/sync-runtime-support.mjs",
     "make:readme": "node ./scripts/sync-root-readme.mjs",
     "make:icons": "npx export-svg-typescript@latest -i ../../packages/loading-animations/src/svg -o ../../packages/loading-animations/src/svg/index.ts",
     "prepublishOnly": "npm run build",
     "ship": "bun x standard-version --release-as patch; rm CHANGELOG.md; npm publish",
     "test:ui": "vitest --ui",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:contract": "vitest run test/contract.test.ts",
+    "test:types": "tsc -p test/types/tsconfig.json && tsc -p test/types/tsconfig.grab-api.json",
+    "test:runtime": "node test/runtime/smoke.mjs"
   },
   "peerDependencies": {
     "react": ">=16.8.0",

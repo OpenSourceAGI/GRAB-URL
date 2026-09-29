@@ -1,0 +1,19 @@
+{
+  // Compiles contract.types.ts against the BUILT declarations — what a
+  // consumer's `import ... from "grab-url"` actually resolves to — so run
+  // `npm run build` first. Strict on purpose: most consumers compile strict.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": [],
+    "paths": {
+      "grab-url": ["../../dist/grab-api-slim.d.ts"]
+    }
+  },
+  "files": ["contract.types.ts"]
+}

@@ -44,6 +44,7 @@ _Send anything, get back parsed data — no boilerplate per content type._
 - **Auto-Unzip**: Automatically extracts ZIP responses into `{ data: { filename: content } }` using archiver-web. Set `unzip: false` to disable. Import from `grab-url/full` — see [Slim by default](#slim-by-default).
 - **DOM Parsing**: Automatically parses HTML responses. Pass `parseDOM: "selector"` for CSS selector extraction or `parseDOM: false` to disable. Uses linkedom. Import from `grab-url/full` — see [Slim by default](#slim-by-default).
 - **Request Stategies**: [🎯 Examples](https://grab.js.org/docs/examples) show common stategies like debounce, repeat, proxy, unit tests, interceptors, file upload, etc
+- **Runtime Support**: [🛡️ Runtime support & behavior contract](https://grab.js.org/docs/runtime-support) lists what each runtime (browsers, Node, Bun, Deno, Workers, SSR) needs, what CI verifies there, the `GrabError` codes and plugin lifecycle, and the known quirks
 
 #### Reliability & Traffic Control
 

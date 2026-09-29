@@ -6,7 +6,8 @@
  */
 
 import { printJSONStructure, log } from "@grab-url/log";
-import { GrabOptions, GrabResponse, GrabFunction } from "../common/types";
+import { GrabOptions, GrabResponse, GrabFunction, GrabContext } from "../common/types";
+import { GrabError, toGrabError } from "../common/grab-error";
 import { buildUrl, isLocalhost } from "../common/utils";
 import { showAlert } from "../devtools/devtools";
 
@@ -20,9 +21,16 @@ import {
 import { setupInfiniteScroll } from "../response/infinite-scroll";
 import { manageCacheAndPagination } from "./cache-pagination";
 import { prepareFetchRequest } from "./request-prep";
+import { createMeta, newTraceId, runStage } from "./pipeline";
 import type { executeRequest as ExecuteRequestType } from "./request-executor";
 
 type ExecuteRequestFn = typeof ExecuteRequestType;
+
+/**
+ * Carries the trace id and attempt number from a failed attempt into its
+ * retry. A symbol, so it can never collide with — or be sent as — a param.
+ */
+const ATTEMPT = Symbol.for("grab.attempt");
 
 /**
  * Creates a grab function using the provided executor — enables slim builds to inject
@@ -79,8 +87,18 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     post,
     put,
     patch,
+    plugins,
+    [ATTEMPT]: attemptInfo,
     ...params
-  } = merged;
+  } = merged as typeof merged & { [ATTEMPT]?: { id: string; attempt: number } };
+
+  const attempt = attemptInfo?.attempt ?? 1;
+  const traceId = attemptInfo?.id ?? newTraceId();
+  const meta = createMeta(traceId, attempt);
+  // Built once the request is prepared; until then a failure (debounce,
+  // rate limit) has no URL or init to report, and runs no plugin hooks.
+  let ctx: GrabContext | undefined;
+  let logEntry: any;
 
   const urlConfig = buildUrl(baseURL, path);
   baseURL = urlConfig.baseURL;
@@ -132,10 +150,19 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
       rateLimit > 0 &&
       priorRequest?.lastFetchTime > Date.now() - 1000 * rateLimit
     ) {
-      throw new Error(
+      throw new GrabError(
         `Fetch rate limit exceeded for ${path}. Wait ${rateLimit}s between requests.`,
+        { code: "RATE_LIMITED" },
       );
     }
+
+    // cache:true pre-fills the prior response above and still refetches.
+    meta.cacheStatus = !cache
+      ? "bypass"
+      : !paginateKeyOf(infiniteScroll) && priorRequest?.response &&
+          (!cacheForTime || priorRequest.lastFetchTime > Date.now() - 1000 * cacheForTime)
+        ? "revalidated"
+        : "miss";
 
     if (priorRequest?.controller) {
       if (cancelOngoingIfNew) priorRequest.controller.abort();
@@ -150,12 +177,14 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
       signal = AbortSignal.timeout(timeout * 1000);
     }
 
-    grabLog.unshift({
+    logEntry = {
       path,
       request: paramsAsText,
       lastFetchTime: Date.now(),
       controller,
-    });
+      meta,
+    };
+    grabLog.unshift(logEntry);
 
     let { fetchParams, paramsGETRequest } = prepareFetchRequest(
       method,
@@ -172,8 +201,23 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
         [path, response, params, fetchParams] = modified;
     }
 
+    ctx = {
+      id: traceId,
+      path,
+      url: baseURL + path + paramsGETRequest,
+      method: (fetchParams.method as string) || method,
+      // prepareFetchRequest always builds headers as a plain object.
+      init: fetchParams as GrabContext["init"],
+      options: merged,
+      params,
+      attempt,
+      meta,
+    };
+    const context = ctx;
+    await runStage(plugins, "beforeRequest", context);
+
     const startTime = new Date();
-    const res = await executeRequest(
+    let res = await executeRequest(
       baseURL,
       path,
       paramsGETRequest,
@@ -184,7 +228,24 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
       parseDOM,
       unescapeHTML,
       onRawResponse,
+      {
+        transport: (name) => {
+          meta.transport = name;
+        },
+        response: async (raw) => {
+          context.response = raw;
+          meta.status = raw.status;
+          await runStage(plugins, "afterResponse", context);
+          await runStage(plugins, "beforeParse", context);
+        },
+      },
     );
+
+    if (plugins?.length) {
+      context.data = res;
+      await runStage(plugins, "afterParse", context);
+      res = context.data;
+    }
 
     // Clear loading state
     if (resFunction)
@@ -213,16 +274,36 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
     if (grabLog[0]) grabLog[0].response = response;
     if (resFunction) response = emitResponse(response, resFunction);
 
+    finishMeta(meta);
+    if (ctx) await runStage(plugins, "finally", ctx);
     return response as any;
-  } catch (error: any) {
+  } catch (thrown: any) {
+    const error = toGrabError(thrown, {
+      url: ctx?.url ?? baseURL + path,
+      method: ctx?.method ?? method,
+      attempt,
+      traceId,
+    });
+    if (!error.response && ctx?.response) error.response = ctx.response;
+    if (error.status === undefined && error.response) error.status = error.response.status;
+    finishMeta(meta);
+    if (logEntry) logEntry.error = error.message;
+
+    if (ctx) {
+      ctx.error = error;
+      await runStage(plugins, "onError", ctx);
+      await runStage(plugins, "finally", ctx);
+    }
+
     if (typeof onError === "function")
-      onError(error.message, baseURL + path, params);
+      onError(error.message, baseURL + path, params, error);
 
     if (merged.retryAttempts && merged.retryAttempts > 0) {
       return await grab(path, {
         ...options,
         retryAttempts: --merged.retryAttempts,
-      });
+        [ATTEMPT]: { id: traceId, attempt: attempt + 1 },
+      } as any);
     }
 
     if (!error.message.includes("signal") && debug) {
@@ -247,4 +328,13 @@ export function createGrab(executeRequest: ExecuteRequestFn) {
   }
   };
   return grab as any;
+}
+
+function finishMeta(meta: { startedAt: number; finishedAt?: number; durationMs?: number }) {
+  meta.finishedAt = Date.now();
+  meta.durationMs = meta.finishedAt - meta.startedAt;
+}
+
+function paginateKeyOf(infiniteScroll: unknown): unknown {
+  return Array.isArray(infiniteScroll) ? infiniteScroll[0] : undefined;
 }

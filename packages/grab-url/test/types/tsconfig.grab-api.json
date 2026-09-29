@@ -1,0 +1,10 @@
+{
+  // The same contract against grab-api.js, whose declarations are rolled up
+  // into one file by a different build — the two must not drift.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "grab-url": ["../../../grab-api/dist/grab-api-slim.d.ts"]
+    }
+  }
+}

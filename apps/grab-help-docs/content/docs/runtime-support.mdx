@@ -1,0 +1,317 @@
+---
+title: Runtime Support & Behavior Contract
+description: What grab() needs from each runtime, what CI verifies there, and the behavior every release guarantees.
+icon: ShieldCheck
+---
+
+{/* Generated from RUNTIME_SUPPORT.md by packages/grab-url/scripts/sync-runtime-support.mjs — edit that file, not this one. */}
+
+**Contract version 1.0** · applies to `grab-url` 3.0.x and `grab-api.js` 3.0.x · last verified 2026-09-28
+
+"Works anywhere" is a claim; this page turns it into guarantees that CI checks.
+It says, for each runtime, what `grab()` needs from the platform, what it does
+there, what is tested on every push, and what is known not to work.
+
+Every guarantee below is pinned by a test. Changing one is a breaking change:
+it needs a major version, a CHANGELOG entry, and an edit here in the same PR.
+
+| Label | Meaning |
+| --- | --- |
+| **Tested** | CI runs the runtime contract on it for every push and pull request |
+| **Expected** | Should work from the platform's APIs; not yet in CI |
+| **Unsupported** | Known to fail, with the reason given |
+
+## Support matrix
+
+| Runtime | Status | Versions tested | Feature floor | What CI runs |
+| --- | --- | --- | --- | --- |
+| Chromium | **Tested** | Playwright's current build | Chrome/Edge 103 | Runtime contract via Playwright |
+| Firefox | **Tested** | Playwright's current build | Firefox 100 | Runtime contract via Playwright |
+| WebKit / Safari | **Tested** | Playwright's current build | Safari 16 | Runtime contract via Playwright |
+| Node.js | **Tested** | 18, 20, 22, 24 | 18.0 (`engines`) | Full contract suite on 22; runtime contract on all four |
+| Bun | **Tested** | latest 1.x | — | Runtime contract |
+| Deno | **Tested** | latest 2.x | — | Runtime contract |
+| Cloudflare Workers | Expected | — | — | Not yet; Miniflare leg planned |
+| Vercel Edge | Expected | — | — | Not yet |
+| SSR (Next.js, Nuxt, SvelteKit, Remix) | Expected, with caveats | — | — | Covered by the Node leg; read the SSR section |
+| React Native | **Unsupported** | — | — | Importing throws; see below |
+
+CI tests the versions in the third column only. The browser feature floor is
+the first release with `AbortSignal.timeout`; older browsers with `fetch` still
+work, but the `timeout` option is silently skipped there (see **Timeouts**).
+
+## What every runtime needs
+
+`grab()` has no runtime dependencies. It calls the platform's own globals:
+
+| Global | Used for | If missing |
+| --- | --- | --- |
+| `fetch`, `Response`, `Headers` | every request | nothing works — polyfill `fetch` first |
+| `AbortController` | every request (it backs `cancelOngoingIfNew`) | every request fails |
+| `AbortSignal.timeout` | the `timeout` option | timeout is skipped, requests can hang |
+| `URLSearchParams` | query strings | nothing works |
+| `ReadableStream` on `response.body` | `onStream`, ZIP stream-unzip in `/full` | `onStream` receives `null` |
+| `Blob` | `application/octet-stream`, `application/pdf` and ZIP bodies | those bodies fail to parse |
+
+## The behavior contract
+
+These hold on every **Tested** runtime. The full list is
+`packages/grab-url/test/contract.test.ts` (Vitest, real HTTP server); the subset
+run on every runtime is `packages/grab-url/test/runtime/checks.mjs`.
+
+### Requests
+
+- `GET` and `DELETE` send params as a query string; `POST`, `PUT` and `PATCH`
+  send them as a JSON body.
+- An explicit `body` is sent verbatim; `body: null` sends none.
+- `Content-Type: application/json` and `Accept: application/json` are sent by
+  default; caller `headers` override them.
+- Utility options (`cache`, `timeout`, `retryAttempts`, `plugins`, …) are never
+  sent as params.
+- Redirects are followed; the final response is returned.
+
+### Responses
+
+- A JSON object is spread onto the result **and** kept under `.data`.
+- Text is placed under `.data`, with HTML entities unescaped unless
+  `unescapeHTML: false`.
+- `application/octet-stream`, `application/pdf` and ZIP (in `/slim`) become a
+  `Blob` under `.data`.
+- A response with **no** `Content-Type` is parsed as JSON.
+
+### Failures
+
+`grab()` never rejects. A failure resolves to a result whose `.error` is a
+**string**, and `isLoading` is cleared. The strings are part of the contract:
+
+| Failure | `.error` | `GrabError.code` |
+| --- | --- | --- |
+| Non-2xx status | `HTTP error: 404 Not Found` | `HTTP` |
+| Body is not valid for its type | `Error parsing response: SyntaxError: …` | `PARSE` |
+| Body stream dies part-way | `Error parsing response: TypeError: …` | `STREAM` |
+| `onStream` consumer throws | the consumer's message | `STREAM` |
+| DNS, refused, TLS, CORS | the runtime's message (`fetch failed`, `Failed to fetch`, …) | `NETWORK` |
+| `timeout` elapsed | the runtime's message | `TIMEOUT` |
+| Cancelled by `cancelOngoingIfNew` | the runtime's message | `ABORTED` |
+| `rateLimit` refused | `Fetch rate limit exceeded for /path. Wait Ns between requests.` | `RATE_LIMITED` |
+| A plugin hook throws | `Plugin "name" failed in stage: message` | `PLUGIN` |
+| A mock handler or `onRequest` throws | its message | `UNKNOWN` |
+
+`VALIDATION` and `CACHE` are reserved for schema validation and cache stores.
+
+The classified error reaches you as the **fourth argument of `onError`**, and
+as `ctx.error` in plugin hooks:
+
+```ts
+import grab, { GrabError } from "grab-url";
+
+await grab("users/42", {
+  async onError(message, url, params, error: GrabError) {
+    error.code;       // "HTTP"
+    error.status;     // 404
+    error.retryable;  // false — true for NETWORK, TIMEOUT, STREAM, 408/425/429/5xx
+    error.attempt;    // 1-based
+    error.traceId;    // shared by every attempt of this call
+    await error.response?.json(); // the error body, still unread
+  },
+});
+```
+
+For an `HTTP` failure the error body is left **unread** on `error.response`, so
+JSON, text and binary error bodies are all recoverable.
+
+### Retries, concurrency and cache
+
+- `retryAttempts: n` retries **any** failure up to `n` times, immediately.
+  `Retry-After` is not honored. `retryable` is informational — it does not yet
+  gate retries.
+- Concurrent identical requests are sent separately; there is no automatic
+  in-flight dedupe. `cancelNewIfOngoing` drops the second call, resolving it to
+  `{ isLoading: true }`; `cancelOngoingIfNew` aborts the first.
+- `cache: true` pre-fills the result from the previous identical request (within
+  `cacheForTime`) **and still refetches**, overwriting it when the network
+  answers. Plugins see this as `meta.cacheStatus`: `miss` on the first request,
+  `revalidated` when a cached value was shown, `bypass` without `cache`.
+- The cache key is the path plus params. **Headers are not part of it.**
+
+### Timeouts
+
+`timeout` is in seconds (default 30) and uses `AbortSignal.timeout`. Where that
+API is missing, no timeout is applied. Runtimes disagree on what a fired timeout
+rejects with (WebKit uses a plain `AbortError`); `grab()` reads the signal's
+`reason`, so the code is `TIMEOUT` on every tested runtime. `cancelOngoingIfNew: true` also disables
+the timeout for that request, because both use the one signal slot.
+
+## The request pipeline
+
+Plugins are the extension point every later feature attaches to — caching
+policies, schema validation, telemetry, progress — instead of each patching
+`grab()`. A plugin is an object with a `name` and any of six hooks; pass them
+per call, or on `grab.defaults` / `grab.instance()` to apply them everywhere.
+Options merge shallowly, so a `plugins` array passed per call **replaces** the
+default one rather than adding to it — spread the defaults in if you want both.
+
+```ts
+import grab, { type GrabPlugin } from "grab-url";
+
+const timing: GrabPlugin = {
+  name: "timing",
+  beforeRequest(ctx) { ctx.init.headers["x-trace-id"] = ctx.id; },
+  finally(ctx) { console.log(ctx.method, ctx.url, ctx.meta.status, ctx.meta.durationMs); },
+};
+
+const api = grab.instance({ baseURL: "https://api.example.com", plugins: [timing] });
+```
+
+Order for each attempt:
+
+1. Options are merged (defaults → instance → call); debounce, repeat and
+   rate limiting run; the cache is consulted.
+2. The request is prepared, then `onRequest` (legacy) runs.
+3. **`beforeRequest`** — mutate `ctx.init` (headers, body) before it is sent.
+4. The transport sends it (`fetch`, or `mock` when a `grab.mock` entry matches).
+5. `onRawResponse` (legacy), then **`afterResponse`** and **`beforeParse`**,
+   before the status check — so they see non-2xx responses too. Skipped for mocks.
+6. The body is parsed.
+7. **`afterParse`** — read or replace `ctx.data`; what you leave there is returned.
+8. On any failure: **`onError`** with `ctx.error`, then `onError` (legacy).
+9. **`finally`**, once per attempt, success or failure.
+10. A retry starts again from step 1 with `attempt + 1` and the same trace id.
+
+A throw from `beforeRequest`, `afterResponse`, `beforeParse` or `afterParse`
+fails the request with code `PLUGIN` — or keeps its own code if it threw a
+`GrabError`, which is how a validator reports `VALIDATION`. A throw from
+`onError` or `finally` is swallowed: they observe an outcome, they do not change it.
+
+`ctx.url` is a string, not a `Request`: a relative URL is valid in a browser but
+cannot construct a `Request` in Node, Deno or Workers.
+
+`ctx.meta` carries `id`, `startedAt`, `finishedAt`, `durationMs`, `attempt`,
+`status`, `transport`, `cacheStatus`, `fromCache` and `deduped`. It is kept on the
+request's `grab.log` entry too, and is never added to the result object, whose
+keys belong to your API's data.
+
+Integrations can feature-detect: `grab.supports.plugins` and
+`grab.supports.grabError` are `true` from this version.
+
+## Browser
+
+- **Fetch** is required; so is `AbortSignal.timeout` for timeouts (see the matrix).
+- **AbortController** backs `cancelOngoingIfNew`.
+- **ReadableStream** — `onStream` receives `response.body` untouched. There is no
+  `onDownloadProgress` yet; count bytes from the stream yourself.
+- **IndexedDB** is not used. `localStorage` is used only by `infiniteScroll` to
+  restore the scroll position.
+- **FormData** bodies are sent, but with `Content-Type: application/json`
+  (a known quirk, below). Drop the header with a plugin and the browser sets the
+  multipart boundary:
+
+  ```ts
+  const multipart: GrabPlugin = {
+    name: "multipart",
+    beforeRequest(ctx) {
+      if (ctx.init.body instanceof FormData) delete ctx.init.headers["Content-Type"];
+    },
+  };
+  ```
+
+- **Upload progress** is not available: `fetch` has no upload progress events,
+  and streaming request bodies (`duplex: "half"`) work only in Chromium-based
+  browsers today.
+- **DevTools** — on `localhost` the Ctrl+Alt+I request-history overlay is installed and
+  failures raise an on-page alert when `debug` is on.
+
+## Node.js
+
+- **Minimum 18.0** (`engines`). Every leg of CI from 18 to 24 runs the runtime
+  contract against the built bundle.
+- `grab()` calls the global `fetch`, which in Node is Undici. There is no
+  dispatcher, agent or proxy option yet: to proxy, set Undici's global
+  dispatcher (`setGlobalDispatcher(new ProxyAgent(url))` from an `undici`
+  release compatible with your Node) before calling `grab()`.
+- Node's fetch sends no cookies and has no page origin: relative paths need
+  `baseURL` or the `SERVER_API_URL` environment variable.
+- **ESM and CJS** both ship: `import` resolves `dist/*.es.js`, `require`
+  resolves `dist/*.cjs`. They are separate module instances — do not mix them in
+  one process or you get two `grab.mock` registries and two caches.
+- The module registers `globalThis.grab` and `globalThis.log` on import.
+
+## Cloudflare Workers and Vercel Edge
+
+- Only `fetch` semantics apply; there are no Node options to ignore.
+- The Workers **Cache API** is not used; `cache: true` is `grab()`'s own
+  in-memory cache, living as long as the isolate.
+- Request bodies are sent as given. Whether a `ReadableStream` body is accepted
+  is up to the platform; set any extra `init` fields it needs from a
+  `beforeRequest` plugin.
+- Streaming responses work through `onStream`.
+- There is no page origin — pass an absolute `baseURL`.
+- **Module state lives as long as the isolate** and is shared by every request
+  it serves. Read the SSR section; the same cautions apply.
+
+## Deno and Bun
+
+Both use their own `fetch` and pass the runtime contract. Node-only
+libraries (for example a Node `http.Agent`) do nothing here.
+
+## Server-side rendering
+
+`grab()` keeps its state at module level — `grab.log` (history and cache),
+`grab.defaults`, `grab.mock`. On a server that state is **shared by every
+request the process serves**:
+
+- **Never use `cache: true` for per-user data on a server.** The cache key
+  ignores headers, so a request carrying user B's `Authorization` is pre-filled
+  with user A's cached result before B's own response arrives.
+- `grab.log` gains an entry for **every** request and is never trimmed. In a
+  long-running server it grows without bound. Until a retention option exists,
+  prefer short-lived instances or clear it from a scheduled job — knowing that
+  clearing it also clears the cache.
+- `setDefaults` changes defaults for every request in the process. Prefer
+  `grab.instance()` for per-request configuration.
+- There is no hydration API yet: data fetched on the server is not handed to the
+  browser; the browser refetches. Do not serialize `grab.log` into a page — it
+  holds responses fetched with other users' credentials.
+
+## React Native
+
+**Unsupported in 3.0.x.** React Native defines `window` but not `document`, and
+the module's browser branch calls `document.addEventListener` at import time, so
+`import grab from "grab-url"` throws `ReferenceError: document is not defined`.
+Once that guard is fixed, expect the limits of React Native's `fetch`: no
+`response.body` stream (`onStream` receives `null`), no upload progress, and no
+timeout if the engine lacks `AbortSignal.timeout`.
+
+## Known quirks
+
+Shipped behavior that is arguably wrong. Each is pinned by a test so it cannot
+change by accident; fixing one is a deliberate, versioned change.
+
+| Quirk | Workaround |
+| --- | --- |
+| `FormData` and `URLSearchParams` bodies are sent with `Content-Type: application/json` | Delete the header in a `beforeRequest` plugin (above) |
+| Array params serialize comma-joined (`ids=1%2C2`); object params as `[object Object]` | Serialize them yourself before passing |
+| A text body with no `Content-Type` fails as `PARSE`, because it is parsed as JSON | Have the server send a content type |
+| The cache key ignores headers | Do not cache per-user data on servers |
+| `grab.log` is never trimmed | See SSR |
+| `Retry-After` is ignored; every failure is retried | Set `retryAttempts` only where retrying is safe |
+
+## How this is tested
+
+| Where | What |
+| --- | --- |
+| `packages/grab-url/test/contract.test.ts` | Full behavior contract against a real HTTP server (Vitest, Node) |
+| `packages/grab-url/test/runtime/checks.mjs` | The runtime contract, dependency-free, shared by the two runners below |
+| `packages/grab-url/test/runtime/smoke.mjs` | Runs it under Node, Bun and Deno against the built bundle |
+| `packages/grab-url/test/runtime/browser.mjs` | Runs it in Chromium, Firefox and WebKit via Playwright |
+| `packages/grab-url/test/types/` | Type-level contract, compiled with `strict` against both packages' published `.d.ts` |
+| `packages/grab-url/test/packaging.test.ts` | Bundle-size ceiling and the slim/full split |
+| `.github/workflows/compatibility.yml` | Runs all of the above across the matrix |
+
+Planned legs, not yet in CI: Cloudflare Workers via Miniflare, and React, Vue
+and Svelte integration fixtures.
+
+## Changelog
+
+- **1.0** (2026-09-28) — first published contract. Adds `GrabError`, `GrabMeta`
+  and the plugin pipeline, all additive: every `.error` string is unchanged.
