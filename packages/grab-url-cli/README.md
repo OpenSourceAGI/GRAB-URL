@@ -20,7 +20,7 @@ CLI front end for [`grab-url`](https://grab.js.org). Fetches API responses, down
 
 ```bash
 npm i -g grab-url-cli    # installs the `grab-url`, `grab` and `g` commands
-npx grab-url-cli <url> [options]
+npx grab-url <url> [options]
 ```
 
 Separate from the `grab-url` library on purpose: importing `grab-url` in an app gives you a
@@ -31,48 +31,48 @@ the terminal dependencies and fetches a `yt-dlp` binary on install.
 
 ```bash
 # Fetch JSON/text from an API and save to output.json
-npx grab-url-cli https://api.example.com/data
+npx grab-url https://api.example.com/data
 
 # Download a file
-npx grab-url-cli https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
+npx grab-url https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
 
 # Download multiple files concurrently
-npx grab-url-cli https://example.com/file1.zip https://example.com/file2.zip
+npx grab-url https://example.com/file1.zip https://example.com/file2.zip
 
 # Save the first URL to a custom filename
-npx grab-url-cli https://example.com/file.iso -o ubuntu.iso
+npx grab-url https://example.com/file.iso -o ubuntu.iso
 
 # Pass query params as JSON
-npx grab-url-cli https://api.example.com/search -p '{"q":"hello","limit":10}'
+npx grab-url https://api.example.com/search -p '{"q":"hello","limit":10}'
 
 # Print to stdout instead of writing a file
-npx grab-url-cli https://api.example.com/data --no-save
+npx grab-url https://api.example.com/data --no-save
 
 # Media sites are detected by domain and downloaded with yt-dlp
-npx grab-url-cli "https://www.youtube.com/watch?v=VIDEO_ID"
+npx grab-url "https://www.youtube.com/watch?v=VIDEO_ID"
 
 # Grab just the audio, in a container of your choosing
-npx grab-url-cli https://soundcloud.com/artist/track -a mp3
+npx grab-url https://soundcloud.com/artist/track -a mp3
 
 # Pick a format, or pass any yt-dlp flag straight through
-npx grab-url-cli https://vimeo.com/76979871 -f "bestvideo[height<=720]+bestaudio"
-npx grab-url-cli https://www.twitch.tv/videos/123 --ytdlp-args "--limit-rate 2M"
+npx grab-url https://vimeo.com/76979871 -f "bestvideo[height<=720]+bestaudio"
+npx grab-url https://www.twitch.tv/videos/123 --ytdlp-args "--limit-rate 2M"
 
 # Pull a file over SFTP (aria2c)
-npx grab-url-cli sftp://user@host/srv/backup.tar.gz --password hunter2
+npx grab-url sftp://user@host/srv/backup.tar.gz --password hunter2
 
 # Download a torrent or a magnet link into ./downloads
-npx grab-url-cli ./ubuntu.torrent -d ./downloads
-npx grab-url-cli "magnet:?xt=urn:btih:HASH" -d ./downloads --seed
+npx grab-url ./ubuntu.torrent -d ./downloads
+npx grab-url "magnet:?xt=urn:btih:HASH" -d ./downloads --seed
 
 # Detach immediately and keep transferring in the background
-npx grab-url-cli https://example.com/big.iso --background
+npx grab-url https://example.com/big.iso --background
 
 # See what is still running in the background
-npx grab-url-cli --jobs
+npx grab-url --jobs
 
 # Archive a page into ./<Page Title>/ - full page, article, cite, transcript, video
-npx grab-url-cli https://example.com/article --page
+npx grab-url https://example.com/article --page
 ```
 
 ## Options
@@ -169,7 +169,7 @@ no elevation — and the step is best-effort: a machine with no network or a loc
 still installs grab-url fine, just without the media path until yt-dlp arrives another way.
 
 ```bash
-npx grab-url-cli --install-ytdlp     # fetch or refresh it by hand
+npx grab-url --install-ytdlp     # fetch or refresh it by hand
 npm run ytdlp:sidecar            # fetch it under Tauri's externalBin naming
 ```
 

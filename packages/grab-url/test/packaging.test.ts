@@ -8,7 +8,8 @@
  *      unzipper, nothing lazily reachable from it either.
  *   2. `grab-url/full` is the one that carries linkedom and archiver-web.
  *   3. The CLI is a separate package. Nothing named `grab-url-cli` is inside
- *      the library's `dist/`, and the library declares no bin.
+ *      the library's `dist/`; the library's one bin is a builtins-only
+ *      launcher that hands `npx grab-url` off to `grab-url-cli`.
  *   4. `grab-api.js` publishes the same source under the same entry shape, and
  *      exports exactly the same names — the two must not drift.
  *
@@ -120,9 +121,22 @@ describe('grab-url exports map', () => {
 // ─── the CLI lives somewhere else ────────────────────────────────────────────
 
 describe('the CLI is packaged separately', () => {
-  it('gives the library no bin and no ./cli export', () => {
-    expect(grabUrlPkg.bin).toBeUndefined();
+  it('gives the library only the launcher bin and no ./cli export', () => {
+    expect(grabUrlPkg.bin).toEqual({ 'grab-url': './bin/grab-url.mjs' });
+    expect(grabUrlPkg.files).toContain('bin');
     expect(grabUrlPkg.exports['./cli']).toBeUndefined();
+  });
+
+  it('keeps the launcher out of the build and free of CLI code', () => {
+    // `npx grab-url` runs this file. It must stay a hand-off to grab-url-cli:
+    // Node builtins only, never an import of the CLI or of the library.
+    const launcher = readFileSync(join(pkgRoot, 'bin/grab-url.mjs'), 'utf8');
+    expect(launcher.startsWith('#!/usr/bin/env node\n')).toBe(true);
+    const imports = [...launcher.matchAll(/\bfrom\s*["']([^"']+)["']|\bimport\s*\(\s*["']([^"']+)["']/g)]
+      .map(([, a, b]) => a ?? b);
+    expect(imports.length).toBeGreaterThan(0);
+    for (const specifier of imports) expect(specifier).toMatch(/^node:/);
+    expect(readFileSync(join(pkgRoot, 'vite.config.ts'), 'utf8')).not.toMatch(/bin\/grab-url/);
   });
 
   it('leaves the CLI-only dependencies out of the library', () => {

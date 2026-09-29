@@ -119,26 +119,26 @@ two caches, and a stub registered on one is invisible to the other.
 
 ### Examples
 
-**CLI File Downloader** — `npm i -g grab-url-cli`, or `npx grab-url-cli`
+**CLI File Downloader** — `npm i -g grab-url-cli`, or just `npx grab-url` (no install)
 ```bash
-npx grab-url-cli https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
+npx grab-url https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
 
 # 700+ media sites are detected by domain and pulled with yt-dlp, which
 # installing grab-url-cli fetches for you
-npx grab-url-cli "https://www.youtube.com/watch?v=VIDEO_ID"
-npx grab-url-cli https://soundcloud.com/artist/track -a mp3
+npx grab-url "https://www.youtube.com/watch?v=VIDEO_ID"
+npx grab-url https://soundcloud.com/artist/track -a mp3
 
 # SFTP, torrents and magnet links (needs aria2c installed)
-npx grab-url-cli sftp://user@host/srv/backup.tar.gz --password hunter2
-npx grab-url-cli "magnet:?xt=urn:btih:HASH" -d ./downloads
+npx grab-url sftp://user@host/srv/backup.tar.gz --password hunter2
+npx grab-url "magnet:?xt=urn:btih:HASH" -d ./downloads
 
 # Archive a page into ./<Page Title>/ - article, cite, transcript and any video
 # (needs `npm i -g extract-webpage`; the video step needs yt-dlp)
-npx grab-url-cli https://example.com/article --page
+npx grab-url https://example.com/article --page
 
 # Detach and keep going in the background; Ctrl+C on any transfer offers the same
-npx grab-url-cli https://example.com/big.iso --background
-npx grab-url-cli --jobs
+npx grab-url https://example.com/big.iso --background
+npx grab-url --jobs
 ```
 
 

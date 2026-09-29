@@ -129,6 +129,12 @@ Before 3.0 this rode inside the `grab-url` package, which meant every consumer
 of a 5 kB HTTP client also installed chalk, cli-table3, cli-progress and a
 yt-dlp download. Do not move it back.
 
+`npx grab-url <url>` still works: `grab-url` declares one bin,
+`packages/grab-url/bin/grab-url.mjs`, a hand-written launcher that is **not**
+part of any Vite build. It imports Node builtins only and hands off to an
+installed `grab-url-cli`, or to `npx --package grab-url-cli grab-url` when none
+is installed. Keep it that way — no library or CLI imports in that file.
+
 ### The archive bins — `packages/archiver-web/vite.config.ts`
 
 `archiver-web`, `bin-extract`, `bin-compress`. `grab-url/full` still reaches
@@ -202,7 +208,7 @@ npm run test:coverage    # what CI runs (after the build step)
 ```
 
 `test/packaging.test.ts` guards the published shape: the exports map, the
-absence of a bin, and — once `dist/` exists — what each built entry can actually
+builtins-only launcher bin, and — once `dist/` exists — what each built entry can actually
 reach. The bundle half skips when nothing has been built, so run
 `npm run build` before trusting a green local run.
 

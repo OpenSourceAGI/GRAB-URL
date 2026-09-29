@@ -5,11 +5,11 @@
  * background jobs.
  *
  * Usage:
- *   npx grab-url-cli <url> [options]
- *   npx grab-url-cli https://api.example.com/data
- *   npx grab-url-cli https://example.com/file.zip
- *   npx grab-url-cli sftp://user@host/path/file.iso
- *   npx grab-url-cli "magnet:?xt=urn:btih:..." --background
+ *   npx grab-url <url> [options]
+ *   npx grab-url https://api.example.com/data
+ *   npx grab-url https://example.com/file.zip
+ *   npx grab-url sftp://user@host/path/file.iso
+ *   npx grab-url "magnet:?xt=urn:btih:..." --background
  */
 
 import fs from "fs";

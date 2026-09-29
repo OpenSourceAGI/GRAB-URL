@@ -43,8 +43,12 @@
     },
     "./package.json": "./package.json"
   },
+  "bin": {
+    "grab-url": "./bin/grab-url.mjs"
+  },
   "files": [
     "dist",
+    "bin",
     "LICENSE.md",
     "CHANGELOG.md",
     "README.md"
