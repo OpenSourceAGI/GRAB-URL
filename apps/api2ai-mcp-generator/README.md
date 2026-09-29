@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img width="600px" src="https://i.imgur.com/TTJBLxo.png" />
+    <img width="600px" src="https://i.imgur.com/6CKuUBa.png" />
 </p>
 <h3 align="center">
   <a href="https://github.com/vtempest/GRAB-URL/tree/master/api2ai/example-petstore"> 🎯 Example MCP Server </a>
