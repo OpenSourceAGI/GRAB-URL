@@ -1,6 +1,6 @@
 {
   "name": "grab-url-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The grab-url transfer CLI: resumable HTTP/SFTP downloads, torrents and magnets via aria2c, 700+ media sites via yt-dlp, and whole-page archiving. Ships as its own package so importing grab-url stays a 5kB library.",
   "type": "module",
   "main": "./dist/grab-url-cli.cjs.js",
