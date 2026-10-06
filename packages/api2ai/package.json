@@ -4,11 +4,13 @@
   "description": "Generate a production-ready MCP server (mcp-use framework) from any OpenAPI specification.",
   "type": "module",
   "bin": {
-    "api2ai": "./src/generate-mcp-use-server.js"
+    "api2ai": "./src/cli.js"
   },
-  "main": "./src/generate-mcp-use-server.js",
+  "main": "./src/index.js",
   "exports": {
-    ".": "./src/generate-mcp-use-server.js"
+    ".": "./src/index.js",
+    "./cli": "./src/cli.js",
+    "./package.json": "./package.json"
   },
   "optionalDependencies": {
     "js-yaml": "^4.1.1"

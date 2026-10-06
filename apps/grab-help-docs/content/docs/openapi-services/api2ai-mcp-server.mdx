@@ -40,7 +40,8 @@ OpenAPI specs are easy to write and organize your code and have [100s of tools a
 ## Features
 
 - 🚀 **Modern Framework** - Uses mcp-use for clean, maintainable code
-- 🔍 **Built-in Inspector** - Test tools immediately at `/inspector`
+- 🔍 **Inspector** - `npm run dev` serves it at `/mcp/inspector`
+- 🆕 **mcp-use 2.x** - Generated servers target mcp-use `^2.7.3` and zod 4 (Node 22.22.2+)
 - 📡 **Multiple Transports** - HTTP, SSE, and Streamable HTTP support
 - 🎨 **UI Widgets** - Compatible with ChatGPT Apps SDK and MCP-UI
 - 🔐 **Auth Support** - Bearer tokens, API keys, custom headers
@@ -60,17 +61,16 @@ npx api2ai \
 # Install and run
 cd petstore-mcp
 npm install
-npm start
+npm start        # MCP endpoint at http://localhost:3000/mcp
+npm run dev      # hot reload + Inspector at http://localhost:3000/mcp/inspector
 ```
-
-Open http://localhost:3000/inspector to test your tools!
 
 ## Usage
 
 ### CLI
 
 ```bash
-node generate-mcp-use-server.js <openapi-spec> [output-folder] [options]
+npx api2ai <openapi-spec> [output-folder] [options]
 
 Options:
   --name <name>            Server name (default: api-mcp-server)
@@ -79,7 +79,8 @@ Options:
   --allow-mutations        Enable POST/PUT/PATCH/DELETE tools by default
   --include-tags <tags>    Only include tools with these tags (comma-separated)
   --exclude-tags <tags>    Exclude tools with these tags (comma-separated)
-  --approve-writes         Disable approval requirement for restricted tools
+  --exclude-ops <ids>      Exclude these operationIds (comma-separated)
+  --approve-writes         Write REQUIRE_APPROVALS=false into the generated .env
   --help                   Show help
 ```
 
@@ -87,32 +88,32 @@ Options:
 
 ```bash
 # From remote URL
-node generate-mcp-use-server.js \
+npx api2ai \
   https://api.example.com/openapi.json \
   ./my-server \
   --name my-api
 
 # From local file
-node generate-mcp-use-server.js \
+npx api2ai \
   ./specs/my-api.yaml \
   ./my-mcp-server \
   --port 8080
 
 # With custom base URL
-node generate-mcp-use-server.js \
+npx api2ai \
   ./petstore.json \
   ./petstore \
   --base-url https://petstore.example.com/v3
 
 # Include only read-only tools tagged "public"
-node generate-mcp-use-server.js \
+npx api2ai \
   ./api.json \
   ./readonly-server \
   --include-tags public \
   --exclude-tags admin,internal
 
 # Enable writes (mutations) explicitly
-node generate-mcp-use-server.js \
+npx api2ai \
   ./api.json \
   ./full-server \
   --allow-mutations \
@@ -126,7 +127,7 @@ import {
   generateMcpServer,
   extractTools,
   loadOpenApiSpec,
-} from "./generate-mcp-use-server.js";
+} from "api2ai";
 
 // Generate complete server
 const result = await generateMcpServer(
@@ -187,7 +188,7 @@ The generated HTTP client enforces these on every request:
 - **Credential header protection** — tool arguments cannot override `Authorization`, `Cookie`, `X-API-Key`, or other credential headers; env-configured auth always wins
 - **Host allowlist** — `ALLOWED_API_HOSTS` restricts outbound calls to specific hostnames
 
-> **Inspector note**: The built-in inspector at `/inspector` exposes all registered tools. In production, restrict access using a reverse proxy or firewall rule.
+> **Inspector note**: the Inspector (`npm run dev`, or `npm run start:inspector`) exposes all registered tools. Don't run it on a public interface.
 
 ## Generated Output
 
@@ -209,12 +210,11 @@ my-mcp-server/
 
 ### Built-in Endpoints
 
-| Endpoint         | Description                 |
-| ---------------- | --------------------------- |
-| `GET /inspector` | Interactive tool testing UI |
-| `POST /mcp`      | MCP protocol endpoint       |
-| `GET /sse`       | Server-Sent Events endpoint |
-| `GET /health`    | Health check                |
+| Endpoint          | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| `POST /mcp`       | MCP endpoint (Streamable HTTP)                 |
+| `GET /mcp`        | Landing page with client setup instructions    |
+| `/mcp/inspector`  | Interactive tool testing UI (`npm run dev`)    |
 
 ### Environment Variables
 

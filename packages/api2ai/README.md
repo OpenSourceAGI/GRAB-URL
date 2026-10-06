@@ -19,9 +19,11 @@ OpenAPI specs are easy to write and organize your code and have [100s of tools a
 ## Features
 
 - 🚀 **Modern Framework** - Uses mcp-use for clean, maintainable code
-- 🔍 **Built-in Inspector** - Test tools immediately at `/inspector`
-- 📡 **Multiple Transports** - HTTP, SSE, and Streamable HTTP support
-- 🎨 **UI Widgets** - Compatible with ChatGPT Apps SDK and MCP-UI
+- 🆕 **mcp-use 2.x** - Generated servers target mcp-use `^2.7.3` and zod 4
+- 🔍 **Inspector** - `npm run dev` serves it at `/mcp/inspector`
+- 📡 **Streamable HTTP** - One `/mcp` endpoint for every client
+- 🏷️ **Tool Annotations** - `readOnlyHint` / `destructiveHint` / `idempotentHint` from the HTTP method
+- 🔗 **`$ref`, `allOf`, nullable** - Local refs resolved, cycles cut, OpenAPI 3.0 and 3.1 nullability
 - 🔐 **Auth Support** - Bearer tokens, API keys, custom headers
 - ✨ **Zod Schemas** - Type-safe parameter validation
 - 🛡️ **Security Hardening** - Risk classification, policy enforcement, HTTP guardrails
@@ -39,10 +41,11 @@ npx api2ai \
 # Install and run
 cd petstore-mcp
 npm install
-npm start
+npm start        # MCP endpoint at http://localhost:3000/mcp
+npm run dev      # hot reload + Inspector at http://localhost:3000/mcp/inspector
 ```
 
-Open http://localhost:3000/inspector to test your tools!
+Generated servers need **Node 22.22.2+** (mcp-use 2.x's engine floor). The generator itself runs on Node 18+.
 
 ## Usage
 
@@ -55,10 +58,11 @@ Options:
   --name <name>            Server name (default: api-mcp-server)
   --base-url <url>         Override API base URL
   --port <port>            Server port (default: 3000)
-  --allow-mutations        Enable POST/PUT/PATCH/DELETE tools by default
+  --allow-mutations        Enable medium-risk POST/PUT/PATCH/DELETE tools by default
   --include-tags <tags>    Only include tools with these tags (comma-separated)
   --exclude-tags <tags>    Exclude tools with these tags (comma-separated)
-  --approve-writes         Disable approval requirement for restricted tools
+  --exclude-ops <ids>      Exclude these operationIds (comma-separated)
+  --approve-writes         Write REQUIRE_APPROVALS=false into the generated .env
   --help                   Show help
 ```
 
@@ -101,7 +105,7 @@ npx api2ai \
 ### Programmatic Usage
 
 ```javascript
-import { generateMcpServer, extractTools, loadOpenApiSpec } from "api2ai";
+import { generateMcpServer, renderMcpServer, extractTools, loadOpenApiSpec } from "api2ai";
 
 // Generate complete server
 const result = await generateMcpServer(
@@ -125,6 +129,9 @@ const tools = extractTools(spec, {
   filterFn: (tool) => tool.riskLevel === "low",  // only safe read-only tools
   excludeOperationIds: ["deleteUser"],
 });
+
+// Or render every file in memory without writing to disk
+const { files } = renderMcpServer(spec, { serverName: "my-api" });
 ```
 
 ## Security
@@ -160,9 +167,9 @@ The generated HTTP client enforces these on every request:
 - **Response size cap** — configurable via `MAX_RESPONSE_BYTES` (default 10 MB)
 - **No redirects** — `redirect: 'error'` prevents host-pivot attacks
 - **Credential header protection** — tool arguments cannot override `Authorization`, `Cookie`, `X-API-Key`, or other credential headers; env-configured auth always wins
-- **Host allowlist** — `ALLOWED_API_HOSTS` restricts outbound calls to specific hostnames
+- **Host allowlist** — only the spec's API host may be called unless `ALLOWED_API_HOSTS` says otherwise, so a tampered `API_BASE_URL` can't send your credentials elsewhere
 
-> **Inspector note**: The built-in inspector at `/inspector` exposes all registered tools. In production, restrict access using a reverse proxy or firewall rule.
+> **Inspector note**: the Inspector (`npm run dev`, or `npm run start:inspector`) exposes all registered tools. Don't run it on a public interface.
 
 ## Generated Output
 
@@ -186,22 +193,21 @@ my-mcp-server/
 
 | Endpoint | Description |
 |----------|-------------|
-| `GET /inspector` | Interactive tool testing UI |
-| `POST /mcp` | MCP protocol endpoint |
-| `GET /sse` | Server-Sent Events endpoint |
-| `GET /health` | Health check |
+| `POST /mcp` | MCP endpoint (Streamable HTTP) |
+| `GET /mcp` | Landing page with client setup instructions |
+| `/mcp/inspector` | Interactive tool testing UI (`npm run dev` only) |
 
 ### Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `PORT` | Server port | `3000` |
-| `NODE_ENV` | `development` / `production` | `development` |
+| `HOST` | Bind address (`0.0.0.0` in containers) | `127.0.0.1` |
 | `API_BASE_URL` | Base URL for API calls | From spec |
 | `API_KEY` | Bearer token auth | — |
 | `API_AUTH_HEADER` | Custom header (`Name:value`) | — |
-| `MCP_URL` | Public URL for widgets | — |
-| `ALLOWED_ORIGINS` | CORS origins (production) | — |
+| `MCP_URL` | Public URL behind a proxy (its host is allowed) | — |
+| `ALLOWED_ORIGINS` | Browser origins allowed to call `/mcp` | — |
 | `ALLOW_RESTRICTED_TOOLS` | Allow medium/high-risk tools | `false` |
 | `REQUIRE_APPROVALS` | Require approval for restricted tools | `true` |
 | `ALLOWED_API_HOSTS` | Comma-separated allowed API hostnames | (spec's host) |
@@ -220,9 +226,11 @@ my-mcp-server/
 }
 ```
 
-### Connect to ChatGPT
+### Connect to Claude Code
 
-The generated server supports the OpenAI Apps SDK out of the box.
+```bash
+claude mcp add --transport http my-api http://localhost:3000/mcp
+```
 
 ## Advanced Options
 
@@ -280,7 +288,6 @@ const result = await generateMcpServer(specUrl, outputDir, {
 |---------|---------------|---------|
 | Code needed | ~50 lines | ~200+ lines |
 | Inspector | ✅ Built-in | ❌ Manual |
-| UI Widgets | ✅ Supported | ❌ Manual |
 | Zod validation | ✅ Generated | ❌ Manual |
 | Authentication | ✅ Configured | ❌ Manual |
 | Risk classification | ✅ Automatic | ❌ Manual |
@@ -290,9 +297,20 @@ const result = await generateMcpServer(specUrl, outputDir, {
 
 ## Development
 
+```
+src/
+├── cli.js            # the `api2ai` command
+├── index.js          # public API
+├── generate.js       # render + write a server
+├── versions.js       # mcp-use / zod versions written into generated servers
+├── spec/             # load spec, OpenAPI → Zod, risk classification, tool extraction
+└── templates/        # one module per generated file
+```
+
 ```bash
-npm install
-node src/generate-mcp-use-server.js ./petstore.json ./out
+node src/cli.js ./petstore.json ./out
+# tests live in the repo's single Vitest suite
+cd ../grab-url && npx vitest run test/api2ai.test.ts
 ```
 
 ## License
