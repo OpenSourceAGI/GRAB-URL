@@ -220,9 +220,6 @@ https://github.com/user-attachments/assets/903f2483-6fac-4592-be09-5fdc17196a84
 
 ![Debug log](https://i.imgur.com/R8Qp6Vg.png)
 
-**Autocomplete option names**
-
-![Autocomplete](https://i.imgur.com/XlxILJ0.png)
 
 ## Comparison of HTTP Request Libraries
 
