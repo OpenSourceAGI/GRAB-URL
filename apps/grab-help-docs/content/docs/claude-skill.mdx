@@ -351,13 +351,14 @@ Reconnects honor the server's `retry:` field and send `Last-Event-ID`, matching 
 
 When an agent (Claude Desktop, ChatGPT Apps, any MCP client) should call the API as a tool,
 generate an MCP server from the same spec instead of writing tool wrappers. `api2ai` builds it
-on [mcp-use](https://mcp-use.com): every operation becomes a Zod-validated tool, with a built-in
-inspector, HTTP/SSE transports, and a hardened HTTP client.
+on [mcp-use](https://mcp-use.com) 2.x: every operation becomes a Zod-validated tool with MCP
+annotations, served over Streamable HTTP at `/mcp`, with a hardened HTTP client. Generated servers
+need Node 22.22.2+.
 
 ```bash
 npx api2ai ./openapi.json ./my-mcp-server --name my-api
-cd my-mcp-server && npm install && npm start
-# http://localhost:3000/inspector to exercise the tools
+cd my-mcp-server && npm install && npm start   # http://localhost:3000/mcp
+npm run dev   # hot reload + Inspector at http://localhost:3000/mcp/inspector
 ```
 
 ### CLI options
@@ -370,7 +371,8 @@ cd my-mcp-server && npm install && npm start
 | `--allow-mutations`     | Enable `POST`/`PUT`/`PATCH`/`DELETE` tools by default         |
 | `--include-tags <tags>` | Only include operations with these tags (comma-separated)     |
 | `--exclude-tags <tags>` | Exclude operations with these tags (comma-separated)          |
-| `--approve-writes`      | Drop the approval requirement on restricted tools             |
+| `--exclude-ops <ids>`   | Drop these operationIds (comma-separated)                     |
+| `--approve-writes`      | Write `REQUIRE_APPROVALS=false` into the generated `.env`     |
 
 ### Security model — three layers
 
@@ -390,7 +392,8 @@ medium/high, `REQUIRE_APPROVALS=false` drops the per-call approval gate.
 
 **Layer 3 — HTTP hardening** on every generated request: timeouts (`REQUEST_TIMEOUT_MS`,
 default 30s), a response size cap (`MAX_RESPONSE_BYTES`, default 10MB), `redirect: 'error'` so a
-redirect cannot pivot hosts, a host allowlist (`ALLOWED_API_HOSTS`), and credential-header
+redirect cannot pivot hosts, a host allowlist (`ALLOWED_API_HOSTS`, defaulting to the spec's
+API host), and credential-header
 protection — tool arguments can never override `Authorization`, `Cookie` or `X-API-Key`;
 env-configured auth always wins.
 
