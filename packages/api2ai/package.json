@@ -1,6 +1,6 @@
 {
   "name": "api2ai",
-  "version": "1.0.23",
+  "version": "1.0.28",
   "description": "Generate a production-ready MCP server (mcp-use framework) from any OpenAPI specification.",
   "type": "module",
   "bin": {
