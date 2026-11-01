@@ -160,3 +160,23 @@ bun test          # tsx test.ts
 ## License
 
 MIT
+
+## Agent Skill
+
+Teach your coding agent (Claude Code, Cursor, Gemini, Codex, Antigravity, etc.) how to use this package with the [`use-archiver-web`](../../skills/use-archiver-web/SKILL.md) skill.
+
+**One command:**
+
+```bash
+npx skills add OpenSourceAGI/GRAB-URL@use-archiver-web
+```
+
+**Or manually**, copy the skill into your agent's skills folder:
+
+```bash
+mkdir -p ~/.claude/skills/use-archiver-web
+curl -fsSL https://raw.githubusercontent.com/OpenSourceAGI/GRAB-URL/master/skills/use-archiver-web/SKILL.md \
+  -o ~/.claude/skills/use-archiver-web/SKILL.md
+```
+
+Use `.claude/skills/use-archiver-web/SKILL.md` inside a project instead of `~/.claude/...` to scope it to that repo.

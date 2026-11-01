@@ -251,3 +251,23 @@ https://github.com/user-attachments/assets/903f2483-6fac-4592-be09-5fdc17196a84
 **Debugging requests is a bitch. [Make the switch!](https://grab.js.org/docs/Comparisons)**
 
 🌟 Star this repo so it will grow and get updates!
+
+## Agent Skill
+
+Teach your coding agent (Claude Code, Cursor, Gemini, Codex, Antigravity, etc.) how to use this package with the [`use-grab-request`](../../skills/use-grab-request/SKILL.md) skill.
+
+**One command:**
+
+```bash
+npx skills add OpenSourceAGI/GRAB-URL@use-grab-request
+```
+
+**Or manually**, copy the skill into your agent's skills folder:
+
+```bash
+mkdir -p ~/.claude/skills/use-grab-request
+curl -fsSL https://raw.githubusercontent.com/OpenSourceAGI/GRAB-URL/master/skills/use-grab-request/SKILL.md \
+  -o ~/.claude/skills/use-grab-request/SKILL.md
+```
+
+Use `.claude/skills/use-grab-request/SKILL.md` inside a project instead of `~/.claude/...` to scope it to that repo.

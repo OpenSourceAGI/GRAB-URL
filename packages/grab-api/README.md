@@ -170,3 +170,23 @@ config, so a change here lands in both — see
 - 📑 Docs: <https://grab.js.org>
 - 🎯 Examples: <https://grab.js.org/docs/examples>
 - 💬 Discord: <https://discord.gg/SJdBqBz3tV>
+
+## Agent Skill
+
+Teach your coding agent (Claude Code, Cursor, Gemini, Codex, Antigravity, etc.) how to use this package with the [`use-grab-api`](../../skills/use-grab-api/SKILL.md) skill.
+
+**One command:**
+
+```bash
+npx skills add OpenSourceAGI/GRAB-URL@use-grab-api
+```
+
+**Or manually**, copy the skill into your agent's skills folder:
+
+```bash
+mkdir -p ~/.claude/skills/use-grab-api
+curl -fsSL https://raw.githubusercontent.com/OpenSourceAGI/GRAB-URL/master/skills/use-grab-api/SKILL.md \
+  -o ~/.claude/skills/use-grab-api/SKILL.md
+```
+
+Use `.claude/skills/use-grab-api/SKILL.md` inside a project instead of `~/.claude/...` to scope it to that repo.

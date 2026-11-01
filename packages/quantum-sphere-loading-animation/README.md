@@ -143,3 +143,23 @@ See `src/QuantumSphere.d.ts` (or your IDE's autocomplete) for the full list of c
 ## License
 
 MIT © [vtempest](https://github.com/vtempest)
+
+## Agent Skill
+
+Teach your coding agent (Claude Code, Cursor, Gemini, Codex, Antigravity, etc.) how to use this package with the [`use-quantum-sphere-loading`](../../skills/use-quantum-sphere-loading/SKILL.md) skill.
+
+**One command:**
+
+```bash
+npx skills add OpenSourceAGI/GRAB-URL@use-quantum-sphere-loading
+```
+
+**Or manually**, copy the skill into your agent's skills folder:
+
+```bash
+mkdir -p ~/.claude/skills/use-quantum-sphere-loading
+curl -fsSL https://raw.githubusercontent.com/OpenSourceAGI/GRAB-URL/master/skills/use-quantum-sphere-loading/SKILL.md \
+  -o ~/.claude/skills/use-quantum-sphere-loading/SKILL.md
+```
+
+Use `.claude/skills/use-quantum-sphere-loading/SKILL.md` inside a project instead of `~/.claude/...` to scope it to that repo.

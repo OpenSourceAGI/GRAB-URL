@@ -357,3 +357,23 @@ await downloader.downloadMultipleFiles([
 ## License
 
 MIT
+
+## Agent Skill
+
+Teach your coding agent (Claude Code, Cursor, Gemini, Codex, Antigravity, etc.) how to use this package with the [`use-grab-url-cli`](../../skills/use-grab-url-cli/SKILL.md) skill.
+
+**One command:**
+
+```bash
+npx skills add OpenSourceAGI/GRAB-URL@use-grab-url-cli
+```
+
+**Or manually**, copy the skill into your agent's skills folder:
+
+```bash
+mkdir -p ~/.claude/skills/use-grab-url-cli
+curl -fsSL https://raw.githubusercontent.com/OpenSourceAGI/GRAB-URL/master/skills/use-grab-url-cli/SKILL.md \
+  -o ~/.claude/skills/use-grab-url-cli/SKILL.md
+```
+
+Use `.claude/skills/use-grab-url-cli/SKILL.md` inside a project instead of `~/.claude/...` to scope it to that repo.

@@ -247,3 +247,23 @@ The client detects support and never sends options an older grab would turn into
 | [src/cli.ts](src/cli.ts)                                 | The `api2client` command                             |
 
 Serialization and SSE streaming in `src/core/` are ported from Hey API's client core (MIT) so generated SDKs produce identical URLs, bodies and event streams on any client.
+
+## Agent Skill
+
+Teach your coding agent (Claude Code, Cursor, Gemini, Codex, Antigravity, etc.) how to use this package with the [`use-api2client`](../../skills/use-api2client/SKILL.md) skill.
+
+**One command:**
+
+```bash
+npx skills add OpenSourceAGI/GRAB-URL@use-api2client
+```
+
+**Or manually**, copy the skill into your agent's skills folder:
+
+```bash
+mkdir -p ~/.claude/skills/use-api2client
+curl -fsSL https://raw.githubusercontent.com/OpenSourceAGI/GRAB-URL/master/skills/use-api2client/SKILL.md \
+  -o ~/.claude/skills/use-api2client/SKILL.md
+```
+
+Use `.claude/skills/use-api2client/SKILL.md` inside a project instead of `~/.claude/...` to scope it to that repo.

@@ -190,3 +190,23 @@ npx export-svg-typescript@latest -i ./src/svg -o ./src/svg/index.ts
 ## License
 
 MIT
+
+## Agent Skill
+
+Teach your coding agent (Claude Code, Cursor, Gemini, Codex, Antigravity, etc.) how to use this package with the [`use-loading-animations`](../../skills/use-loading-animations/SKILL.md) skill.
+
+**One command:**
+
+```bash
+npx skills add OpenSourceAGI/GRAB-URL@use-loading-animations
+```
+
+**Or manually**, copy the skill into your agent's skills folder:
+
+```bash
+mkdir -p ~/.claude/skills/use-loading-animations
+curl -fsSL https://raw.githubusercontent.com/OpenSourceAGI/GRAB-URL/master/skills/use-loading-animations/SKILL.md \
+  -o ~/.claude/skills/use-loading-animations/SKILL.md
+```
+
+Use `.claude/skills/use-loading-animations/SKILL.md` inside a project instead of `~/.claude/...` to scope it to that repo.
