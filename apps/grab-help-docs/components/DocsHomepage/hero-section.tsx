@@ -125,18 +125,16 @@ export function HeroSection() {
                 v1.0 — Zero Dependencies, 4KB
               </Badge>
 
-              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance mb-4 break-words">
-                Why <span className="line-through text-muted-foreground">fetch</span> when you can just
-              </h1>
-              <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 break-words">
-                <span className="shimmer-text">GRAB</span>
-                <span className="text-primary">?</span>
-              </h2>
-
-              <p className="text-lg md:text-xl text-muted-foreground mb-2 font-mono">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance mb-6 break-words font-mono">
                 Generate Request {"{"}to: <span className="text-primary">API</span> from:{" "}
-                <span className="text-foreground">Browser</span>
+                <span className="shimmer-text">Browser</span>
                 {"}"}
+              </h1>
+
+              <p className="text-lg md:text-xl text-muted-foreground mb-2">
+                Why <span className="line-through">fetch</span> when you can just{" "}
+                <span className="text-foreground font-semibold">GRAB</span>
+                <span className="text-primary">?</span>
               </p>
 
               <p className="text-xl text-muted-foreground mb-8">
