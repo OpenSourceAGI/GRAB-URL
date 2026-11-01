@@ -1,6 +1,6 @@
 {
   "name": "api2client",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Hey API client that sends generated OpenAPI SDK requests with grab instead of axios or fetch, adding caching, retries, rate limiting, deduplication and mocks.",
   "type": "module",
   "main": "./dist/index.cjs.js",
