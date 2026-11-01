@@ -1,6 +1,6 @@
 {
   "name": "quantum-sphere-loading-icon",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Parabolic spherical orbital loading component for React and Svelte, inspired by quantum superposition of atomic orbitals.",
   "type": "module",
   "main": "./dist/index.js",
