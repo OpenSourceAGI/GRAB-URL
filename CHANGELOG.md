@@ -30,6 +30,17 @@ also kept on each `grab.log` entry. Detect support with
 Cost: the default import grows from about 16.5 kB to 19.5 kB raw (7.4 → 8.6 kB
 gzipped).
 
+**WebKit timeouts are `TIMEOUT`.** When `AbortSignal.timeout` fires, WebKit's
+fetch rejects with a plain `AbortError` where every other runtime throws a
+`TimeoutError`. grab now reads the signal's reason, so a timeout is classified
+as `TIMEOUT` rather than `ABORTED` in Safari too.
+
+**`npx grab-url` runs the CLI.** `grab-url` ships a builtins-only launcher bin
+that hands off to an installed `grab-url-cli`, or fetches it with
+`npx --package grab-url-cli grab-url`. The launcher sits outside the Vite build,
+so the SDK bundle still carries no CLI code or dependencies. The old
+`npx grab-url-cli` could not pick a bin and is no longer documented.
+
 ***
 
 ## 3.0.0 — slim by default, CLI split out
@@ -98,6 +109,36 @@ any non-2xx response. This release is that fix — the code is unchanged, it
 simply ships.
 
 ***
+
+## November 2026 — Agent skills
+
+Every package now has an **agent skill** under [`skills/`](skills/) —
+`use-grab-request`, `use-grab-api`, `use-grab-url-cli`, `use-api2ai`,
+`use-api2client`, `use-archiver-web`, `use-loading-animations`, `use-log-json`
+and `use-quantum-sphere-loading` — and each package README says how to install
+its skill. The docs homepage title became **"Generate Request {to: API from:
+Browser}"**.
+
+## October 2026 — api2ai on mcp-use 2.x
+
+**`api2ai` was split into modules and retargeted at mcp-use 2.x.** The
+1,000-line `generate-mcp-use-server.js` became `spec/` (load, OpenAPI → Zod,
+risk, tool extraction), `templates/` (one module per generated file),
+`generate.js`, `cli.js` and `index.js`; the old path remains as a re-exporting
+shim. Generated servers now use mcp-use `^2.7.3` with zod 4 (`MCPServer`,
+`inputSchema`, MCP tool annotations, `structuredContent`, `mcp-use dev` for the
+Inspector), and `node --env-file-if-exists` replaces dotenv.
+
+Fixes that came with it:
+
+- Descriptions and enums with quotes, newlines or backslashes no longer break the output.
+- The base URL path is kept (`/api/v3` + `/pet` → `/api/v3/pet`), and relative or templated `servers[].url` are resolved.
+- Local `$ref` schemas, parameters and bodies, `allOf`, and 3.0/3.1 `nullable` are handled.
+- `--approve-writes` is applied, and duplicate tool names and path/operation params are deduplicated.
+- The host allowlist defaults to the spec's API host, and the response size cap is enforced in bytes while streaming.
+- Regenerating no longer overwrites an existing `.env`.
+
+The README badge block was also cleaned up.
 
 ## September 2026 — Docs overhaul and runnable examples
 
